@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useAuthStore } from '@/src/lib/store/authStore'
-import { createClient } from '@/src/lib/supabase/client'
+import { createSupabaseBrowserClient } from '@/src/lib/supabase/client'
 import { Input } from '@/src/components/ui/Input'
 import { Button } from '@/src/components/ui/Button'
 
@@ -19,7 +19,7 @@ export default function ProfilePage() {
   }, [user])
 
   const fetchProfile = async () => {
-    const supabase = createClient()
+    const supabase = createSupabaseBrowserClient()
     const { data } = await supabase
       .from('users')
       .select('username')
@@ -36,7 +36,7 @@ export default function ProfilePage() {
     setLoading(true)
     setMessage('')
 
-    const supabase = createClient()
+    const supabase = createSupabaseBrowserClient()
     const { error } = await supabase
       .from('users')
       .update({ username })

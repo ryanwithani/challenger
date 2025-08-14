@@ -29,14 +29,6 @@ export function PointTracker({
     ]
   }, [possiblePoints, showMilestones])
 
-  const getProgressColor = () => {
-    if (percentage >= 100) return 'bg-sims-yellow'
-    if (percentage >= 75) return 'bg-sims-green'
-    if (percentage >= 50) return 'bg-sims-blue'
-    if (percentage >= 25) return 'bg-sims-purple'
-    return 'bg-sims-pink'
-  }
-
   return (
     <div className={clsx('card sticky top-6', className)}>
       <h3 className="text-lg font-semibold mb-4">Progress Tracker</h3>
@@ -59,8 +51,7 @@ export function PointTracker({
         <div className="w-full bg-gray-200 rounded-full h-6 overflow-hidden">
           <div
             className={clsx(
-              'h-full rounded-full transition-all duration-500 ease-out',
-              getProgressColor()
+              'h-full rounded-full transition-all duration-500 ease-out bg-brand-accent'
             )}
             style={{ width: `${Math.min(percentage, 100)}%` }}
           />
@@ -83,7 +74,7 @@ export function PointTracker({
       {/* Achievement Badges */}
       {percentage >= 100 && (
         <div className="mt-6 text-center">
-          <div className="inline-flex items-center px-4 py-2 bg-sims-yellow/20 text-sims-yellow rounded-full">
+          <div className="inline-flex items-center px-4 py-2 bg-brand-primary/20 text-brand-primary rounded-full">
             <span className="text-2xl mr-2">🏆</span>
             <span className="font-semibold">Challenge Complete!</span>
           </div>
@@ -125,12 +116,12 @@ export function PointTracker({
       
       {/* Encouragement Message */}
       {percentage > 0 && percentage < 100 && (
-        <div className="mt-4 text-center text-sm text-gray-600">
-          {percentage < 25 && "Great start! Keep going! 💪"}
-          {percentage >= 25 && percentage < 50 && "You're making progress! 🌟"}
-          {percentage >= 50 && percentage < 75 && "Halfway there! You've got this! 🎯"}
-          {percentage >= 75 && percentage < 100 && "Almost done! Final stretch! 🏁"}
-        </div>
+        <div className="mt-4 text-center text-sm text-slate-600">
+        {percentage < 25 && "Great start—keep logging progress."}
+        {percentage >= 25 && percentage < 50 && "Nice momentum. Aim for the next milestone."}
+        {percentage >= 50 && percentage < 75 && "Halfway there. You’ve got this."}
+        {percentage >= 75 && percentage < 100 && "Almost done—final stretch."}
+      </div>
       )}
     </div>
   )

@@ -41,8 +41,9 @@ export interface Database {
           user_id: string
           name: string
           description: string | null
-          template_type: string | null
-          is_active: boolean
+          challenge_type: string | null
+          configuration: Json | null 
+          status: string | null
           created_at: string
           updated_at: string
         }
@@ -51,8 +52,9 @@ export interface Database {
           user_id: string
           name: string
           description?: string | null
-          template_type?: string | null
-          is_active?: boolean
+          challenge_type?: string | null
+          configuration?: Json | null
+          status?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -61,8 +63,9 @@ export interface Database {
           user_id?: string
           name?: string
           description?: string | null
-          template_type?: string | null
-          is_active?: boolean
+          challenge_type?: string | null
+          configuration?: Json | null
+          status?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -78,6 +81,7 @@ export interface Database {
           age_stage: string | null
           generation: number
           is_heir: boolean
+          relationship_to_heir: string | null
           created_at: string
         }
         Insert: {
@@ -90,6 +94,7 @@ export interface Database {
           age_stage?: string | null
           generation?: number
           is_heir?: boolean
+          relationship_to_heir?: string | null
           created_at?: string
         }
         Update: {
@@ -102,6 +107,7 @@ export interface Database {
           age_stage?: string | null
           generation?: number
           is_heir?: boolean
+          relationship_to_heir?: string | null
           created_at?: string
         }
       }

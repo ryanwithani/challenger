@@ -3,11 +3,12 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { clsx } from 'clsx'
+import { TbHome, TbTarget, TbUser } from 'react-icons/tb'
 
 const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: '🏠' },
-  { name: 'Challenges', href: '/challenge/new', icon: '🎯' },
-  { name: 'Profile', href: '/profile', icon: '👤' },
+  { name: 'Dashboard', href: '/dashboard', icon: TbHome },
+  { name: 'Challenges', href: '/challenge/new', icon: TbTarget },
+  { name: 'Profile', href: '/profile', icon: TbUser },
 ]
 
 export function Sidebar() {
@@ -28,12 +29,12 @@ export function Sidebar() {
                 className={clsx(
                   'group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors',
                   {
-                    'bg-green-600 text-white': isActive,
+                    'bg-brand-primary text-white': isActive,
                     'text-gray-600 hover:bg-gray-50 hover:text-gray-900': !isActive,
                   }
                 )}
               >
-                <span className="mr-3 text-lg">{item.icon}</span>
+                <item.icon className="h-5 w-5 text-slate-500" aria-hidden />
                 {item.name}
               </Link>
             )
@@ -44,12 +45,12 @@ export function Sidebar() {
       <div className="flex-shrink-0 flex border-t border-gray-200 p-4">
         <div className="flex items-center">
           <div className="flex-shrink-0">
-            <div className="w-8 h-8 bg-sims-purple rounded-full flex items-center justify-center">
+            <div className="w-8 h-8 bg-brand-primary rounded-full flex items-center justify-center">
               <span className="text-white text-sm font-bold">S</span>
             </div>
           </div>
           <div className="ml-3">
-            <p className="text-sm font-medium text-gray-700">Sims Tracker</p>
+            <p className="text-sm font-medium text-gray-700">Sims Challenger</p>
             <p className="text-xs text-gray-500">Challenge your gameplay</p>
           </div>
         </div>

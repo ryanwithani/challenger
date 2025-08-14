@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { createClient } from '@/src/lib/supabase/client'
+import { createSupabaseBrowserClient } from '@/src/lib/supabase/client'
 import { Database } from '@/src/types/database.types'
 
 type Challenge = Database['public']['Tables']['challenges']['Row']
@@ -43,7 +43,7 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
   
   fetchChallenges: async () => {
     set({ loading: true })
-    const supabase = createClient()
+    const supabase = createSupabaseBrowserClient()
     const { data, error } = await supabase
       .from('challenges')
       .select('*')
@@ -58,7 +58,7 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
   
   fetchChallenge: async (id: string) => {
     set({ loading: true })
-    const supabase = createClient()
+    const supabase = createSupabaseBrowserClient()
     
     // Fetch challenge details
     const { data: challenge } = await supabase
@@ -95,7 +95,7 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
   },
   
   createChallenge: async (challenge: Partial<Challenge>) => {
-    const supabase = createClient()
+    const supabase = createSupabaseBrowserClient()
     const { data: { user } } = await supabase.auth.getUser()
     
     if (!user) throw new Error('User not authenticated')
@@ -105,17 +105,23 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
       .insert({
         ...challenge,
         user_id: user.id,
+        status: 'active',
       })
       .select()
       .single()
     
-    if (!error && data) {
+    if (error) {
+      console.error('Supabase error:', error)
+      throw new Error(error.message || 'Failed to create challenge')
+    }
+    
+    if (data) {
       set({ challenges: [...get().challenges, data] })
     }
   },
   
   updateChallenge: async (id: string, updates: Partial<Challenge>) => {
-    const supabase = createClient()
+    const supabase = createSupabaseBrowserClient()
     const { error } = await supabase
       .from('challenges')
       .update(updates)
@@ -131,7 +137,7 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
   },
   
   deleteChallenge: async (id: string) => {
-    const supabase = createClient()
+    const supabase = createSupabaseBrowserClient()
     const { error } = await supabase
       .from('challenges')
       .delete()
@@ -145,7 +151,7 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
   },
   
   addSim: async (sim: Partial<Sim>) => {
-    const supabase = createClient()
+    const supabase = createSupabaseBrowserClient()
     const { data, error } = await supabase
       .from('sims')
       .insert(sim)
@@ -158,7 +164,7 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
   },
   
   updateSim: async (id: string, updates: Partial<Sim>) => {
-    const supabase = createClient()
+    const supabase = createSupabaseBrowserClient()
     const { error } = await supabase
       .from('sims')
       .update(updates)
@@ -174,7 +180,7 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
   },
   
   deleteSim: async (id: string) => {
-    const supabase = createClient()
+    const supabase = createSupabaseBrowserClient()
     const { error } = await supabase
       .from('sims')
       .delete()
@@ -188,7 +194,7 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
   },
   
   addGoal: async (goal: Partial<Goal>) => {
-    const supabase = createClient()
+    const supabase = createSupabaseBrowserClient()
     const { data, error } = await supabase
       .from('goals')
       .insert(goal)
@@ -201,7 +207,7 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
   },
   
   updateGoal: async (id: string, updates: Partial<Goal>) => {
-    const supabase = createClient()
+    const supabase = createSupabaseBrowserClient()
     const { error } = await supabase
       .from('goals')
       .update(updates)
@@ -217,7 +223,7 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
   },
   
   deleteGoal: async (id: string) => {
-    const supabase = createClient()
+    const supabase = createSupabaseBrowserClient()
     const { error } = await supabase
       .from('goals')
       .delete()
@@ -231,7 +237,7 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
   },
   
   toggleGoalProgress: async (goalId: string, simId?: string) => {
-    const supabase = createClient()
+    const supabase = createSupabaseBrowserClient()
     const { data: { user } } = await supabase.auth.getUser()
     
     if (!user) throw new Error('User not authenticated')

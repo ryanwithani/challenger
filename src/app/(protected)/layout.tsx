@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/src/lib/store/authStore'
 import { Sidebar } from '@/src/components/layout/Sidebar'
-import { Header } from '@/src/components/layout/Header'
+import { Navbar } from '@/src/components/layout/Navbar'
 import { Footer } from '@/src/components/layout/Footer'
 
 export default function ProtectedLayout({
@@ -41,7 +41,7 @@ export default function ProtectedLayout({
     <div className="min-h-screen bg-gray-50 flex">
       <Sidebar />
       <div className="flex-1 flex flex-col">
-        <Header />
+        <Navbar />
         <main className="flex-1 p-6">
           {children}
         </main>

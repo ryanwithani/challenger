@@ -1,10 +1,10 @@
 import Link from 'next/link'
-import { Header } from '@/src/components/layout/Header'
+import { Navbar } from '@/src/components/layout/Navbar'
 
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-sims-green/10 to-sims-blue/10">
-      <Header />
+      <Navbar />
       
       <main className="container mx-auto px-4 py-16">
         <section className="text-center max-w-4xl mx-auto">
@@ -19,9 +19,6 @@ export default function LandingPage() {
           <div className="flex gap-4 justify-center">
             <Link href="/register" className="btn-primary text-lg px-8 py-3">
               Get Started Free
-            </Link>
-            <Link href="/login" className="btn-secondary text-lg px-8 py-3">
-              Sign In
             </Link>
           </div>
         </section>

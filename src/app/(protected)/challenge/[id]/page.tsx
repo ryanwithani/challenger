@@ -10,6 +10,7 @@ import { Button } from '@/src/components/ui/Button'
 import { SimForm } from '@/src/components/forms/SimForm'
 import { GoalForm } from '@/src/components/forms/GoalForm'
 import { Modal } from '@/src/components/ui/Modal'
+import { LegacyTracker } from '@/src/components/challenge/LegacyTracker'
 
 export default function ChallengePage() {
   const params = useParams()
@@ -42,6 +43,57 @@ export default function ChallengePage() {
       </div>
     )
   }
+
+  // Check if this is a Legacy Challenge
+  const isLegacyChallenge = currentChallenge.challenge_type === 'legacy'
+
+  // If it's a Legacy Challenge, use the LegacyTracker
+  if (isLegacyChallenge) {
+    return (
+      <div>
+        <LegacyTracker
+          challenge={currentChallenge}
+          sims={sims}
+          goals={goals}
+          progress={progress}
+          onAddSim={() => setShowSimForm(true)}
+          onAddGoal={() => setShowGoalForm(true)}
+          onToggleGoal={toggleGoalProgress}
+          calculatePoints={calculatePoints}
+        />
+
+        {/* Modals */}
+        <Modal
+          isOpen={showSimForm}
+          onClose={() => setShowSimForm(false)}
+          title="Add New Sim"
+        >
+          <SimForm
+            challengeId={challengeId}
+            onSubmit={async (data) => {
+              await addSim(data)
+              setShowSimForm(false)
+            }}
+          />
+        </Modal>
+
+        <Modal
+          isOpen={showGoalForm}
+          onClose={() => setShowGoalForm(false)}
+          title="Add New Goal"
+        >
+          <GoalForm
+            challengeId={challengeId}
+            onSubmit={async (data) => {
+              await addGoal(data)
+              setShowGoalForm(false)
+            }}
+          />
+        </Modal>
+      </div>
+    )
+  }
+
 
   return (
     <div>

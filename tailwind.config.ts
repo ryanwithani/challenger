@@ -7,15 +7,14 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        'sims-green': '#00a870',
-        'sims-blue': '#0084c7',
-        'sims-purple': '#8b5fbf',
-        'sims-pink': '#e91e63',
-        'sims-yellow': '#ffc107',
+        brand: {
+          primary: '#8B5FBF',
+          accent:  '#00A870',
+          // neutrals via Tailwind slate + gray (don’t rebrand them)
+        },
       },
-      fontFamily: {
-        'sims': ['Comic Sans MS', 'cursive'],
-      },
+      borderRadius: { md: '8px', lg: '12px', xl: '16px' },
+      boxShadow: { card: '0 2px 10px rgba(16,24,40,0.06)' }
     },
   },
   plugins: [],

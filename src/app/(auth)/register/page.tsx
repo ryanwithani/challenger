@@ -6,6 +6,8 @@ import Link from 'next/link'
 import { useAuthStore } from '@/src/lib/store/authStore'
 import { Input } from '@/src/components/ui/Input'
 import { Button } from '@/src/components/ui/Button'
+import { PasswordInput } from '@/src/components/auth/PasswordInput'
+import { signUpSchema } from '@/src/lib/utils/validators'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -20,23 +22,22 @@ export default function RegisterPage() {
     e.preventDefault()
     setError('')
 
-    if (password !== confirmPassword) {
-      setError('Passwords do not match')
-      return
-    }
-
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters')
+    const parsed = signUpSchema.safeParse({ email, password, confirmPassword })
+    if (!parsed.success) {
+      const { formErrors, fieldErrors } = parsed.error.flatten()
+      setError(formErrors[0] || fieldErrors.password?.[0] || fieldErrors.email?.[0] || "Please fix the errors and try again.")
       return
     }
 
     setLoading(true)
 
     try {
-      await signUp(email, password)
-      router.push('/dashboard')
-    } catch (err: any) {
-      setError(err.message || 'Failed to create account')
+      try {
+        await signUp(email, password)
+        router.push('/dashboard')
+      } catch (err: any) {
+        setError(err?.message || 'Failed to create account')
+      }
     } finally {
       setLoading(false)
     }
@@ -55,11 +56,10 @@ export default function RegisterPage() {
           required
         />
         
-        <Input
-          type="password"
-          placeholder="Password"
+        <PasswordInput
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          showValidation={true}
           required
         />
         

@@ -6,10 +6,12 @@ import Link from 'next/link'
 import { useAuthStore } from '@/src/lib/store/authStore'
 import { Input } from '@/src/components/ui/Input'
 import { Button } from '@/src/components/ui/Button'
+import { PasswordInput } from '@/src/components/auth/PasswordInput'
+import { signInSchema } from '@/src/lib/utils/validators'
 
 export default function LoginPage() {
   const router = useRouter()
-  const { signIn } = useAuthStore()
+  const { signIn, getAuthErrorMessage } = useAuthStore()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -18,13 +20,20 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-    setLoading(true)
 
+    const validation = signInSchema.safeParse({ email, password })
+    if (!validation.success) {
+      setError(validation.error.errors.map(e => e.message).join(', '))
+      return
+    }
+    
+    setLoading(true)
     try {
       await signIn(email, password)
       router.push('/dashboard')
     } catch (err: any) {
-      setError(err.message || 'Failed to sign in')
+      const friendlyMessage = getAuthErrorMessage(err)
+      setError(friendlyMessage)
     } finally {
       setLoading(false)
     }
@@ -32,7 +41,7 @@ export default function LoginPage() {
 
   return (
     <div className="card">
-      <h1 className="text-2xl font-bold text-center mb-6">Welcome Back!</h1>
+      <h1 className="text-2xl font-bold text-center mb-6">Sign In</h1>
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input
@@ -43,9 +52,7 @@ export default function LoginPage() {
           required
         />
         
-        <Input
-          type="password"
-          placeholder="Password"
+        <PasswordInput
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
