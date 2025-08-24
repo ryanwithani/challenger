@@ -4,26 +4,157 @@
 
 @layer base {
   :root {
+    /* Light mode colors */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
+    --background-dark: 222.2 84% 4.9%;
+    --foreground-dark: 210 40% 98%;
+
+    /* Semantic colors */
+    --border: 214.3 31.8% 91.4%;
+    --border-dark: 217.2 32.6% 17.5%;
+
+    --card: 0 0% 100%;
+    --card-dark: 222.2 84% 4.9%;
+
+    --muted: 210 40% 96%;
+    --muted-dark: 217.2 32.6% 17.5%;
+
+    --primary: 142.1 76.2% 36.3%;
+    --primary-dark: 142.1 70.6% 45.3%;
+
+    --secondary: 210 40% 96%;
+    --secondary-dark: 217.2 32.6% 17.5%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: var(--background-dark);
+    --foreground: var(--foreground-dark);
+    --border: var(--border-dark);
+    --card: var(--card-dark);
+    --muted: var(--muted-dark);
+    --primary: var(--primary-dark);
+    --secondary: var(--secondary-dark);
+  }
+
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition-colors;
+    @apply bg-sims-green hover:bg-sims-green/90 text-white font-bold py-2 px-4 rounded transition-colors;
   }
-  
+
   .btn-secondary {
-    @apply bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors;
+    @apply bg-sims-blue hover:bg-sims-blue/90 text-white font-bold py-2 px-4 rounded transition-colors;
   }
-  
+
   .card {
-    @apply bg-white rounded-lg shadow-md p-6 border border-gray-200;
+    @apply rounded-lg shadow-md p-6 transition-colors;
+    background-color: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+  }
+
+  /* Dark mode variants for components */
+  .dark .btn-primary {
+    @apply bg-sims-green/90 hover:bg-sims-green;
+  }
+
+  .dark .btn-secondary {
+    @apply bg-sims-blue/90 hover:bg-sims-blue;
+  }
+}
+
+@layer utilities {
+
+  /* Text color utilities for dark mode */
+  .text-gray-900 {
+    color: rgb(17 24 39);
+  }
+
+  .dark .text-gray-900 {
+    color: rgb(243 244 246);
+  }
+
+  .text-gray-800 {
+    color: rgb(31 41 55);
+  }
+
+  .dark .text-gray-800 {
+    color: rgb(229 231 235);
+  }
+
+  .text-gray-700 {
+    color: rgb(55 65 81);
+  }
+
+  .dark .text-gray-700 {
+    color: rgb(209 213 219);
+  }
+
+  .text-gray-600 {
+    color: rgb(75 85 99);
+  }
+
+  .dark .text-gray-600 {
+    color: rgb(156 163 175);
+  }
+
+  .text-gray-500 {
+    color: rgb(107 114 128);
+  }
+
+  .dark .text-gray-500 {
+    color: rgb(107 114 128);
+  }
+
+  /* Background color utilities for dark mode */
+  .bg-white {
+    background-color: rgb(255 255 255);
+  }
+
+  .dark .bg-white {
+    background-color: rgb(31 41 55);
+  }
+
+  .bg-gray-50 {
+    background-color: rgb(249 250 251);
+  }
+
+  .dark .bg-gray-50 {
+    background-color: rgb(17 24 39);
+  }
+
+  .bg-gray-100 {
+    background-color: rgb(243 244 246);
+  }
+
+  .dark .bg-gray-100 {
+    background-color: rgb(31 41 55);
+  }
+
+  /* Border color utilities for dark mode */
+  .border-gray-200 {
+    border-color: rgb(229 231 235);
+  }
+
+  .dark .border-gray-200 {
+    border-color: rgb(55 65 81);
+  }
+
+  .border-gray-300 {
+    border-color: rgb(209 213 219);
+  }
+
+  .dark .border-gray-300 {
+    border-color: rgb(75 85 99);
   }
 }

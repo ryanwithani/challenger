@@ -15,7 +15,7 @@ import { LegacyTracker } from '@/src/components/challenge/LegacyTracker'
 export default function ChallengePage() {
   const params = useParams()
   const challengeId = params.id as string
-  
+
   const {
     currentChallenge,
     sims,
@@ -24,17 +24,43 @@ export default function ChallengePage() {
     fetchChallenge,
     addSim,
     addGoal,
+    updateSim,
     toggleGoalProgress,
+    updateGoalValue,
+    completeGoalWithDetails,
     calculatePoints,
-    loading
+    calculateCategoryPoints,
+    loading,
   } = useChallengeStore()
 
   const [showSimForm, setShowSimForm] = useState(false)
   const [showGoalForm, setShowGoalForm] = useState(false)
 
+  // FIXED: Removed fetchChallenge from dependencies to prevent infinite loop
   useEffect(() => {
     fetchChallenge(challengeId)
-  }, [challengeId, fetchChallenge])
+  }, [challengeId])
+
+  // Helper function to update sim as heir
+  const updateSimAsHeir = async (simId: string) => {
+    try {
+      // First, remove heir status from all other sims in this challenge
+      const updatePromises = sims.map(sim => {
+        if (sim.id === simId) {
+          // Set this sim as heir
+          return updateSim(sim.id, { is_heir: true })
+        } else if (sim.is_heir) {
+          // Remove heir status from other sims
+          return updateSim(sim.id, { is_heir: false })
+        }
+        return Promise.resolve()
+      })
+
+      await Promise.all(updatePromises)
+    } catch (error) {
+      console.error('Error updating sim as heir:', error)
+    }
+  }
 
   if (loading || !currentChallenge) {
     return (
@@ -57,9 +83,12 @@ export default function ChallengePage() {
           goals={goals}
           progress={progress}
           onAddSim={() => setShowSimForm(true)}
-          onAddGoal={() => setShowGoalForm(true)}
           onToggleGoal={toggleGoalProgress}
+          onUpdateGoalValue={updateGoalValue}
+          onCompleteGoalWithDetails={completeGoalWithDetails}
           calculatePoints={calculatePoints}
+          calculateCategoryPoints={calculateCategoryPoints}
+          onSelectHeir={updateSimAsHeir}
         />
 
         {/* Modals */}
@@ -94,7 +123,6 @@ export default function ChallengePage() {
     )
   }
 
-
   return (
     <div>
       <div className="mb-8">
@@ -115,7 +143,7 @@ export default function ChallengePage() {
                 Add Sim
               </Button>
             </div>
-            
+
             {sims.length === 0 ? (
               <p className="text-gray-500">No Sims added yet</p>
             ) : (
@@ -135,7 +163,7 @@ export default function ChallengePage() {
                 Add Goal
               </Button>
             </div>
-            
+
             {goals.length === 0 ? (
               <p className="text-gray-500">No goals added yet</p>
             ) : (

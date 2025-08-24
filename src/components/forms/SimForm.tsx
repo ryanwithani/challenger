@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Input } from '@/src/components/ui/Input'
 import { Button } from '@/src/components/ui/Button'
 import { Database } from '@/src/types/database.types'
+import { AvatarUpload } from '@/src/components/sim/AvatarUpload'
 
 type SimInsert = Database['public']['Tables']['sims']['Insert']
 
@@ -25,7 +26,7 @@ type SimFormData = z.infer<typeof simSchema>
 interface SimFormProps {
   challengeId: string
   onSubmit: (data: SimInsert) => void | Promise<void>
-  initialData?: Partial<SimFormData>
+  initialData?: Partial<SimFormData & { avatar_url?: string | null, id?: string }>
   currentGeneration?: number
 }
 
@@ -81,16 +82,17 @@ const commonAspirations = [
   'Bodybuilder', 'Extreme Sports Enthusiast',
 ]
 
-export function SimForm({ 
-  challengeId, 
-  onSubmit, 
+export function SimForm({
+  challengeId,
+  onSubmit,
   initialData,
-  currentGeneration = 1 
+  currentGeneration = 1
 }: SimFormProps) {
   const [selectedTraits, setSelectedTraits] = useState<string[]>(
     initialData?.traits || []
   )
   const [showAllTraits, setShowAllTraits] = useState(false)
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(initialData?.avatar_url || null)
 
   const {
     register,
@@ -119,8 +121,8 @@ export function SimForm({
     const newTraits = selectedTraits.includes(trait)
       ? selectedTraits.filter(t => t !== trait)
       : selectedTraits.length < maxTraits
-      ? [...selectedTraits, trait]
-      : selectedTraits
+        ? [...selectedTraits, trait]
+        : selectedTraits
 
     setSelectedTraits(newTraits)
     setValue('traits', newTraits)
@@ -131,6 +133,7 @@ export function SimForm({
       ...data,
       challenge_id: challengeId,
       traits: selectedTraits,
+      avatar_url: avatarUrl,
     })
   }
 
@@ -155,6 +158,20 @@ export function SimForm({
             <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
           )}
         </div>
+
+        {/* Avatar Upload - Only show if editing existing sim */}
+        {initialData?.id && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Sim Avatar
+            </label>
+            <AvatarUpload
+              simId={initialData.id}
+              currentAvatarUrl={avatarUrl}
+              onAvatarUpdate={setAvatarUrl}
+            />
+          </div>
+        )}
 
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -263,11 +280,10 @@ export function SimForm({
                   key={trait}
                   type="button"
                   onClick={() => toggleTrait(trait)}
-                  className={`px-3 py-1.5 text-sm rounded-full transition-colors ${
-                    selectedTraits.includes(trait)
-                      ? 'bg-sims-purple text-white'
-                      : 'bg-white hover:bg-gray-100 text-gray-700 border border-gray-300'
-                  }`}
+                  className={`px-3 py-1.5 text-sm rounded-full transition-colors ${selectedTraits.includes(trait)
+                    ? 'bg-sims-purple text-white'
+                    : 'bg-white hover:bg-gray-100 text-gray-700 border border-gray-300'
+                    }`}
                   disabled={!selectedTraits.includes(trait) && selectedTraits.length >= maxTraits}
                 >
                   {trait}
@@ -312,9 +328,18 @@ export function SimForm({
         </label>
       </div>
 
+      {/* Note about avatar upload for new sims */}
+      {!initialData?.id && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <p className="text-sm text-blue-700">
+            💡 <strong>Tip:</strong> You can add an avatar after creating the sim by editing their profile.
+          </p>
+        </div>
+      )}
+
       {/* Submit Button */}
       <Button type="submit" className="w-full">
-        Add Sim
+        {initialData?.id ? 'Update Sim' : 'Add Sim'}
       </Button>
     </form>
   )

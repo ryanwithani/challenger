@@ -5,10 +5,12 @@ import Link from 'next/link'
 import { useAuthStore } from '@/src/lib/store/authStore'
 import { Button } from '@/src/components/ui/Button'
 import { LoginModal } from '@/src/components/auth/LoginModal'
+import { SignUpModal } from '@/src/components/auth/SignUpModal'
 
 export function Navbar() {
   const { user, signOut } = useAuthStore()
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
+  const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false)
 
   const handleSignOut = async () => {
     try {
@@ -16,11 +18,6 @@ export function Navbar() {
     } catch (error) {
       console.error('Error signing out:', error)
     }
-  }
-  const handleSignInClick = () => {
-    console.log('Sign in button clicked!') // Debug log
-    setIsLoginModalOpen(true)
-    console.log('Modal should be open now') // Debug log
   }
 
   return (
@@ -30,9 +27,9 @@ export function Navbar() {
           <div className="flex items-center space-x-4">
             <Link href="/" className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">S</span>
+                <span className="text-white font-bold text-sm">C</span>
               </div>
-              <h1 className="text-xl font-bold text-gray-900">Sims Challenge Tracker</h1>
+              <h1 className="text-xl font-bold text-gray-900">Challenger</h1>
             </Link>
           </div>
 
@@ -47,9 +44,9 @@ export function Navbar() {
                     Dashboard
                   </Button>
                 </Link>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={handleSignOut}
                 >
                   Sign Out
@@ -57,13 +54,16 @@ export function Navbar() {
               </div>
             ) : (
               <div className="flex items-center space-x-3">
-                <Link href="/register">
-                  <Button variant="outline" size="sm" onClick={handleSignInClick}>
-                    Sign Up
-                  </Button>
-                </Link>
-                <Button 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsSignUpModalOpen(true)}
+                >
+                  Sign Up
+                </Button>
+                <Button
+                  variant='outline'
+                  size="sm"
                   onClick={() => setIsLoginModalOpen(true)}
                 >
                   Sign In
@@ -76,14 +76,18 @@ export function Navbar() {
 
       {console.log('Rendering LoginModal with isOpen:', isLoginModalOpen)}
 
-      <LoginModal 
-        isOpen={isLoginModalOpen} 
+      <LoginModal
+        isOpen={isLoginModalOpen}
         onClose={
           () => {
             console.log('Modal close called')
             setIsLoginModalOpen(false)
           }
-        } 
+        }
+      />
+      <SignUpModal
+        isOpen={isSignUpModalOpen}
+        onClose={() => setIsSignUpModalOpen(false)}
       />
     </>
   )

@@ -26,7 +26,6 @@ const legacyConfigSchema = z.object({
   heir_selection: z.enum(['first_born', 'last_born', 'random', 'exemplar', 'strength']),
   species_rule: z.enum(['human_only', 'occult_allowed', 'occult_preferred']),
   lifespan: z.enum(['short', 'normal', 'long']),
-
 })
 
 const expansionPackSchema = z.object({
@@ -63,32 +62,31 @@ interface WizardData {
 
 // ===== CHALLENGE TEMPLATES =====
 const challengeTemplates = [
-  { 
-    value: 'custom', 
+  {
+    value: 'custom',
     label: 'Custom Challenge',
     description: 'Create your own unique challenge',
     needsConfiguration: false
   },
-  { 
-    value: 'legacy', 
+  {
+    value: 'legacy',
     label: 'Legacy Challenge',
     description: '10 generations with specific rules and restrictions',
     needsConfiguration: true
   },
-  { 
-    value: 'not_so_berry', 
+  {
+    value: 'not_so_berry',
     label: 'Not So Berry',
     description: 'Colorful legacy with unique goals per generation',
     needsConfiguration: false
   },
-  { 
-    value: '100_baby', 
+  {
+    value: '100_baby',
     label: '100 Baby Challenge',
     description: 'Have 100 babies with one matriarch',
     needsConfiguration: false
   },
 ]
-
 
 // ===== STEP 1: BASIC INFO =====
 interface BasicInfoStepProps {
@@ -126,7 +124,7 @@ function BasicInfoStep({ data, onNext, onCancel }: BasicInfoStepProps) {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div>
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Choose Your Challenge</h2>
-        
+
         {/* Template Selection */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-3">
@@ -136,11 +134,10 @@ function BasicInfoStep({ data, onNext, onCancel }: BasicInfoStepProps) {
             {challengeTemplates.map((template) => (
               <label
                 key={template.value}
-                className={`relative flex cursor-pointer rounded-lg border p-4 focus:outline-none ${
-                  selectedTemplate === template.value
+                className={`relative flex cursor-pointer rounded-lg border p-4 focus:outline-none ${selectedTemplate === template.value
                     ? 'border-sims-green bg-sims-green/5'
                     : 'border-gray-200 hover:border-gray-300'
-                }`}
+                  }`}
               >
                 <input
                   type="radio"
@@ -182,10 +179,10 @@ function BasicInfoStep({ data, onNext, onCancel }: BasicInfoStepProps) {
               templateType === 'legacy'
                 ? 'The Smith Legacy'
                 : templateType === 'not_so_berry'
-                ? 'My Not So Berry Challenge'
-                : templateType === '100_baby'
-                ? 'The 100 Baby Challenge'
-                : 'My Custom Challenge'
+                  ? 'My Not So Berry Challenge'
+                  : templateType === '100_baby'
+                    ? 'The 100 Baby Challenge'
+                    : 'My Custom Challenge'
             }
             className={errors.name ? 'border-red-500' : ''}
           />
@@ -240,7 +237,7 @@ function ConfigurationStep({ challengeType, data, onNext, onBack }: Configuratio
   if (challengeType === 'legacy') {
     return <LegacyConfigurationStep data={data as LegacyConfigData} onNext={onNext} onBack={onBack} />
   }
-  
+
   // For other challenge types that might need configuration in the future
   return null
 }
@@ -252,22 +249,22 @@ const startingOptions = [
     description: 'Start with $1,800 on 50x50 lot - classic experience'
   },
   {
-    value: 'extreme', 
+    value: 'extreme',
     label: 'Extreme Start',
     description: 'Start with $0 on 64x64 lot in winter (+1 bonus point)'
   },
   {
     value: 'ultra_extreme',
-    label: 'Ultra Extreme Start', 
+    label: 'Ultra Extreme Start',
     description: 'Start with $0 and $35k debt to repay (+2 bonus points)'
   }
 ]
 
-function LegacyConfigurationStep({ 
-  data, 
-  onNext, 
-  onBack 
-}: { 
+function LegacyConfigurationStep({
+  data,
+  onNext,
+  onBack
+}: {
   data: LegacyConfigData | undefined
   onNext: (data: LegacyConfigData) => void
   onBack: () => void
@@ -290,8 +287,6 @@ function LegacyConfigurationStep({
     },
   })
 
-  const genderLaw = watch('gender_law')
-
   const onSubmit = (formData: LegacyConfigData) => {
     onNext(formData)
   }
@@ -309,11 +304,10 @@ function LegacyConfigurationStep({
             {startingOptions.map((option) => (
               <label
                 key={option.value}
-                className={`relative flex cursor-pointer rounded-lg border p-4 focus:outline-none ${
-                  watch('start_type') === option.value
+                className={`relative flex cursor-pointer rounded-lg border p-4 focus:outline-none ${watch('start_type') === option.value
                     ? 'border-sims-green bg-sims-green/5'
                     : 'border-gray-200 hover:border-gray-300'
-                }`}
+                  }`}
               >
                 <input
                   type="radio"
@@ -359,7 +353,7 @@ function LegacyConfigurationStep({
               <label key={law.value} className="flex items-start space-x-3 cursor-pointer">
                 <input
                   type="radio"
-                    {...register('gender_law')}
+                  {...register('gender_law')}
                   value={law.value}
                   className="mt-1 h-4 w-4 text-sims-green focus:ring-sims-green border-gray-300"
                 />
@@ -388,7 +382,7 @@ function LegacyConfigurationStep({
               <label key={law.value} className="flex items-start space-x-3 cursor-pointer">
                 <input
                   type="radio"
-                    {...register('bloodline_law')}
+                  {...register('bloodline_law')}
                   value={law.value}
                   className="mt-1 h-4 w-4 text-sims-green focus:ring-sims-green border-gray-300"
                 />
@@ -506,11 +500,11 @@ interface ExpansionPackStepProps {
   isLegacyChallenge?: boolean
 }
 
-export function ExpansionPackStep({ 
-  data, 
-  onNext, 
-  onBack, 
-  isLegacyChallenge = false 
+export function ExpansionPackStep({
+  data,
+  onNext,
+  onBack,
+  isLegacyChallenge = false
 }: ExpansionPackStepProps) {
   const { preferences, loading: preferencesLoading, fetchPreferences, updateExpansionPacks } = useUserPreferencesStore()
   const [selectedPacks, setSelectedPacks] = useState<string[]>([])
@@ -585,7 +579,7 @@ export function ExpansionPackStep({
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div>
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Your Expansion Packs</h2>
-        
+
         {isLegacyChallenge && (
           <div className="mb-6 p-4 bg-blue-50 rounded-lg">
             <h3 className="text-sm font-medium text-blue-900 mb-2">Legacy Challenge Scoring</h3>
@@ -610,7 +604,7 @@ export function ExpansionPackStep({
             )}
           </div>
         )}
-        
+
         {/* Base Game (Always Selected) */}
         <div className="mb-6">
           <label className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
@@ -635,7 +629,7 @@ export function ExpansionPackStep({
         <div className="space-y-3">
           <h3 className="text-sm font-medium text-gray-700">Expansion Packs</h3>
           <div className="space-y-2">
-            {isLegacyChallenge ? ExpansionPacks.map((pack) => (
+            {ExpansionPacks.map((pack) => (
               <label key={pack.key} className="flex items-start space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
                 <input
                   type="checkbox"
@@ -647,7 +641,7 @@ export function ExpansionPackStep({
                     <span className="text-sm font-medium text-gray-900">{pack.name}</span>
                     <span className="text-xs text-gray-500">{pack.category}</span>
                   </div>
-                  
+
                   {isLegacyChallenge && (
                     <div className="mt-2 text-xs text-gray-600">
                       <div className="grid grid-cols-1 gap-1">
@@ -660,20 +654,6 @@ export function ExpansionPackStep({
                   )}
                 </div>
               </label>
-            )) : ExpansionPacks.map((pack) => (
-              <label key={pack.key} className="flex items-start space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
-                <input
-                  type="checkbox"
-                  {...register(pack.key as keyof ExpansionPackData)}
-                  className="mt-1 h-4 w-4 text-sims-green focus:ring-sims-green border-gray-300 rounded"
-                />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-900">{pack.name}</span>
-                    <span className="text-xs text-gray-500">{pack.category}</span>
-                  </div>
-                </div>
-              </label>
             ))}
           </div>
         </div>
@@ -681,7 +661,7 @@ export function ExpansionPackStep({
         {isLegacyChallenge && selectedPacks.length === 0 && (
           <div className="mt-4 p-3 bg-yellow-50 rounded-lg">
             <p className="text-sm text-yellow-800">
-              <span className="font-medium">Base game only:</span> You'll be able to earn approximately 60-70 out of 100 possible Legacy Challenge points. 
+              <span className="font-medium">Base game only:</span> You'll be able to earn approximately 60-70 out of 100 possible Legacy Challenge points.
               Consider adding expansion packs to unlock more scoring opportunities!
             </p>
           </div>
@@ -714,7 +694,6 @@ function calculateLegacyScoring(selectedPacks: string[]) {
   let totalCareers = 23 // Base game careers
   let totalSkills = 15 // Base game skills  
   let totalCollections = 13 // Base game collections
-  let bonusPoints = 0
 
   // Add expansion pack content
   const packContributions = {
@@ -766,15 +745,15 @@ function calculateLegacyScoring(selectedPacks: string[]) {
 function SummaryStep({ data, onSubmit, onBack, loading }: SummaryStepProps) {
   const template = challengeTemplates.find(t => t.value === data.basicInfo?.challenge_type)
   const isLegacyChallenge = data.basicInfo?.challenge_type === 'legacy'
-  
+
   // Calculate Legacy scoring if applicable
-  const selectedPacks = data.expansionPacks ? 
+  const selectedPacks = data.expansionPacks ?
     Object.entries(data.expansionPacks)
       .filter(([key, value]) => key !== 'base_game' && value === true)
       .map(([key]) => key) : []
-      
+
   const legacyScoring = isLegacyChallenge ? calculateLegacyScoring(selectedPacks) : null
-  
+
   const handleSubmit = () => {
     onSubmit(data)
   }
@@ -783,7 +762,7 @@ function SummaryStep({ data, onSubmit, onBack, loading }: SummaryStepProps) {
     <div className="space-y-6">
       <div>
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Review Your Challenge</h2>
-        
+
         {/* Basic Info Summary */}
         <div className="bg-gray-50 rounded-lg p-4 mb-4">
           <h3 className="text-lg font-medium text-gray-900 mb-2">Challenge Details</h3>
@@ -804,11 +783,10 @@ function SummaryStep({ data, onSubmit, onBack, loading }: SummaryStepProps) {
               <div>
                 <div className="mb-2">
                   <span className="font-medium">Starting Difficulty:</span>{' '}
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    (data.configuration as any).start_type === 'ultra_extreme' ? 'bg-red-100 text-red-800' :
-                    (data.configuration as any).start_type === 'extreme' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-green-100 text-green-800'
-                  }`}>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${(data.configuration as any).start_type === 'ultra_extreme' ? 'bg-red-100 text-red-800' :
+                      (data.configuration as any).start_type === 'extreme' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-green-100 text-green-800'
+                    }`}>
                     {((data.configuration as any).start_type || 'regular').replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
                   </span>
                   {(data.configuration as any).start_type === 'extreme' && (
@@ -822,8 +800,8 @@ function SummaryStep({ data, onSubmit, onBack, loading }: SummaryStepProps) {
               <div>
                 <div><span className="font-medium">Gender Law:</span> {((data.configuration as any).gender_law || '').replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}</div>
                 <div><span className="font-medium">Bloodline Law:</span> {((data.configuration as any).bloodline_law || '').replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}</div>
-                <div><span className="font-medium">Heir Law:</span> {((data.configuration as any).heir_law || '').replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}</div>
-                <div><span className="font-medium">Species Law:</span> {((data.configuration as any).species_law || '').replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}</div>
+                <div><span className="font-medium">Heir Selection:</span> {((data.configuration as any).heir_selection || '').replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}</div>
+                <div><span className="font-medium">Species Rule:</span> {((data.configuration as any).species_rule || '').replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}</div>
               </div>
             </div>
           </div>
@@ -868,7 +846,7 @@ function SummaryStep({ data, onSubmit, onBack, loading }: SummaryStepProps) {
                     <div className="text-xs opacity-90">Est. Max Points</div>
                   </div>
                 </div>
-                
+
                 <div className="text-xs text-gray-600">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                     <div>
@@ -886,7 +864,7 @@ function SummaryStep({ data, onSubmit, onBack, loading }: SummaryStepProps) {
                 {selectedPacks.length === 0 && (
                   <div className="mt-3 p-3 bg-yellow-50 rounded border border-yellow-200">
                     <p className="text-sm text-yellow-800">
-                      <span className="font-medium">Base game only:</span> You'll have access to limited scoring opportunities. 
+                      <span className="font-medium">Base game only:</span> You'll have access to limited scoring opportunities.
                       Consider expansion packs to unlock more careers, skills, and collections!
                     </p>
                   </div>
@@ -942,12 +920,36 @@ export function ChallengeWizard({ onSubmit, onCancel, loading }: ChallengeWizard
     fetchPreferences()
   }, [fetchPreferences])
 
-  const steps = [
-    { number: 1, name: 'Challenge Details', status: currentStep > 1 ? 'complete' : currentStep === 1 ? 'current' : 'upcoming' },
-    { number: 2, name: 'Configuration', status: currentStep > 2 ? 'complete' : currentStep === 2 ? 'current' : 'upcoming' },
-    { number: 3, name: 'Expansion Packs', status: currentStep > 3 ? 'complete' : currentStep === 3 ? 'current' : 'upcoming' },
-    { number: 4, name: 'Review', status: currentStep === 4 ? 'current' : 'upcoming' },
-  ]
+  // Determine which steps to show based on challenge type
+  const getSteps = () => {
+    const template = challengeTemplates.find(t => t.value === wizardData.basicInfo?.challenge_type)
+    const needsConfig = template?.needsConfiguration || false
+
+    if (needsConfig) {
+      return [
+        { number: 1, name: 'Challenge Details', step: 1 },
+        { number: 2, name: 'Configuration', step: 2 },
+        { number: 3, name: 'Expansion Packs', step: 3 },
+        { number: 4, name: 'Review', step: 4 },
+      ]
+    } else {
+      return [
+        { number: 1, name: 'Challenge Details', step: 1 },
+        { number: 2, name: 'Expansion Packs', step: 3 },
+        { number: 3, name: 'Review', step: 4 },
+      ]
+    }
+  }
+
+  const steps = getSteps()
+
+  const getCurrentStepInfo = () => {
+    return steps.find(step => step.step === currentStep) || steps[0]
+  }
+
+  const getCurrentStepIndex = () => {
+    return steps.findIndex(step => step.step === currentStep)
+  }
 
   // Determine if configuration step should be skipped
   const needsConfiguration = () => {
@@ -957,12 +959,12 @@ export function ChallengeWizard({ onSubmit, onCancel, loading }: ChallengeWizard
 
   const handleBasicInfoNext = (data: BasicInfoData) => {
     setWizardData(prev => ({ ...prev, basicInfo: data }))
-    
+
     // Skip configuration step if not needed
     if (!challengeTemplates.find(t => t.value === data.challenge_type)?.needsConfiguration) {
-      setCurrentStep(3)
+      setCurrentStep(3) // Go directly to expansion packs
     } else {
-      setCurrentStep(2)
+      setCurrentStep(2) // Go to configuration
     }
   }
 
@@ -981,11 +983,11 @@ export function ChallengeWizard({ onSubmit, onCancel, loading }: ChallengeWizard
     if (wizardData.expansionPacks) {
       return wizardData.expansionPacks
     }
-    
+
     if (preferences?.expansion_packs) {
       return preferences.expansion_packs as ExpansionPackData
     }
-    
+
     return undefined
   }
 
@@ -1004,6 +1006,8 @@ export function ChallengeWizard({ onSubmit, onCancel, loading }: ChallengeWizard
   const goBack = () => {
     if (currentStep === 3 && !needsConfiguration()) {
       setCurrentStep(1) // Skip configuration step when going back
+    } else if (currentStep === 4 && !needsConfiguration()) {
+      setCurrentStep(3) // From review to expansion packs if no config
     } else {
       setCurrentStep(currentStep - 1)
     }
@@ -1013,47 +1017,54 @@ export function ChallengeWizard({ onSubmit, onCancel, loading }: ChallengeWizard
     <div className="space-y-8">
       {/* Progress Steps */}
       <nav aria-label="Progress">
-        <ol className="flex items-center">
-          {steps.map((step, stepIdx) => (
-            <li key={step.name} className={`relative ${stepIdx !== steps.length - 1 ? 'pr-8 sm:pr-20' : ''}`}>
-              {/* Skip configuration step in progress if not needed */}
-              {step.number === 2 && !needsConfiguration() ? null : (
-                <>
-                  {step.status === 'complete' ? (
-                    <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                      <div className="h-0.5 w-full bg-sims-green" />
-                    </div>
-                  ) : step.status === 'current' ? (
-                    <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                      <div className="h-0.5 w-full bg-gray-200" />
-                    </div>
-                  ) : (
-                    <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                      <div className="h-0.5 w-full bg-gray-200" />
-                    </div>
-                  )}
-                  <div className="relative w-8 h-8 flex items-center justify-center bg-white border-2 border-gray-300 rounded-full">
-                    {step.status === 'complete' ? (
-                      <svg className="w-5 h-5 text-sims-green" viewBox="0 0 20 20" fill="currentColor">
+        <ol className="flex items-center justify-between">
+          {steps.map((step, stepIdx) => {
+            const currentIndex = getCurrentStepIndex()
+            const isComplete = stepIdx < currentIndex
+            const isCurrent = stepIdx === currentIndex
+
+            return (
+              <li key={step.name} className="relative flex-1">
+                {/* Connector line */}
+                {stepIdx !== steps.length - 1 && (
+                  <div className="absolute top-4 left-1/2 w-full h-0.5 bg-gray-200">
+                    <div
+                      className={`h-full transition-all duration-300 ${isComplete ? 'bg-sims-green w-full' : 'bg-gray-200 w-0'
+                        }`}
+                    />
+                  </div>
+                )}
+
+                {/* Step circle and label */}
+                <div className="relative flex flex-col items-center">
+                  <div className={`
+                    w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-300 bg-white z-10
+                    ${isComplete
+                      ? 'border-sims-green bg-sims-green'
+                      : isCurrent
+                        ? 'border-sims-green bg-white'
+                        : 'border-gray-300 bg-white'
+                    }
+                  `}>
+                    {isComplete ? (
+                      <svg className="w-4 h-4 text-white" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                       </svg>
-                    ) : step.status === 'current' ? (
-                      <span className="w-2.5 h-2.5 bg-sims-green rounded-full" />
                     ) : (
-                      <span className="w-2.5 h-2.5 bg-gray-300 rounded-full" />
+                      <span className={`text-sm font-medium ${isCurrent ? 'text-sims-green' : 'text-gray-500'
+                        }`}>
+                        {step.number}
+                      </span>
                     )}
                   </div>
-                  <span className="ml-4 min-w-0 flex flex-col">
-                    <span className={`text-xs font-semibold tracking-wide uppercase ${
-                      step.status === 'current' ? 'text-sims-green' : 'text-gray-500'
+                  <span className={`mt-2 text-xs font-medium text-center ${isCurrent ? 'text-sims-green' : isComplete ? 'text-gray-700' : 'text-gray-500'
                     }`}>
-                      {step.name}
-                    </span>
+                    {step.name}
                   </span>
-                </>
-              )}
-            </li>
-          ))}
+                </div>
+              </li>
+            )
+          })}
         </ol>
       </nav>
 
@@ -1076,14 +1087,14 @@ export function ChallengeWizard({ onSubmit, onCancel, loading }: ChallengeWizard
           />
         )}
 
-{currentStep === 3 && (
-  <ExpansionPackStep
-    data={getExpansionPackData()}
-    onNext={handleExpansionPackNext}
-    onBack={goBack}
-    isLegacyChallenge={wizardData.basicInfo?.challenge_type === 'legacy'}
-  />
-)}
+        {currentStep === 3 && (
+          <ExpansionPackStep
+            data={getExpansionPackData()}
+            onNext={handleExpansionPackNext}
+            onBack={goBack}
+            isLegacyChallenge={wizardData.basicInfo?.challenge_type === 'legacy'}
+          />
+        )}
 
         {currentStep === 4 && (
           <SummaryStep

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useChallengeStore } from '@/src/lib/store/challengeStore'
-import { ChallengeWizard } from '@/src/components/forms/ChallengeForm'
+import { ChallengeWizard } from '@/src/components/forms/ChallengeWizard'
 
 export default function NewChallengePage() {
   const router = useRouter()

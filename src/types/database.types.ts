@@ -42,7 +42,7 @@ export interface Database {
           name: string
           description: string | null
           challenge_type: string | null
-          configuration: Json | null 
+          configuration: Json | null
           status: string | null
           created_at: string
           updated_at: string
@@ -83,6 +83,7 @@ export interface Database {
           is_heir: boolean
           relationship_to_heir: string | null
           created_at: string
+          avatar_url: string | null
         }
         Insert: {
           id?: string
@@ -96,6 +97,7 @@ export interface Database {
           is_heir?: boolean
           relationship_to_heir?: string | null
           created_at?: string
+          avatar_url?: string | null
         }
         Update: {
           id?: string
@@ -109,6 +111,7 @@ export interface Database {
           is_heir?: boolean
           relationship_to_heir?: string | null
           created_at?: string
+          avatar_url?: string | null
         }
       }
       goals: {
@@ -122,6 +125,11 @@ export interface Database {
           is_required: boolean
           order_index: number
           created_at: string
+          goal_type: string
+          current_value: number
+          thresholds: string
+          max_points: number
+          target_value: number
         }
         Insert: {
           id?: string
@@ -133,6 +141,11 @@ export interface Database {
           is_required?: boolean
           order_index?: number
           created_at?: string
+          goal_type: string
+          current_value: number
+          thresholds: string
+          max_points: number
+          target_value: number
         }
         Update: {
           id?: string
@@ -144,6 +157,11 @@ export interface Database {
           is_required?: boolean
           order_index?: number
           created_at?: string
+          goal_type: string
+          current_value: number
+          thresholds: string
+          max_points: number
+          target_value: number
         }
       }
       progress: {
@@ -154,6 +172,7 @@ export interface Database {
           sim_id: string | null
           completed_at: string
           notes: string | null
+          completion_details: string
         }
         Insert: {
           id?: string
@@ -162,6 +181,7 @@ export interface Database {
           sim_id?: string | null
           completed_at?: string
           notes?: string | null
+          completion_details: string
         }
         Update: {
           id?: string
@@ -169,6 +189,39 @@ export interface Database {
           goal_id?: string
           sim_id?: string | null
           completed_at?: string
+          notes?: string | null
+          completion_details: string
+        }
+      }
+      sim_achievements: {
+        Row: {
+          id: string
+          goal_id: string
+          sim_id: string | null
+          goal_title: string
+          completion_method: string
+          points_earned: number
+          achieved_at: string
+          notes: string | null
+        }
+        Insert: {
+          id?: string
+          goal_id: string
+          sim_id: string | null
+          goal_title?: string
+          completion_method?: string
+          points_earned?: number
+          achieved_at?: string
+          notes?: string | null
+        }
+        Update: {
+          id?: string
+          goal_id: string
+          sim_id: string | null
+          goal_title?: string
+          completion_method?: string
+          points_earned?: number
+          achieved_at?: string
           notes?: string | null
         }
       }

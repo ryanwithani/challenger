@@ -50,45 +50,47 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
     <Modal isOpen={isOpen} onClose={handleClose}>
       <div className="w-full max-w-md">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Sign In</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Sign In</h2>
           <button
             onClick={handleClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
           >
           </button>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
             type="email"
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
             required
           />
-          
+
           <PasswordInput
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
             required
           />
-          
+
           {error && (
-            <p className="text-red-500 text-sm">{error}</p>
+            <p className="text-red-500 dark:text-red-400 text-sm">{error}</p>
           )}
-          
+
           <Button
             type="submit"
-            className="w-full"
+            className="w-full bg-sims-green hover:bg-sims-green/90 text-white dark:bg-sims-green dark:hover:bg-sims-green/90"
             disabled={loading}
           >
             {loading ? 'Signing in...' : 'Sign In'}
           </Button>
         </form>
-        
-        <p className="text-center mt-4 text-sm text-gray-600">
+
+        <p className="text-center mt-4 text-sm text-gray-600 dark:text-gray-400">
           Don't have an account?{' '}
-          <Link href="/register" className="text-sims-blue hover:underline">
+          <Link href="/register" className="text-sims-blue hover:underline dark:text-sims-blue">
             Sign up
           </Link>
         </p>
