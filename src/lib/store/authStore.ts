@@ -6,64 +6,85 @@ interface AuthState {
   user: User | null
   loading: boolean
   initialized: boolean
+  showPasswordUpdateModal: boolean // ADD THIS
   signIn: (email: string, password: string) => Promise<void>
   signUp: (email: string, password: string) => Promise<void>
   signOut: () => Promise<void>
   fetchUser: () => Promise<void>
   initialize: () => Promise<void>
   getAuthErrorMessage: (error: any) => string
+  requestPasswordReset: (email: string) => Promise<void> // ADD THIS
+  updatePassword: (password: string) => Promise<void> // ADD THIS
+  setShowPasswordUpdateModal: (show: boolean) => void // ADD THIS
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   loading: true,
   initialized: false,
+  showPasswordUpdateModal: false, // ADD THIS
 
   initialize: async () => {
     const supabase = createSupabaseBrowserClient()
     const { data: { session } } = await supabase.auth.getSession()
-    
-    set({ 
-      user: session?.user ?? null, 
+
+    set({
+      user: session?.user ?? null,
       loading: false,
-      initialized: true 
+      initialized: true
     })
-    
+
     // Listen for auth changes
     supabase.auth.onAuthStateChange((event, session) => {
       set({ user: session?.user ?? null })
+
+      // ADD THIS: Handle password recovery event
+      if (event === 'PASSWORD_RECOVERY') {
+        set({ showPasswordUpdateModal: true })
+      }
     })
+
+    // ADD THIS: Check if we're coming from a password reset link
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search)
+      if (urlParams.get('type') === 'recovery' && session) {
+        set({ showPasswordUpdateModal: true })
+        // Clean up URL
+        const newUrl = window.location.pathname
+        window.history.replaceState({}, document.title, newUrl)
+      }
+    }
   },
-  
+
   signIn: async (email: string, password: string) => {
     // Check if we're rate limited (from localStorage tracking)
     const rateLimitKey = `rate_limit_${email}`
     const attempts = JSON.parse(localStorage.getItem(rateLimitKey) || '[]')
     const now = Date.now()
     const recentAttempts = attempts.filter((time: number) => now - time < 900000) // 15 min
-    
+
     if (recentAttempts.length >= 5) {
       throw new Error('Too many login attempts. Please try again in 15 minutes.')
     }
-  
+
     const supabase = createSupabaseBrowserClient()
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
-    
+
     if (error) {
       // Track failed attempt
       recentAttempts.push(now)
       localStorage.setItem(rateLimitKey, JSON.stringify(recentAttempts))
       throw error
     }
-    
+
     // Clear attempts on success
     localStorage.removeItem(rateLimitKey)
     set({ user: data.user })
   },
-  
+
   signUp: async (email: string, password: string) => {
     const supabase = createSupabaseBrowserClient()
     const { data, error } = await supabase.auth.signUp({
@@ -73,13 +94,13 @@ export const useAuthStore = create<AuthState>((set) => ({
     if (error) throw error
     set({ user: data.user })
   },
-  
+
   signOut: async () => {
     const supabase = createSupabaseBrowserClient()
     await supabase.auth.signOut()
     set({ user: null })
   },
-  
+
   fetchUser: async () => {
     const supabase = createSupabaseBrowserClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -95,5 +116,51 @@ export const useAuthStore = create<AuthState>((set) => ({
       default:
         return 'Something went wrong. Please try again.'
     }
-  }
+  },
+
+  // ADD THIS: Request password reset
+  requestPasswordReset: async (email: string) => {
+    // Use localStorage for rate limiting (consistent with your signIn method)
+    const rateLimitKey = `reset_request_${email}`
+    const attempts = JSON.parse(localStorage.getItem(rateLimitKey) || '[]')
+    const now = Date.now()
+    const recentAttempts = attempts.filter((time: number) => now - time < 3600000) // 1 hour
+
+    if (recentAttempts.length >= 3) {
+      throw new Error('Too many reset attempts. Please try again in an hour.')
+    }
+
+    const supabase = createSupabaseBrowserClient()
+    const redirectUrl = `${window.location.origin}?type=recovery`
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: redirectUrl,
+    })
+
+    if (error) throw error
+
+    // Track successful attempt
+    recentAttempts.push(now)
+    localStorage.setItem(rateLimitKey, JSON.stringify(recentAttempts))
+  },
+
+  // ADD THIS: Update password after reset
+  updatePassword: async (password: string) => {
+    const supabase = createSupabaseBrowserClient()
+
+    const { error } = await supabase.auth.updateUser({ password })
+    if (error) throw error
+
+    // Clear any rate limits for this user
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user?.email) {
+      localStorage.removeItem(`rate_limit_${user.email}`)
+      localStorage.removeItem(`reset_request_${user.email}`)
+    }
+  },
+
+  // ADD THIS: Control password update modal
+  setShowPasswordUpdateModal: (show: boolean) => {
+    set({ showPasswordUpdateModal: show })
+  },
 }))

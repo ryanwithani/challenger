@@ -54,16 +54,78 @@ export const changePasswordSchema = z.object({
   { path: ["confirmNewPassword"], message: "Passwords do not match." }
 )
 
+export const emailSchema = z
+  .string()
+  .min(1, 'Email is required')
+  .email('Please enter a valid email address')
+  .max(254, 'Email address is too long')
+  .toLowerCase()
+  .trim()
+  .refine((email) => {
+    // No consecutive dots
+    return !email.includes('..')
+  }, 'Email cannot contain consecutive dots')
+  .refine((email) => {
+    // Cannot start or end with a dot
+    return !email.startsWith('.') && !email.endsWith('.')
+  }, 'Email cannot start or end with a dot')
+  .refine((email) => {
+    // Local part (before @) cannot start or end with a dot
+    const [localPart] = email.split('@')
+    return !localPart.startsWith('.') && !localPart.endsWith('.')
+  }, 'Email username cannot start or end with a dot')
+  .refine((email) => {
+    // Check for common typos in popular domains
+    const commonTypos = [
+      'gmial.com',
+      'gmai.com',
+      'gmil.com',
+      'gmal.com',
+      'gmail.co',
+      'gmail.cm',
+      'gmaill.com',
+      'yahooo.com',
+      'yaho.com',
+      'yahoo.co',
+      'hotmial.com',
+      'hotmai.com',
+      'hotmal.com',
+      'hotmil.com',
+      'outlok.com',
+      'outloo.com'
+    ]
+    const domain = email.split('@')[1]?.toLowerCase()
+    return !commonTypos.includes(domain)
+  }, 'Please check your email domain for typos')
+
+export function validateEmail(email: string) {
+  const result = emailSchema.safeParse(email)
+
+  if (result.success) {
+    return {
+      valid: true,
+      email: result.data,
+      errors: []
+    }
+  }
+  return {
+    valid: false,
+    email: null,
+    errors: result.error.errors.map(err => err.message)
+  }
+}
+
 export const signInSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
+  email: emailSchema,
   password: z.string().min(1, 'Password is required'),
 })
 
 export const signUpSchema = z.object({
-  email: z.string().email('Invalid email address'),
+  email: emailSchema,
   password: passwordSchema,
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
 });
+
