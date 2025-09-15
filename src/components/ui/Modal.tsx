@@ -11,13 +11,13 @@ interface ModalProps {
   closeOnOverlayClick?: boolean
 }
 
-export function Modal({ 
-  isOpen, 
-  onClose, 
-  title, 
-  children, 
-  size = 'md',
-  closeOnOverlayClick = true 
+export function Modal({
+  isOpen,
+  onClose,
+  title,
+  children,
+  size = 'xl',
+  closeOnOverlayClick = true
 }: ModalProps) {
   // Handle escape key press
   useEffect(() => {
@@ -49,12 +49,12 @@ export function Modal({
   const modalContent = (
     <>
       {/* Overlay */}
-      <div 
+      <div
         className="fixed inset-0 bg-black bg-opacity-50 transition-opacity z-40"
         onClick={closeOnOverlayClick ? onClose : undefined}
         aria-hidden="true"
       />
-      
+
       {/* Modal */}
       <div className="fixed inset-0 flex items-center justify-center p-4 z-50">
         <div
@@ -75,7 +75,7 @@ export function Modal({
               <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
             </div>
           )}
-          
+
           {/* Close button */}
           <button
             onClick={onClose}
@@ -94,7 +94,7 @@ export function Modal({
               <path d="M6 18L18 6M6 6l12 12"></path>
             </svg>
           </button>
-          
+
           {/* Content */}
           <div className="px-6 py-4 max-h-[calc(100vh-200px)] overflow-y-auto">
             {children}
@@ -105,7 +105,7 @@ export function Modal({
   )
 
   // Use portal to render modal at the end of document body
-  return typeof window !== 'undefined' 
+  return typeof window !== 'undefined'
     ? createPortal(modalContent, document.body)
     : null
 }

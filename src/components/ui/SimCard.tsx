@@ -1,7 +1,9 @@
 import Link from 'next/link'
 import { Database } from '@/src/types/database.types'
+import { useChallengeStore } from '@/src/lib/store/challengeStore'
 
 type Sim = Database['public']['Tables']['sims']['Row']
+type Challenge = Database['public']['Tables']['challenges']['Row']
 
 interface SimCardProps {
   sim: Sim
@@ -11,7 +13,7 @@ interface SimCardProps {
 
 export function SimCard({ sim, showProfileLink = true, className = '' }: SimCardProps) {
   const traits = Array.isArray(sim.traits) ? sim.traits : []
-
+  const { challenges } = useChallengeStore()
   const getAgeStageIcon = (ageStage: string | null) => {
     switch (ageStage) {
       case 'baby': return '👶'
@@ -38,6 +40,11 @@ export function SimCard({ sim, showProfileLink = true, className = '' }: SimCard
     return <span className="text-2xl">{getAgeStageIcon(sim.age_stage)}</span>
   }
 
+  const getChallengeName = (challenge_id: string) => {
+    const challenge = challenges.find((c: Challenge) => c.id === challenge_id)
+    return challenge?.name || 'Unknown Challenge'
+  }
+
   const CardContent = () => (
     <div className={`card hover:shadow-lg transition-shadow ${className}`}>
       <div className="flex items-start justify-between mb-3">
@@ -45,7 +52,7 @@ export function SimCard({ sim, showProfileLink = true, className = '' }: SimCard
           {getSimAvatar(sim)}
           <div>
             <h3 className="text-lg font-semibold">{sim.name}</h3>
-            <p className="text-sm text-gray-600">Generation {sim.generation}</p>
+            <p className="text-sm text-gray-600">{getChallengeName(sim.challenge_id || '')}</p>
           </div>
         </div>
 

@@ -1,9 +1,11 @@
 import Link from 'next/link'
 import { Navbar } from '@/src/components/layout/Navbar'
+import { AuthInitializer } from '../components/auth/AuthInitializer'
 
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-sims-green/10 to-sims-blue/10">
+      <AuthInitializer />
       <Navbar />
 
       <main className="container mx-auto px-4 py-16">

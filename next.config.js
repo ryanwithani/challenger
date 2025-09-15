@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   async headers() {
+    const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
     return [
       {
         source: '/:path*',
@@ -16,9 +17,9 @@ const nextConfig = {
               "default-src 'self'",
               "script-src 'self' 'unsafe-eval' 'unsafe-inline'", // Relaxed for Next.js
               "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' blob: data:",
+              `img-src 'self' blob: data: ${SUPABASE_URL}`,
               "font-src 'self'",
-              "connect-src 'self' https://zxvquevneenqsjpnhqzi.supabase.co",
+              `connect-src 'self' ${SUPABASE_URL}`,
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'",

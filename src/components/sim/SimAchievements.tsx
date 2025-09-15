@@ -67,7 +67,7 @@ export function SimAchievements({ sim, achievements }: SimAchievementsProps) {
     return (
         <div className="space-y-6">
             {/* Achievement Summary */}
-            <div className="bg-gradient-to-r from-sims-green to-sims-blue rounded-lg p-6 text-white">
+            <div className="bg-gradient-to-r from-sims-green to-sims-blue rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 text-white">
                 <div className="flex items-center justify-between">
                     <div>
                         <h2 className="text-2xl font-bold">{sim.name}'s Achievements</h2>
@@ -97,7 +97,7 @@ export function SimAchievements({ sim, achievements }: SimAchievementsProps) {
             {achievements.length > 0 ? (
                 <div className="space-y-6">
                     {Object.entries(achievementsByCategory).map(([category, categoryAchievements]) => (
-                        <div key={category} className="bg-white rounded-lg border border-gray-200 p-6">
+                        <div key={category} className="bg-white rounded-2xl border-2 border-gray-100 p-6 shadow-lg hover:shadow-xl transition-all duration-300">
                             <div className="flex items-center justify-between mb-4">
                                 <h3 className="text-lg font-semibold">{category} Achievements</h3>
                                 <span className="text-sm text-gray-500">
@@ -111,7 +111,7 @@ export function SimAchievements({ sim, achievements }: SimAchievementsProps) {
                                     .map((achievement) => (
                                         <div
                                             key={achievement.id}
-                                            className={`border rounded-lg p-4 ${getCategoryColor(achievement.goal_title)}`}
+                                            className={`border rounded-xl p-4 ${getCategoryColor(achievement.goal_title)}`}
                                         >
                                             <div className="flex items-start justify-between">
                                                 <div className="flex items-start space-x-3">
@@ -150,7 +150,7 @@ export function SimAchievements({ sim, achievements }: SimAchievementsProps) {
                     <p className="text-gray-600 mb-4">
                         {sim.name} hasn't completed any goals yet. Start playing and achieving goals to see them here!
                     </p>
-                    <div className="bg-gray-50 rounded-lg p-4 max-w-md mx-auto">
+                    <div className="bg-gray-50 rounded-xl p-4 max-w-md mx-auto">
                         <p className="text-sm text-gray-600">
                             💡 <strong>Tip:</strong> Achievements are earned when you complete goals in the challenge.
                             Visit the Scoring tab to mark goals as complete and they'll appear here.

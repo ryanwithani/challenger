@@ -1,220 +1,164 @@
-import { useState, useEffect } from 'react'
-import { useForm } from 'react-hook-form'
-import { z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Button } from '@/src/components/ui/Button'
-import { useUserPreferencesStore } from '@/src/lib/store/userPreferencesStore'
+// src/components/profile/ExpansionPacks.tsx
+'use client';
 
-const expansionPackSchema = z.object({
-    base_game: z.boolean().default(true),
-    get_to_work: z.boolean().default(false),
-    get_together: z.boolean().default(false),
-    city_living: z.boolean().default(false),
-    cats_dogs: z.boolean().default(false),
-    seasons: z.boolean().default(false),
-    get_famous: z.boolean().default(false),
-    island_living: z.boolean().default(false),
-    discover_university: z.boolean().default(false),
-    eco_lifestyle: z.boolean().default(false),
-    snowy_escape: z.boolean().default(false),
-    cottage_living: z.boolean().default(false),
-    high_school_years: z.boolean().default(false),
-    growing_together: z.boolean().default(false),
-    horse_ranch: z.boolean().default(false),
-    for_rent: z.boolean().default(false),
-    lovestruck: z.boolean().default(false),
-    life_death: z.boolean().default(false),
-  })
-  
-  type ExpansionPackData = z.infer<typeof expansionPackSchema>
+import { Fragment } from 'react';
 
-  export const ExpansionPacks = [
-    {
-      key: 'get_to_work',
-      name: 'Get to Work',
-      category: 'Expansion Pack',
-      legacyImpact: {
-        careers: ['Detective', 'Doctor', 'Scientist'],
-        skills: ['Photography', 'Baking'],
-        collections: ['Aliens', 'Crystals', 'Metals'],
-        points: '+6 career points, +2 skill points, +3 collection points'
-      }
-    },
-    {
-      key: 'get_together',
-      name: 'Get Together',
-      category: 'Expansion Pack',
-      legacyImpact: {
-        careers: ['No new careers'],
-        skills: ['Dancing', 'DJ Mixing'],
-        collections: ['No new collections'],
-        points: '+2 skill points, enables club system'
-      }
-    },
-    {
-      key: 'city_living',
-      name: 'City Living',
-      category: 'Expansion Pack',
-      legacyImpact: {
-        careers: ['Politician (2 branches)', 'Critic (2 branches)', 'Social Media (2 branches)'],
-        skills: ['Singing'],
-        collections: ['City Posters', 'Snow Globes'],
-        points: '+6 career points, +1 skill point, +2 collection points'
-      }
-    },
-    {
-      key: 'cats_dogs',
-      name: 'Cats & Dogs',
-      category: 'Expansion Pack',
-      legacyImpact: {
-        careers: ['Veterinarian (2 branches)'],
-        skills: ['Veterinarian'],
-        collections: ['Feathers', 'My Sims Trophies'],
-        points: '+2 career points, +1 skill point, +2 collection points'
-      }
-    },
-    {
-      key: 'seasons',
-      name: 'Seasons',
-      category: 'Expansion Pack',
-      legacyImpact: {
-        careers: ['No new careers'],
-        skills: ['Flower Arranging'],
-        collections: ['Decorative Eggs'],
-        points: '+1 skill point, +1 collection point, holiday traditions'
-      }
-    },
-    {
-      key: 'get_famous',
-      name: 'Get Famous',
-      category: 'Expansion Pack',
-      legacyImpact: {
-        careers: ['Actor (2 branches)'],
-        skills: ['Acting', 'Media Production'],
-        collections: ['No new collections'],
-        points: '+2 career points, +2 skill points, fame system'
-      }
-    },
-    {
-      key: 'island_living',
-      name: 'Island Living',
-      category: 'Expansion Pack',
-      legacyImpact: {
-        careers: ['Conservationist (2 branches)'],
-        skills: ['No new skills'],
-        collections: ['Seashells', 'Buried Treasure'],
-        points: '+2 career points, +2 collection points, mermaids'
-      }
-    },
-    {
-      key: 'discover_university',
-      name: 'Discover University',
-      category: 'Expansion Pack',
-      legacyImpact: {
-        careers: ['Education (2 branches)', 'Engineer (2 branches)', 'Law (2 branches)'],
-        skills: ['Research & Debate', 'Robotics'],
-        collections: ['Ping Pong Balls'],
-        points: '+6 career points, +2 skill points, +1 collection point'
-      }
-    },
-    {
-      key: 'eco_lifestyle',
-      name: 'Eco Lifestyle',
-      category: 'Expansion Pack',
-      legacyImpact: {
-        careers: ['Civil Designer (2 branches)'],
-        skills: ['Fabrication', 'Juice Fizzing'],
-        collections: ['Candles', 'Insect Farms'],
-        points: '+2 career points, +2 skill points, +2 collection points'
-      }
-    },
-    {
-      key: 'snowy_escape',
-      name: 'Snowy Escape',
-      category: 'Expansion Pack',
-      legacyImpact: {
-        careers: ['Salaryman (2 branches)'],
-        skills: ['Rock Climbing', 'Skiing', 'Snowboarding'],
-        collections: ['Omiscan Treasures'],
-        points: '+2 career points, +3 skill points, +1 collection point'
-      }
-    },
-    {
-      key: 'cottage_living',
-      name: 'Cottage Living',
-      category: 'Expansion Pack',
-      legacyImpact: {
-        careers: ['No new careers'],
-        skills: ['Cross-Stitch'],
-        collections: ['Wild Birds', 'Grocery Bags'],
-        points: '+1 skill point, +2 collection points, animal care'
-      }
-    },
-    {
-      key: 'high_school_years',
-      name: 'High School Years',
-      category: 'Expansion Pack',
-      legacyImpact: {
-        careers: ['No new adult careers (teen careers available)'],
-        skills: ['No new skills'],
-        collections: ['Crystals & Metals (enhanced)', 'Yearbook Quotes'],
-        points: 'Enhanced teen gameplay, +1 collection point'
-      }
-    },
-    {
-      key: 'growing_together',
-      name: 'Growing Together',
-      category: 'Expansion Pack',
-      legacyImpact: {
-        careers: ['No new careers'],
-        skills: ['No new skills'],
-        collections: ['No new collections'],
-        points: 'Enhanced family dynamics, compatibility system'
-      }
-    },
-    {
-      key: 'horse_ranch',
-      name: 'Horse Ranch',
-      category: 'Expansion Pack',
-      legacyImpact: {
-        careers: ['No new careers'],
-        skills: ['Horse Riding', 'Nectar Making'],
-        collections: ['Prairie Grass'],
-        points: '+2 skill points, +1 collection point, horse care'
-      }
-    },
-    {
-      key: 'for_rent',
-      name: 'For Rent',
-      category: 'Expansion Pack',
-      legacyImpact: {
-        careers: ['No new careers'],
-        skills: ['No new skills'],
-        collections: ['No new collections'],
-        points: 'Rental property management, apartment living'
-      }
-    },
-    {
-      key: 'lovestruck',
-      name: 'Lovestruck',
-      category: 'Expansion Pack',
-      legacyImpact: {
-        careers: ['No new careers'],
-        skills: ['No new skills'],
-        collections: ['No new collections'],
-        points: 'Enhanced romance system, dating features'
-      }
-    },
-    {
-      key: 'life_death',
-      name: 'Life & Death',
-      category: 'Expansion Pack',
-      legacyImpact: {
-        careers: ['Undertaker (2 branches)'],
-        skills: ['Thanatology'],
-        collections: ['Epitaphs'],
-        points: '+2 career points, +1 skill point, +1 collection point'
-      }
-    }
-  ]
-  
+export type ExpansionPacksValue = {
+  // Always enabled; we render it locked-on
+  base_game: boolean;
+
+  // Expansion examples — add/remove keys to match your schema
+  get_to_work: boolean;
+  get_together: boolean;
+  city_living: boolean;
+  cats_dogs: boolean;
+  seasons: boolean;
+  get_famous: boolean;
+  island_living: boolean;
+  discover_university: boolean;
+  eco_lifestyle: boolean;
+  snowy_escape: boolean;
+  cottage_living: boolean;
+  high_school_years: boolean;
+  growing_together: boolean;
+  horse_ranch: boolean;
+  for_rent: boolean;
+  lovestruck?: boolean;
+  life_death?: boolean;
+};
+
+export type ExpansionPackDef = {
+  key: keyof ExpansionPacksValue;
+  name: string;
+  category: 'Expansion Pack' | 'Game Pack' | 'Stuff Pack' | 'Kits/Other';
+  alwaysOn?: boolean; // for base game
+};
+
+export const PACKS: ExpansionPackDef[] = [
+  { key: 'base_game', name: 'The Sims 4 (Base Game)', category: 'Kits/Other', alwaysOn: true },
+
+  { key: 'get_to_work', name: 'Get to Work', category: 'Expansion Pack' },
+  { key: 'get_together', name: 'Get Together', category: 'Expansion Pack' },
+  { key: 'city_living', name: 'City Living', category: 'Expansion Pack' },
+  { key: 'cats_dogs', name: 'Cats & Dogs', category: 'Expansion Pack' },
+  { key: 'seasons', name: 'Seasons', category: 'Expansion Pack' },
+  { key: 'get_famous', name: 'Get Famous', category: 'Expansion Pack' },
+  { key: 'island_living', name: 'Island Living', category: 'Expansion Pack' },
+  { key: 'discover_university', name: 'Discover University', category: 'Expansion Pack' },
+  { key: 'eco_lifestyle', name: 'Eco Lifestyle', category: 'Expansion Pack' },
+  { key: 'snowy_escape', name: 'Snowy Escape', category: 'Expansion Pack' },
+  { key: 'cottage_living', name: 'Cottage Living', category: 'Expansion Pack' },
+  { key: 'high_school_years', name: 'High School Years', category: 'Expansion Pack' },
+  { key: 'growing_together', name: 'Growing Together', category: 'Expansion Pack' },
+  { key: 'horse_ranch', name: 'Horse Ranch', category: 'Expansion Pack' },
+  { key: 'for_rent', name: 'For Rent', category: 'Expansion Pack' },
+
+  // Optional newer packs—uncomment if present in your DB schema
+  // { key: 'lovestruck', name: 'Lovestruck', category: 'Game Pack' },
+  // { key: 'life_death', name: 'Life & Death', category: 'Game Pack' },
+];
+
+type Props = {
+  value: ExpansionPacksValue;
+  onChange?: (next: ExpansionPacksValue) => void;
+  readOnly?: boolean;
+  className?: string;
+  header?: React.ReactNode;
+  hint?: React.ReactNode;
+};
+
+export function ExpansionPacks({
+  value,
+  onChange,
+  readOnly = false,
+  className,
+  header = <h2 className="text-lg font-semibold">Expansion Packs</h2>,
+  hint,
+}: Props) {
+  const toggle = (key: keyof ExpansionPacksValue) => {
+    if (readOnly) return;
+    if (!onChange) return;
+
+    // base_game is always on
+    if (key === 'base_game') return;
+
+    const next: ExpansionPacksValue = { ...value, [key]: !value[key] };
+    // Ensure base game never becomes false
+    next.base_game = true;
+    onChange(next);
+  };
+
+  // Group packs by category for nicer reading
+  const byCategory = PACKS.reduce<Record<string, ExpansionPackDef[]>>((acc, p) => {
+    (acc[p.category] ||= []).push(p);
+    return acc;
+  }, {});
+
+  return (
+    <div className={className}>
+      {header}
+      {hint && <div className="mt-1 text-xs text-gray-500">{hint}</div>}
+
+      <div className="mt-4 space-y-6">
+        {Object.entries(byCategory).map(([category, items]) => (
+          <Fragment key={category}>
+            <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+              {category}
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+              {items.map((pack) => {
+                const checked = Boolean(value[pack.key]);
+                const disabled = readOnly || pack.alwaysOn;
+
+                return (
+                  <button
+                    key={String(pack.key)}
+                    type="button"
+                    role="checkbox"
+                    aria-checked={checked}
+                    aria-label={pack.name}
+                    disabled={disabled}
+                    onClick={() => toggle(pack.key)}
+                    className={[
+                      'group relative h-20 rounded-xl border bg-white dark:bg-zinc-900',
+                      'px-3 py-2 text-left transition-all',
+                      checked
+                        ? 'border-sims-purple ring-0'
+                        : 'border-gray-200 hover:border-sims-blue/60',
+                      disabled && !checked ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer',
+                      'focus:outline-none focus:ring-2 focus:ring-sims-blue',
+                    ].join(' ')}
+                  >
+                    {/* Check mark */}
+                    {checked && (
+                      <span
+                        className="absolute right-1.5 top-1.5 grid h-5 w-5 place-items-center rounded-full bg-sims-purple text-white text-[11px]"
+                        aria-hidden
+                      >
+                        ✓
+                      </span>
+                    )}
+
+                    <div className="flex h-full items-center">
+                      <div className="flex-1 pr-2">
+                        <div className="text-[13px] font-medium leading-tight line-clamp-2">
+                          {pack.name}
+                        </div>
+                        {pack.alwaysOn && (
+                          <div className="mt-0.5 text-[11px] text-gray-500">Always enabled</div>
+                        )}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </Fragment>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default ExpansionPacks;

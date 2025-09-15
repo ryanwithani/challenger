@@ -15,15 +15,17 @@ export function AvatarUpload({ simId, currentAvatarUrl, onAvatarUpdate }: Avatar
     const [uploading, setUploading] = useState(false)
     const [dragOver, setDragOver] = useState(false)
 
+    const supportedImageFormats = new Set(['image/png', 'image/jpg', 'image/jpeg'])
+
     const handleFileUpload = async (file: File) => {
         // Validate file
-        if (!file.type.startsWith('image/')) {
-            alert('Please upload an image file')
+        if (!supportedImageFormats.has(file.type)) {
+            alert('Please upload a supported image format (.png, .jpg, .jpeg).')
             return
         }
 
         if (file.size > 5 * 1024 * 1024) { // 5MB limit
-            alert('File size must be less than 5MB')
+            alert('File size must be less than 5MB.')
             return
         }
 
@@ -76,7 +78,7 @@ export function AvatarUpload({ simId, currentAvatarUrl, onAvatarUpdate }: Avatar
                         <img
                             src={currentAvatarUrl}
                             alt="Sim avatar"
-                            className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg"
+                            className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg hover:shadow-xl transition-all duration-300"
                         />
                         <button
                             onClick={handleDeleteAvatar}
@@ -87,7 +89,7 @@ export function AvatarUpload({ simId, currentAvatarUrl, onAvatarUpdate }: Avatar
                         </button>
                     </div>
                 ) : (
-                    <div className="w-32 h-32 rounded-full bg-gray-200 border-4 border-white shadow-lg flex items-center justify-center mx-auto">
+                    <div className="w-32 h-32 rounded-full bg-gray-200 border-4 border-white shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center mx-auto">
                         <span className="text-4xl text-gray-400">👤</span>
                     </div>
                 )}
@@ -95,9 +97,9 @@ export function AvatarUpload({ simId, currentAvatarUrl, onAvatarUpdate }: Avatar
 
             {/* Upload Area */}
             <div
-                className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${dragOver
-                        ? 'border-sims-green bg-sims-green/10'
-                        : 'border-gray-300 hover:border-gray-400'
+                className={`border-2 border-dashed rounded-xl shadow-lg hover:shadow-xl duration-300 p-6 text-center transition-colors ${dragOver
+                    ? 'border-sims-green bg-sims-green/10'
+                    : 'border-gray-300 hover:border-gray-400'
                     }`}
                 onDragOver={(e) => {
                     e.preventDefault()
@@ -108,7 +110,7 @@ export function AvatarUpload({ simId, currentAvatarUrl, onAvatarUpdate }: Avatar
             >
                 <input
                     type="file"
-                    accept="image/*"
+                    accept={Array.from(supportedImageFormats).join(', ')}
                     onChange={handleFileSelect}
                     className="hidden"
                     id="avatar-upload"

@@ -6,9 +6,11 @@ import { useAuthStore } from '@/src/lib/store/authStore'
 import { Button } from '@/src/components/ui/Button'
 import { LoginModal } from '@/src/components/auth/LoginModal'
 import { SignUpModal } from '@/src/components/auth/SignUpModal'
+import { PasswordResetModal } from '../auth/PasswordResetModal'
+import { PasswordUpdateModal } from '../auth/PasswordUpdateModal'
 
 export function Navbar() {
-  const { user, signOut } = useAuthStore()
+  const { user, signOut, showPasswordUpdateModal, setShowPasswordUpdateModal } = useAuthStore()
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
   const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false)
 
@@ -74,8 +76,6 @@ export function Navbar() {
         </div>
       </nav>
 
-      {console.log('Rendering LoginModal with isOpen:', isLoginModalOpen)}
-
       <LoginModal
         isOpen={isLoginModalOpen}
         onClose={
@@ -88,6 +88,11 @@ export function Navbar() {
       <SignUpModal
         isOpen={isSignUpModalOpen}
         onClose={() => setIsSignUpModalOpen(false)}
+      />
+
+      <PasswordUpdateModal
+        isOpen={showPasswordUpdateModal}
+        onClose={() => setShowPasswordUpdateModal(false)}
       />
     </>
   )

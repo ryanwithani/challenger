@@ -5,6 +5,7 @@ import { Button } from '@/src/components/ui/Button'
 import { Database } from '@/src/types/database.types'
 import { LEGACY_CATEGORIES } from '@/src/components/challenge/GoalsSeeder'
 import { GoalCompletionModal } from './GoalCompletionModal'
+import { ChevronRight, Users, Trophy, Star, Plus, Edit3, Check, X, Crown, Heart, Baby } from 'lucide-react'
 
 type Challenge = Database['public']['Tables']['challenges']['Row']
 type Sim = Database['public']['Tables']['sims']['Row']
@@ -20,7 +21,7 @@ interface LegacyTrackerProps {
   onToggleGoal: (goalId: string) => void
   onUpdateGoalValue: (goalId: string, newValue: number) => void
   onCompleteGoalWithDetails: (goalId: string, simId: string, method: string, notes?: string) => Promise<void>
-  onSelectHeir: (simId: string, generation: number) => Promise<void> // Add this
+  onSelectHeir: (simId: string, generation: number) => Promise<void>
   calculatePoints: () => number
   calculateCategoryPoints: (category: string) => number
 }
@@ -37,64 +38,105 @@ interface GenerationCardProps {
 
 function GenerationCard({ generation, heir, spouse, children, isActive, onSelectHeir }: GenerationCardProps) {
   return (
-    <div className={`rounded-lg border-2 p-4 ${isActive ? 'border-sims-green bg-sims-green/5' : 'border-gray-200'}`}>
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-lg font-semibold">Generation {generation}</h3>
-        {isActive && (
-          <span className="px-2 py-1 bg-sims-green text-white text-xs rounded-full">Current</span>
-        )}
+    <div className={`relative rounded-2xl p-6 border-2 transition-all duration-300 hover:shadow-lg ${isActive
+        ? 'border-emerald-400 bg-gradient-to-br from-emerald-50 to-teal-50 shadow-lg'
+        : 'border-gray-200 bg-white hover:border-gray-300'
+      }`}>
+      {/* Generation Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center space-x-3">
+          <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-lg ${isActive ? 'bg-gradient-to-br from-emerald-500 to-teal-600' : 'bg-gradient-to-br from-gray-400 to-gray-600'
+            }`}>
+            {generation}
+          </div>
+          <div>
+            <h3 className="text-xl font-bold text-gray-900">Generation {generation}</h3>
+            {isActive && (
+              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                <Star className="w-3 h-3 mr-1" />
+                Current
+              </span>
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* Heir */}
-      <div className="mb-3">
-        <div className="text-sm font-medium text-gray-700 mb-1">Heir</div>
+      {/* Heir Section */}
+      <div className="mb-6">
+        <div className="flex items-center mb-3">
+          <Crown className="w-4 h-4 text-amber-500 mr-2" />
+          <span className="text-sm font-semibold text-gray-700">Heir</span>
+        </div>
         {heir ? (
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-sims-blue rounded-full flex items-center justify-center text-white text-sm font-medium">
+          <div className="flex items-center space-x-3 p-3 bg-white rounded-xl border border-amber-200">
+            <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-amber-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
               {heir.name.charAt(0)}
             </div>
             <div>
-              <div className="font-medium">{heir.name}</div>
-              <div className="text-xs text-gray-500">Age: {heir.age_stage}</div>
+              <div className="font-semibold text-gray-900">{heir.name}</div>
+              <div className="text-sm text-gray-500">Age: {heir.age_stage}</div>
             </div>
           </div>
         ) : (
-          <div className="text-sm text-gray-500 italic">No heir selected</div>
+          <div className="flex items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-xl">
+            <span className="text-sm text-gray-500">No heir selected</span>
+          </div>
         )}
       </div>
 
-      {/* Spouse */}
-      <div className="mb-3">
-        <div className="text-sm font-medium text-gray-700 mb-1">Primary Spouse</div>
+      {/* Spouse Section */}
+      <div className="mb-6">
+        <div className="flex items-center mb-3">
+          <Heart className="w-4 h-4 text-pink-500 mr-2" />
+          <span className="text-sm font-semibold text-gray-700">Primary Spouse</span>
+        </div>
         {spouse ? (
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-pink-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+          <div className="flex items-center space-x-3 p-3 bg-white rounded-xl border border-pink-200">
+            <div className="w-12 h-12 bg-gradient-to-br from-pink-400 to-pink-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
               {spouse.name.charAt(0)}
             </div>
             <div>
-              <div className="font-medium">{spouse.name}</div>
-              <div className="text-xs text-gray-500">Age: {spouse.age_stage}</div>
+              <div className="font-semibold text-gray-900">{spouse.name}</div>
+              <div className="text-sm text-gray-500">Age: {spouse.age_stage}</div>
             </div>
           </div>
         ) : (
-          <div className="text-sm text-gray-500 italic">No spouse</div>
+          <div className="flex items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-xl">
+            <span className="text-sm text-gray-500">No spouse</span>
+          </div>
         )}
       </div>
 
-      {/* Children */}
+      {/* Children Section */}
       <div>
-        <div className="text-sm font-medium text-gray-700 mb-1">Children ({children.length})</div>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center">
+            <Baby className="w-4 h-4 text-blue-500 mr-2" />
+            <span className="text-sm font-semibold text-gray-700">Children</span>
+          </div>
+          <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+            {children.length}
+          </span>
+        </div>
         {children.length > 0 ? (
-          <div className="space-y-1">
+          <div className="space-y-2">
             {children.slice(0, 3).map((child) => (
-              <div key={child.id} className="flex items-center justify-between text-sm">
-                <span>{child.name}</span>
+              <div key={child.id} className="flex items-center justify-between p-3 bg-white rounded-xl border border-blue-200">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                    {child.name.charAt(0)}
+                  </div>
+                  <div>
+                    <div className="font-medium text-gray-900">{child.name}</div>
+                    <div className="text-xs text-gray-500">Age: {child.age_stage}</div>
+                  </div>
+                </div>
                 {!heir && isActive && (
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={() => onSelectHeir(child)}
-                    className="text-xs py-1 px-2 h-6"
+                    className="px-3 py-1 bg-gradient-to-r from-amber-500 to-amber-600 text-white border-none rounded-lg text-xs font-medium hover:from-amber-600 hover:to-amber-700 transition-all duration-200"
                   >
                     Make Heir
                   </Button>
@@ -102,11 +144,15 @@ function GenerationCard({ generation, heir, spouse, children, isActive, onSelect
               </div>
             ))}
             {children.length > 3 && (
-              <div className="text-xs text-gray-500">+{children.length - 3} more</div>
+              <div className="text-center text-sm text-gray-500 py-2">
+                +{children.length - 3} more children
+              </div>
             )}
           </div>
         ) : (
-          <div className="text-sm text-gray-500 italic">No children yet</div>
+          <div className="flex items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-xl">
+            <span className="text-sm text-gray-500">No children yet</span>
+          </div>
         )}
       </div>
     </div>
@@ -165,7 +211,7 @@ function GoalComponent({
           <Button
             size="sm"
             onClick={() => onOpenCompletionModal(goal)}
-            className="px-3 py-1 text-xs bg-sims-green text-white hover:bg-sims-green/90"
+            className="px-3 py-1 text-xs bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700 border-none"
           >
             Complete
           </Button>
@@ -175,12 +221,10 @@ function GoalComponent({
         return (
           <button
             onClick={() => onToggleGoal(goal.id)}
-            className="w-4 h-4 rounded border-2 flex items-center justify-center bg-sims-green border-sims-green text-white hover:bg-sims-green/80"
+            className="w-8 h-8 rounded-xl border-2 flex items-center justify-center bg-gradient-to-br from-emerald-500 to-green-600 border-emerald-500 text-white hover:from-emerald-600 hover:to-green-700 transition-all duration-300"
             title="Click to mark as incomplete"
           >
-            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-            </svg>
+            <Check className="w-5 h-5" />
           </button>
         )
       }
@@ -191,17 +235,13 @@ function GoalComponent({
       return (
         <button
           onClick={() => onToggleGoal(goal.id)}
-          className={`w-4 h-4 rounded border-2 flex items-center justify-center ${isCompleted
-            ? 'bg-sims-green border-sims-green text-white hover:bg-sims-green/80'
-            : 'border-gray-300 hover:border-sims-green'
+          className={`w-8 h-8 rounded-xl border-2 flex items-center justify-center transition-all duration-300 ${isCompleted
+            ? 'bg-gradient-to-br from-emerald-500 to-green-600 border-emerald-500 text-white'
+            : 'border-gray-300 hover:border-emerald-400 hover:bg-emerald-50'
             }`}
           title={isCompleted ? "Click to mark as incomplete" : "Click to mark as complete"}
         >
-          {isCompleted && (
-            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-            </svg>
-          )}
+          {isCompleted && <Check className="w-5 h-5" />}
         </button>
       )
     }
@@ -211,15 +251,17 @@ function GoalComponent({
       return (
         <div className="flex items-center space-x-2">
           {/* Show current value */}
-          <span className="font-mono text-sm font-bold">{goal.current_value || 0}</span>
+          <span className="px-3 py-2 bg-blue-100 text-blue-800 rounded-lg font-bold">
+            {goal.current_value || 0}
+          </span>
 
           {/* Add completion button */}
           <Button
             size="sm"
             onClick={() => onOpenCompletionModal(goal)}
-            className="px-2 py-1 text-xs bg-sims-green text-white hover:bg-sims-green/90"
+            className="px-2 py-1 text-xs bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700 border-none"
           >
-            +
+            <Plus className="w-4 h-4" />
           </Button>
 
           {/* Edit value button */}
@@ -228,12 +270,10 @@ function GoalComponent({
               setTempValue(goal.current_value || 0)
               setEditingValue(true)
             }}
-            className="p-1 hover:bg-gray-100 rounded"
+            className="p-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
             title="Edit value manually"
           >
-            <svg className="w-3 h-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-            </svg>
+            <Edit3 className="w-4 h-4" />
           </button>
         </div>
       )
@@ -244,38 +284,37 @@ function GoalComponent({
       return (
         <div className="flex items-center space-x-2">
           {editingValue ? (
-            <div className="flex items-center space-x-1">
+            <div className="flex items-center space-x-2">
               <input
                 type="number"
                 value={tempValue}
                 onChange={(e) => setTempValue(parseInt(e.target.value) || 0)}
-                className="w-16 px-2 py-1 text-sm border rounded"
+                className="w-16 px-2 py-1 text-sm border-2 border-blue-200 rounded-lg focus:border-blue-400 focus:outline-none"
                 min="0"
               />
-              <Button size="sm" onClick={handleSaveValue} className="px-2 py-1 text-xs">
-                ✓
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setEditingValue(false)}
-                className="px-2 py-1 text-xs"
+              <button
+                onClick={handleSaveValue}
+                className="p-1 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
               >
-                ✕
-              </Button>
+                <Check className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setEditingValue(false)}
+                className="p-1 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
           ) : (
             <div
-              className="flex items-center space-x-1 cursor-pointer hover:bg-gray-100 px-2 py-1 rounded"
+              className="flex items-center space-x-1 cursor-pointer hover:bg-gray-100 px-3 py-2 rounded-lg transition-colors"
               onClick={() => {
                 setTempValue(goal.current_value || 0)
                 setEditingValue(true)
               }}
             >
-              <span className="font-mono text-sm font-bold">{goal.current_value || 0}</span>
-              <svg className="w-3 h-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-              </svg>
+              <span className="px-3 py-2 bg-blue-100 text-blue-800 rounded-lg font-bold">{goal.current_value || 0}</span>
+              <Edit3 className="w-4 h-4 text-gray-400 ml-2" />
             </div>
           )}
         </div>
@@ -286,16 +325,12 @@ function GoalComponent({
     return (
       <button
         onClick={() => onToggleGoal(goal.id)}
-        className={`w-4 h-4 rounded border-2 flex items-center justify-center ${isCompleted
-          ? 'bg-sims-green border-sims-green text-white'
-          : 'border-gray-300 hover:border-sims-green'
+        className={`w-8 h-8 rounded-xl border-2 flex items-center justify-center transition-all duration-300 ${isCompleted
+          ? 'bg-gradient-to-br from-emerald-500 to-green-600 border-emerald-500 text-white'
+          : 'border-gray-300 hover:border-emerald-400 hover:bg-emerald-50'
           }`}
       >
-        {isCompleted && (
-          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-          </svg>
-        )}
+        {isCompleted && <Check className="w-5 h-5" />}
       </button>
     )
   }
@@ -336,38 +371,50 @@ function GoalComponent({
   const completionProgress = progress.find(p => p.goal_id === goal.id)
 
   return (
-    <div className={`flex items-start space-x-3 p-3 border rounded-lg ${isCompleted ? 'bg-green-50 border-green-200' : 'bg-white border-gray-200'
+    <div className={`relative rounded-2xl p-6 border-2 transition-all duration-300 ${isCompleted
+        ? 'border-emerald-200 bg-gradient-to-br from-emerald-50 to-green-50'
+        : 'border-gray-200 bg-white hover:border-gray-300'
       }`}>
-      <div className="mt-1">
-        {renderGoalControl()}
-      </div>
-      <div className="flex-1">
-        <div className={`font-medium ${isCompleted && goal.goal_type === 'milestone' ? 'line-through text-gray-500' : ''}`}>
-          {goal.title}
+      {/* Goal Header */}
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex-1">
+          <h4 className={`font-bold text-lg ${isCompleted && goal.goal_type === 'milestone' ? 'line-through text-gray-500' : 'text-gray-900'}`}>
+            {goal.title}
+          </h4>
+          {goal.description && (
+            <p className="text-gray-600 mt-1">{goal.description}</p>
+          )}
         </div>
-        {goal.description && (
-          <div className="text-sm text-gray-600 mt-1">{goal.description}</div>
-        )}
 
-        {/* Show completion details if completed */}
-        {isCompleted && completionProgress?.completion_details && (
-          <div className="text-sm text-green-700 mt-2 p-2 bg-green-100 rounded">
-            <div className="font-medium">Completed:</div>
-            <div>Method: {JSON.parse(completionProgress.completion_details).method}</div>
+        {/* Goal Controls */}
+        <div className="ml-4">
+          {renderGoalControl()}
+        </div>
+      </div>
+
+      {/* Show completion details if completed */}
+      {isCompleted && completionProgress?.completion_details && (
+        <div className="p-4 bg-emerald-100 rounded-xl border border-emerald-200 mb-4">
+          <div className="font-semibold text-emerald-800 mb-2">✅ Completed!</div>
+          <div className="space-y-1 text-sm text-emerald-700">
+            <div><strong>Method:</strong> {JSON.parse(completionProgress.completion_details).method}</div>
             {JSON.parse(completionProgress.completion_details).sim_name && (
-              <div>By: {JSON.parse(completionProgress.completion_details).sim_name}</div>
+              <div><strong>By:</strong> {JSON.parse(completionProgress.completion_details).sim_name}</div>
             )}
             {JSON.parse(completionProgress.completion_details).notes && (
-              <div>Notes: {JSON.parse(completionProgress.completion_details).notes}</div>
+              <div><strong>Notes:</strong> {JSON.parse(completionProgress.completion_details).notes}</div>
             )}
           </div>
-        )}
+        </div>
+      )}
 
-        <div className="text-sm text-sims-green font-medium mt-1">
+      {/* Goal Points and Progress */}
+      <div className="flex items-center justify-between">
+        <div className="text-sm font-semibold text-emerald-600">
           {getGoalStatusText()}
         </div>
         {goal.goal_type === 'threshold' && goal.thresholds && (
-          <div className="text-xs text-gray-500 mt-1">
+          <div className="text-xs text-gray-500">
             Next: {JSON.parse(goal.thresholds).find((t: any) => (goal.current_value || 0) < t.value)?.value || 'Max reached'}
           </div>
         )}
@@ -405,33 +452,38 @@ function ScoringCategory({
   const progressPercentage = category.maxPoints > 0 ? (currentPoints / category.maxPoints) * 100 : 0
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-4">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center space-x-3">
-          <div className={`w-4 h-4 rounded ${category.color}`}></div>
-          <h3 className="font-semibold">{category.name}</h3>
+    <div className="bg-white rounded-3xl border-2 border-gray-200 p-8 shadow-lg hover:shadow-xl transition-all duration-300">
+      {/* Category Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center space-x-4">
+          <div className={`w-16 h-16 rounded-2xl ${category.color} flex items-center justify-center`}>
+            <Trophy className="w-8 h-8 text-white" />
+          </div>
+          <div>
+            <h3 className="text-2xl font-bold text-gray-900">{category.name}</h3>
+            <p className="text-gray-600">{category.description}</p>
+          </div>
         </div>
         <div className="text-right">
-          <div className="font-bold text-lg">{currentPoints}/{category.maxPoints}</div>
-          <div className="text-xs text-gray-500">{Math.round(progressPercentage)}% complete</div>
+          <div className="text-3xl font-bold text-gray-900">{currentPoints}</div>
+          <div className="text-lg text-gray-500">/ {category.maxPoints}</div>
+          <div className="text-sm text-gray-400">{Math.round(progressPercentage)}% complete</div>
         </div>
       </div>
 
       {/* Progress Bar */}
-      <div className="mb-3">
-        <div className="w-full bg-gray-200 rounded-full h-2">
+      <div className="mb-8">
+        <div className="w-full bg-gray-200 rounded-full h-4">
           <div
-            className={`h-2 rounded-full transition-all duration-300 ${category.color}`}
+            className={`h-4 rounded-full transition-all duration-500 ${category.color}`}
             style={{ width: `${Math.min(progressPercentage, 100)}%` }}
-          ></div>
+          />
         </div>
       </div>
 
-      <p className="text-sm text-gray-600 mb-3">{category.description}</p>
-
       {/* Goals */}
       {categoryGoals.length > 0 ? (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {categoryGoals.map((goal) => (
             <GoalComponent
               key={goal.id}
@@ -445,7 +497,9 @@ function ScoringCategory({
           ))}
         </div>
       ) : (
-        <div className="text-sm text-gray-500 italic">No goals in this category</div>
+        <div className="flex items-center justify-center p-8 border-2 border-dashed border-gray-300 rounded-2xl">
+          <span className="text-gray-500">No goals in this category</span>
+        </div>
       )}
     </div>
   )
@@ -489,7 +543,6 @@ export function LegacyTracker({
   }
 
   const handleGoalCompletion = async (goalId: string, simId: string, method: string, notes?: string) => {
-    // This function should be passed from the store
     await onCompleteGoalWithDetails(goalId, simId, method, notes)
     handleCloseCompletionModal()
   }
@@ -516,174 +569,210 @@ export function LegacyTracker({
   ]
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">{challenge.name}</h1>
-          <div className="flex items-center space-x-4 mt-2 text-sm text-gray-600">
-            <span>Generation {currentGeneration}/10</span>
-            <span>•</span>
-            <span>Total Score: {totalPoints}/100</span>
-            <span>•</span>
-            <span className={`px-2 py-1 rounded-full text-xs font-medium ${config.start_type === 'ultra_extreme' ? 'bg-red-100 text-red-800' :
-              config.start_type === 'extreme' ? 'bg-yellow-100 text-yellow-800' :
-                'bg-green-100 text-green-800'
-              }`}>
-              {(config.start_type || 'regular').replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())} Start
-            </span>
-          </div>
-        </div>
-        <div className="flex space-x-2">
-          <Button onClick={onAddSim} size="sm">Add Sim</Button>
-          {/* No Add Goal button for Legacy challenges - they come pre-seeded */}
-        </div>
-      </div>
-
-      {/* Tabs */}
-      <div className="border-b border-gray-200">
-        <nav className="-mb-px flex space-x-8">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${activeTab === tab.id
-                ? 'border-sims-green text-sims-green'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-            >
-              <span className="mr-2">{tab.icon}</span>
-              {tab.name}
-            </button>
-          ))}
-        </nav>
-      </div>
-
-      {/* Tab Content */}
-      <div className="mt-6">
-        {activeTab === 'overview' && (
-          <div className="space-y-6">
-            {/* Quick Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="bg-white p-4 rounded-lg border border-gray-200 text-center">
-                <div className="text-2xl font-bold text-sims-green">{currentGeneration}</div>
-                <div className="text-sm text-gray-600">Current Generation</div>
-              </div>
-              <div className="bg-white p-4 rounded-lg border border-gray-200 text-center">
-                <div className="text-2xl font-bold text-blue-600">{sims.length}</div>
-                <div className="text-sm text-gray-600">Total Sims</div>
-              </div>
-              <div className="bg-white p-4 rounded-lg border border-gray-200 text-center">
-                <div className="text-2xl font-bold text-purple-600">{goals.length}</div>
-                <div className="text-sm text-gray-600">Total Goals</div>
-              </div>
-              <div className="bg-white p-4 rounded-lg border border-gray-200 text-center">
-                <div className="text-2xl font-bold text-yellow-600">{totalPoints}/100</div>
-                <div className="text-sm text-gray-600">Legacy Score</div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Header */}
+        <div className="bg-white rounded-3xl p-8 shadow-xl border-2 border-gray-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                {challenge.name}
+              </h1>
+              <div className="flex items-center space-x-6 mt-4 text-lg text-gray-600">
+                <div className="flex items-center space-x-2">
+                  <Users className="w-5 h-5" />
+                  <span>Generation {currentGeneration}/10</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Trophy className="w-5 h-5" />
+                  <span>Total Score: {totalPoints}/100</span>
+                </div>
+                <span className={`px-4 py-2 rounded-full text-sm font-semibold text-white ${config.start_type === 'ultra_extreme' ? 'bg-gradient-to-r from-red-500 to-red-700' :
+                    config.start_type === 'extreme' ? 'bg-gradient-to-r from-yellow-500 to-orange-600' :
+                      'bg-gradient-to-r from-green-400 to-green-600'
+                  }`}>
+                  {(config.start_type || 'regular').replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())} Start
+                </span>
               </div>
             </div>
+            <div className="flex space-x-3">
+              <Button
+                onClick={onAddSim}
+                size="sm"
+                className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-purple-700 transition-all duration-200 border-none"
+              >
+                <Plus className="w-5 h-5 mr-2" />
+                Add Sim
+              </Button>
+            </div>
+          </div>
+        </div>
 
-            {/* Category Score Summary */}
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="font-semibold mb-3">Category Scores</h3>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
-                {Object.entries(LEGACY_CATEGORIES).map(([categoryId, categoryRaw]) => {
-                  const category = categoryRaw as {
-                    color: string;
-                    name: string;
-                    maxPoints: number;
-                  };
-                  return (
-                    <div key={categoryId} className="flex items-center space-x-2">
-                      <div className={`w-3 h-3 rounded ${category.color}`}></div>
-                      <span className="font-medium">{category.name}:</span>
-                      <span>{calculateCategoryPoints(categoryId)}/{category.maxPoints}</span>
+        {/* Tabs */}
+        <div className="bg-white rounded-2xl p-2 shadow-lg border-2 border-gray-100">
+          <nav className="flex space-x-2">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`flex-1 py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 flex items-center justify-center space-x-2 ${activeTab === tab.id
+                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+                    : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+                  }`}
+              >
+                <span className="text-2xl">{tab.icon}</span>
+                <span>{tab.name}</span>
+              </button>
+            ))}
+          </nav>
+        </div>
+
+        {/* Tab Content */}
+        <div className="space-y-8">
+          {activeTab === 'overview' && (
+            <div className="space-y-8">
+              {/* Quick Stats */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                {[
+                  { label: 'Current Generation', value: currentGeneration, color: 'from-emerald-500 to-teal-600', icon: '🏠' },
+                  { label: 'Total Sims', value: sims.length, color: 'from-blue-500 to-indigo-600', icon: '👥' },
+                  { label: 'Total Goals', value: goals.length, color: 'from-purple-500 to-pink-600', icon: '🎯' },
+                  { label: 'Legacy Score', value: `${totalPoints}/100`, color: 'from-amber-500 to-orange-600', icon: '🏆' }
+                ].map((stat, index) => (
+                  <div key={index} className="bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-100 text-center hover:shadow-xl transition-all duration-300">
+                    <div className="text-4xl mb-2">{stat.icon}</div>
+                    <div className={`text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                      {stat.value}
                     </div>
-                  );
+                    <div className="text-gray-600 font-medium">{stat.label}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Category Score Summary */}
+              <div className="bg-white rounded-3xl p-8 shadow-lg border-2 border-gray-100">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6">Category Progress</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {Object.entries(LEGACY_CATEGORIES).map(([categoryId, categoryRaw]) => {
+                    const category = categoryRaw as {
+                      color: string;
+                      name: string;
+                      maxPoints: number;
+                    };
+                    const points = calculateCategoryPoints(categoryId)
+                    const percentage = (points / category.maxPoints) * 100
+                    return (
+                      <div key={categoryId} className="p-4 rounded-2xl bg-gray-50 border border-gray-200">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="font-semibold text-gray-900">{category.name}</span>
+                          <span className="font-bold text-lg">{points}/{category.maxPoints}</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-3 mb-2">
+                          <div
+                            className={`h-3 rounded-full transition-all duration-500 ${category.color}`}
+                            style={{ width: `${percentage}%` }}
+                          />
+                        </div>
+                        <div className="text-sm text-gray-500">{Math.round(percentage)}% complete</div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Challenge Rules Summary */}
+              <div className="bg-white rounded-3xl p-8 shadow-lg border-2 border-gray-100">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6">Challenge Rules</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-lg">
+                  <div className="p-4 bg-gray-50 rounded-2xl">
+                    <span className="font-semibold text-gray-700">Gender Law:</span>
+                    <div className="text-gray-900 font-medium mt-1">
+                      {(config.gender_law || '').replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                    </div>
+                  </div>
+                  <div className="p-4 bg-gray-50 rounded-2xl">
+                    <span className="font-semibold text-gray-700">Bloodline Law:</span>
+                    <div className="text-gray-900 font-medium mt-1">
+                      {(config.bloodline_law || '').replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                    </div>
+                  </div>
+                  <div className="p-4 bg-gray-50 rounded-2xl">
+                    <span className="font-semibold text-gray-700">Heir Selection:</span>
+                    <div className="text-gray-900 font-medium mt-1">
+                      {(config.heir_selection || '').replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                    </div>
+                  </div>
+                  <div className="p-4 bg-gray-50 rounded-2xl">
+                    <span className="font-semibold text-gray-700">Species Rule:</span>
+                    <div className="text-gray-900 font-medium mt-1">
+                      {(config.species_rule || '').replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'generations' && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+                {Array.from({ length: 10 }, (_, i) => i + 1).map((generation) => {
+                  const generationSims = simsByGeneration[generation] || []
+                  const heir = generationSims.find(sim => sim.is_heir)
+                  const spouse = generationSims.find(sim => sim.relationship_to_heir === 'spouse')
+                  const children = generationSims.filter(sim => sim.relationship_to_heir === 'child')
+
+                  return (
+                    <GenerationCard
+                      key={generation}
+                      generation={generation}
+                      heir={heir || null}
+                      spouse={spouse || null}
+                      children={children}
+                      isActive={generation === currentGeneration}
+                      onSelectHeir={async (sim) => {
+                        try {
+                          await onSelectHeir(sim.id, generation)
+                        } catch (error) {
+                          console.error('Failed to select heir:', error)
+                        }
+                      }}
+                    />
+                  )
                 })}
               </div>
             </div>
+          )}
 
-            {/* Challenge Rules Summary */}
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="font-semibold mb-3">Challenge Rules</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="font-medium">Gender Law:</span> {(config.gender_law || '').replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
-                </div>
-                <div>
-                  <span className="font-medium">Bloodline Law:</span> {(config.bloodline_law || '').replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
-                </div>
-                <div>
-                  <span className="font-medium">Heir Selection:</span> {(config.heir_selection || '').replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
-                </div>
-                <div>
-                  <span className="font-medium">Species Rule:</span> {(config.species_rule || '').replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
-                </div>
+          {activeTab === 'scoring' && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                {Object.keys(LEGACY_CATEGORIES).map((categoryId) => (
+                  <ScoringCategory
+                    key={categoryId}
+                    categoryId={categoryId}
+                    currentPoints={calculateCategoryPoints(categoryId)}
+                    goals={goals}
+                    progress={progress}
+                    sims={sims}
+                    onToggleGoal={onToggleGoal}
+                    onUpdateGoalValue={onUpdateGoalValue}
+                    onOpenCompletionModal={handleOpenCompletionModal}
+                  />
+                ))}
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
-        {activeTab === 'generations' && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-              {Array.from({ length: 10 }, (_, i) => i + 1).map((generation) => {
-                const generationSims = simsByGeneration[generation] || []
-                const heir = generationSims.find(sim => sim.is_heir)
-                const spouse = generationSims.find(sim => sim.relationship_to_heir === 'spouse')
-                const children = generationSims.filter(sim => sim.relationship_to_heir === 'child')
-
-                return (
-                  <GenerationCard
-                    key={generation}
-                    generation={generation}
-                    heir={heir || null}
-                    spouse={spouse || null}
-                    children={children}
-                    isActive={generation === currentGeneration}
-                    onSelectHeir={async (sim) => {
-                      try {
-                        await onSelectHeir(sim.id, generation) // Use the prop function
-                      } catch (error) {
-                        console.error('Failed to select heir:', error)
-                        // Could add toast notification here
-                      }
-                    }}
-                  />
-                )
-              })}
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'scoring' && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {Object.keys(LEGACY_CATEGORIES).map((categoryId) => (
-                <ScoringCategory
-                  key={categoryId}
-                  categoryId={categoryId}
-                  currentPoints={calculateCategoryPoints(categoryId)}
-                  goals={goals}
-                  progress={progress}
-                  sims={sims}
-                  onToggleGoal={onToggleGoal}
-                  onUpdateGoalValue={onUpdateGoalValue}
-                  onOpenCompletionModal={handleOpenCompletionModal}
-                />
-              ))}
-            </div>
-          </div>
-        )}
+        <GoalCompletionModal
+          isOpen={goalCompletionModal.isOpen}
+          onClose={handleCloseCompletionModal}
+          goal={goalCompletionModal.goal}
+          sims={sims}
+          onComplete={handleGoalCompletion}
+        />
       </div>
-      <GoalCompletionModal
-        isOpen={goalCompletionModal.isOpen}
-        onClose={handleCloseCompletionModal}
-        goal={goalCompletionModal.goal}
-        sims={sims}
-        onComplete={handleGoalCompletion}
-      />
     </div>
   )
 }

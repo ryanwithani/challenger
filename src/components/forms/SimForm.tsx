@@ -8,6 +8,8 @@ import { Input } from '@/src/components/ui/Input'
 import { Button } from '@/src/components/ui/Button'
 import { Database } from '@/src/types/database.types'
 import { AvatarUpload } from '@/src/components/sim/AvatarUpload'
+import { TraitDef, TRAITS } from '../sim/traitsCatalog'
+import TraitTile from '../ui/TraitTile'
 
 type SimInsert = Database['public']['Tables']['sims']['Insert']
 
@@ -30,6 +32,9 @@ interface SimFormProps {
   currentGeneration?: number
 }
 
+const ID_TO_LABEL = new Map(TRAITS.map(t => [t.id, t.label]));
+const LABEL_TO_ID = new Map(TRAITS.map(t => [t.label, t.id]));
+
 const ageStages = [
   { value: 'baby', label: 'Baby' },
   { value: 'toddler', label: 'Toddler' },
@@ -38,22 +43,6 @@ const ageStages = [
   { value: 'young_adult', label: 'Young Adult' },
   { value: 'adult', label: 'Adult' },
   { value: 'elder', label: 'Elder' },
-]
-
-const commonTraits = [
-  // Emotional
-  'Cheerful', 'Gloomy', 'Hot-Headed', 'Romantic', 'Confident',
-  // Social
-  'Outgoing', 'Loner', 'Mean', 'Good', 'Family-Oriented',
-  // Lifestyle
-  'Active', 'Lazy', 'Neat', 'Slob', 'Perfectionist',
-  // Mental
-  'Genius', 'Creative', 'Bookworm', 'Art Lover', 'Music Lover',
-  // Hobby
-  'Geek', 'Foodie', 'Materialistic', 'Loves Outdoors', 'Cat Lover', 'Dog Lover',
-  // Personality
-  'Ambitious', 'Childish', 'Clumsy', 'Erratic', 'Goofball',
-  'Jealous', 'Kleptomaniac', 'Paranoid', 'Self-Assured', 'Snob',
 ]
 
 const commonCareers = [
@@ -88,10 +77,7 @@ export function SimForm({
   initialData,
   currentGeneration = 1
 }: SimFormProps) {
-  const [selectedTraits, setSelectedTraits] = useState<string[]>(
-    initialData?.traits || []
-  )
-  const [showAllTraits, setShowAllTraits] = useState(false)
+
   const [avatarUrl, setAvatarUrl] = useState<string | null>(initialData?.avatar_url || null)
 
   const {
@@ -117,27 +103,49 @@ export function SimForm({
   const ageStage = watch('age_stage')
   const maxTraits = ageStage === 'baby' ? 0 : ageStage === 'toddler' ? 1 : ageStage === 'child' ? 1 : 3
 
-  const toggleTrait = (trait: string) => {
-    const newTraits = selectedTraits.includes(trait)
-      ? selectedTraits.filter(t => t !== trait)
-      : selectedTraits.length < maxTraits
-        ? [...selectedTraits, trait]
-        : selectedTraits
-
-    setSelectedTraits(newTraits)
-    setValue('traits', newTraits)
-  }
 
   const onFormSubmit = async (data: SimFormData) => {
+    const labelsForDb = selectedTraits.map(id => ID_TO_LABEL.get(id) ?? id);
+
     await onSubmit({
       ...data,
       challenge_id: challengeId,
-      traits: selectedTraits,
+      traits: labelsForDb,     // ← DB gets labels
       avatar_url: avatarUrl,
-    })
-  }
+    });
+  };
 
-  const displayedTraits = showAllTraits ? commonTraits : commonTraits.slice(0, 15)
+  const groupByCategory = (traits: TraitDef[]) =>
+    traits.reduce<Record<string, TraitDef[]>>((acc, t) => {
+      (acc[t.category] ||= []).push(t);
+      return acc;
+    }, {});
+
+  const initialIds =
+    (initialData?.traits ?? [])
+      .map(lbl => LABEL_TO_ID.get(lbl))
+      .filter((v): v is string => Boolean(v));  // drop unknowns
+
+  const [selectedTraits, setSelectedTraits] = useState<string[]>(initialIds);
+  setValue('traits', initialIds.map(id => ID_TO_LABEL.get(id) ?? '')); // keep RHF in sync with IDs in the form state
+
+  const toggleTrait = (id: string) => {
+    const isSelected = selectedTraits.includes(id);
+    let next: string[];
+
+    if (isSelected) {
+      next = selectedTraits.filter(t => t !== id);         // always allow unselect
+    } else if (selectedTraits.length < maxTraits) {
+      next = [...selectedTraits, id];                      // add only if under cap
+    } else {
+      return;                                              // ignore extra clicks
+    }
+
+    setSelectedTraits(next);
+    setValue('traits', next); // store IDs in the form while editing
+  };;
+
+  const traitsByCat = groupByCategory(TRAITS);
 
   return (
     <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6">
@@ -273,47 +281,43 @@ export function SimForm({
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Traits (Select up to {maxTraits})
           </label>
-          <div className="bg-gray-50 rounded-lg p-3">
-            <div className="grid grid-cols-3 gap-2">
-              {displayedTraits.map((trait) => (
-                <button
-                  key={trait}
-                  type="button"
-                  onClick={() => toggleTrait(trait)}
-                  className={`px-3 py-1.5 text-sm rounded-full transition-colors ${selectedTraits.includes(trait)
-                    ? 'bg-sims-purple text-white'
-                    : 'bg-white hover:bg-gray-100 text-gray-700 border border-gray-300'
-                    }`}
-                  disabled={!selectedTraits.includes(trait) && selectedTraits.length >= maxTraits}
-                >
-                  {trait}
-                </button>
-              ))}
-            </div>
-            {!showAllTraits && commonTraits.length > 15 && (
-              <button
-                type="button"
-                onClick={() => setShowAllTraits(true)}
-                className="mt-3 text-sm text-sims-blue hover:underline"
-              >
-                Show all traits ({commonTraits.length})
-              </button>
-            )}
-            {showAllTraits && (
-              <button
-                type="button"
-                onClick={() => setShowAllTraits(false)}
-                className="mt-3 text-sm text-sims-blue hover:underline"
-              >
-                Show fewer traits
-              </button>
-            )}
+
+          <div className="space-y-5 rounded-lg bg-gray-50 p-3 dark:bg-zinc-900/40">
+            {Object.entries(groupByCategory(TRAITS)).map(([category, traits]) => (
+              <section key={category}>
+                <div className="mb-2">
+                  <h4 className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                    {category}
+                  </h4>
+                </div>
+
+                {/* 3 cols in narrow modals; scale up on wider screens */}
+                <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
+                  {traits.map((trait) => {
+                    const selected = selectedTraits.includes(trait.id);
+                    const atCap = !selected && selectedTraits.length >= maxTraits;
+
+                    return (
+                      <TraitTile
+                        key={trait.id}
+                        trait={trait}
+                        selected={selected}
+                        disabled={atCap}
+                        onToggle={toggleTrait}
+                      />
+                    );
+                  })}
+                </div>
+              </section>
+            ))}
           </div>
+
           <p className="mt-1 text-xs text-gray-500">
             {selectedTraits.length}/{maxTraits} traits selected
           </p>
         </div>
       )}
+
 
       {/* Heir Status */}
       <div className="flex items-center">

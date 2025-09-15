@@ -28,7 +28,7 @@ export function SimProfile({ sim, achievements, challenge }: SimProfileProps) {
     ]
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4">
             {/* Tabs */}
             <div className="border-b border-gray-200">
                 <nav className="-mb-px flex space-x-8">
