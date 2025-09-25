@@ -1,11 +1,11 @@
-// src/components/sim/TraitTile.tsx
+// src/components/ui/TraitTile.tsx
 'use client';
 
 import Image from 'next/image';
-import { TraitDef } from '@/src/components/sim/traitsCatalog';
+import { TraitDefinition } from '@/src/components/sim/TraitsCatalog';
 
 type Props = {
-    trait: TraitDef;
+    trait: TraitDefinition;
     selected: boolean;
     disabled?: boolean;
     onToggle: (id: string) => void;
@@ -50,13 +50,9 @@ export default function TraitTile({ trait, selected, disabled, onToggle }: Props
 
             <div className="flex flex-col items-center gap-1.5">
                 <div className="grid h-10 w-10 place-items-center rounded-lg bg-white/70 border border-white/60 dark:bg-white/10 dark:border-white/10">
-                    {trait.icon ? (
-                        <Image src={trait.icon} alt="" width={28} height={28} className="object-contain" />
-                    ) : (
                         <span className="text-xl" aria-hidden>
-                            {trait.emoji ?? '⭐'}
+                            {trait.label ?? '⭐'}
                         </span>
-                    )}
                 </div>
                 <div className="text-xs font-semibold leading-tight text-gray-800 dark:text-gray-100">
                     {trait.label}

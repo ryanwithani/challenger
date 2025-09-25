@@ -3,7 +3,7 @@
 
 import { Fragment } from 'react';
 
-export type ExpansionPacksValue = {
+export type PacksValue = {
   // Always enabled; we render it locked-on
   base_game: boolean;
 
@@ -25,22 +25,35 @@ export type ExpansionPacksValue = {
   for_rent: boolean;
   lovestruck?: boolean;
   life_death?: boolean;
+  enchanted_by_nature?: boolean;
+  businesses_and_hobbies?: boolean;
+  outdoor_retreat?: boolean;
+  spa_day?: boolean;
+  strangerville?: boolean;
+  dine_out?: boolean;
+  vampires?: boolean;
+  parenthood?: boolean;
+  jungle_adventure?: boolean;
+  realm_of_magic?: boolean;
+  journey_to_batuu?: boolean;
+  dream_home_decorator?: boolean;
+  my_wedding_stories?: boolean;
+  werewolves?: boolean;
 };
 
-export type ExpansionPackDef = {
-  key: keyof ExpansionPacksValue;
+export type PackDef = {
+  key: keyof PacksValue;
   name: string;
   category: 'Expansion Pack' | 'Game Pack' | 'Stuff Pack' | 'Kits/Other';
   alwaysOn?: boolean; // for base game
 };
 
-export const PACKS: ExpansionPackDef[] = [
+export const PACKS: PackDef[] = [
   { key: 'base_game', name: 'The Sims 4 (Base Game)', category: 'Kits/Other', alwaysOn: true },
-
   { key: 'get_to_work', name: 'Get to Work', category: 'Expansion Pack' },
   { key: 'get_together', name: 'Get Together', category: 'Expansion Pack' },
   { key: 'city_living', name: 'City Living', category: 'Expansion Pack' },
-  { key: 'cats_dogs', name: 'Cats & Dogs', category: 'Expansion Pack' },
+  { key: 'cats_dogs', name: 'Cats and Dogs', category: 'Expansion Pack' },
   { key: 'seasons', name: 'Seasons', category: 'Expansion Pack' },
   { key: 'get_famous', name: 'Get Famous', category: 'Expansion Pack' },
   { key: 'island_living', name: 'Island Living', category: 'Expansion Pack' },
@@ -52,22 +65,34 @@ export const PACKS: ExpansionPackDef[] = [
   { key: 'growing_together', name: 'Growing Together', category: 'Expansion Pack' },
   { key: 'horse_ranch', name: 'Horse Ranch', category: 'Expansion Pack' },
   { key: 'for_rent', name: 'For Rent', category: 'Expansion Pack' },
-
-  // Optional newer packs—uncomment if present in your DB schema
-  // { key: 'lovestruck', name: 'Lovestruck', category: 'Game Pack' },
-  // { key: 'life_death', name: 'Life & Death', category: 'Game Pack' },
+  { key: 'lovestruck', name: 'Lovestruck', category: 'Expansion Pack' },
+  { key: 'life_death', name: 'Life & Death', category: 'Expansion Pack' },
+  { key: 'enchanted_by_nature', name: 'Enchanted by Nature', category: 'Expansion Pack' },
+  { key: 'businesses_and_hobbies', name: 'Businesses and Hobbies', category: 'Expansion Pack' },
+  { key: 'outdoor_retreat', name: 'Outdoor Retreat', category: 'Game Pack' },
+  { key: 'spa_day', name: 'Spa Day', category: 'Game Pack' },
+  { key: 'strangerville', name: 'Strangerville', category: 'Game Pack' },
+  { key: 'dine_out', name: 'Dine Out', category: 'Game Pack' },
+  { key: 'vampires', name: 'Vampires', category: 'Game Pack' },
+  { key: 'parenthood', name: 'Parenthood', category: 'Game Pack' },
+  { key: 'jungle_adventure', name: 'Jungle Adventure', category: 'Game Pack' },
+  { key: 'realm_of_magic', name: 'Realm of Magic', category: 'Game Pack' },
+  { key: 'journey_to_batuu', name: 'Journey to Batuu', category: 'Game Pack' },
+  {key: 'dream_home_decorator', name: 'Dream Home Decorator', category: 'Game Pack' },
+  {key: 'my_wedding_stories', name: 'My Wedding Stories', category: 'Game Pack' },
+  {key: 'werewolves', name: 'Werewolves', category: 'Game Pack' },
 ];
 
 type Props = {
-  value: ExpansionPacksValue;
-  onChange?: (next: ExpansionPacksValue) => void;
+  value: PacksValue;
+  onChange?: (next: PacksValue) => void;
   readOnly?: boolean;
   className?: string;
   header?: React.ReactNode;
   hint?: React.ReactNode;
 };
 
-export function ExpansionPacks({
+export function Packs({
   value,
   onChange,
   readOnly = false,
@@ -75,21 +100,21 @@ export function ExpansionPacks({
   header = <h2 className="text-lg font-semibold">Expansion Packs</h2>,
   hint,
 }: Props) {
-  const toggle = (key: keyof ExpansionPacksValue) => {
+  const toggle = (key: keyof PacksValue) => {
     if (readOnly) return;
     if (!onChange) return;
 
     // base_game is always on
     if (key === 'base_game') return;
 
-    const next: ExpansionPacksValue = { ...value, [key]: !value[key] };
+    const next: PacksValue = { ...value, [key]: !value[key] };
     // Ensure base game never becomes false
     next.base_game = true;
     onChange(next);
   };
 
   // Group packs by category for nicer reading
-  const byCategory = PACKS.reduce<Record<string, ExpansionPackDef[]>>((acc, p) => {
+  const byCategory = PACKS.reduce<Record<string, PackDef[]>>((acc, p) => {
     (acc[p.category] ||= []).push(p);
     return acc;
   }, {});
@@ -161,4 +186,4 @@ export function ExpansionPacks({
   );
 }
 
-export default ExpansionPacks;
+export default Packs;

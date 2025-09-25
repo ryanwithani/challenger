@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Database } from '@/src/types/database.types'
-import { SimOverview } from '@/src/components/sim/SimOverview'
+import SimOverview from '@/src/components/sim/SimOverview'
 import { SimAchievements } from '@/src/components/sim/SimAchievements'
 import { SimRelationships } from '@/src/components/sim/SimRelationships'
 import { SimTimeline } from '@/src/components/sim/SimTimeline'
@@ -51,15 +51,15 @@ export function SimProfile({ sim, achievements, challenge }: SimProfileProps) {
             {/* Tab Content */}
             <div className="mt-6">
                 {activeTab === 'overview' && (
-                    <SimOverview sim={sim} challenge={challenge} />
+                    <SimOverview sim={sim as any} challenge={challenge as any} />
                 )}
 
                 {activeTab === 'achievements' && (
-                    <SimAchievements sim={sim} achievements={achievements} />
+                    <SimAchievements sim={sim as any} achievements={achievements as any} />
                 )}
 
                 {activeTab === 'relationships' && (
-                    <SimRelationships sim={sim} challenge={challenge} />
+                    <SimRelationships sim={sim as any} challenge={challenge as any} />
                 )}
 
                 {activeTab === 'timeline' && (

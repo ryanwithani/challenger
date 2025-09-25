@@ -8,7 +8,7 @@ import { Button } from '@/src/components/ui/Button'
 import { Input } from '@/src/components/ui/Input'
 import { Database } from '@/src/types/database.types'
 import { useUserPreferencesStore } from '@/src/lib/store/userPreferencesStore'
-import { ExpansionPacks } from '@/src/components/profile/ExpansionPacks'
+import { ExpansionPacks } from '@/src/components/profile/Packs'
 
 type Challenge = Database['public']['Tables']['challenges']['Row']
 

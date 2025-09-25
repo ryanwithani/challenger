@@ -8,7 +8,7 @@ import { Input } from '@/src/components/ui/Input'
 import { Button } from '@/src/components/ui/Button'
 import { Database } from '@/src/types/database.types'
 import { AvatarUpload } from '@/src/components/sim/AvatarUpload'
-import { TraitDef, TRAITS } from '../sim/traitsCatalog'
+import { TraitDefinition, Traits } from '../sim/TraitsCatalog'
 import TraitTile from '../ui/TraitTile'
 
 type SimInsert = Database['public']['Tables']['sims']['Insert']
@@ -32,8 +32,8 @@ interface SimFormProps {
   currentGeneration?: number
 }
 
-const ID_TO_LABEL = new Map(TRAITS.map(t => [t.id, t.label]));
-const LABEL_TO_ID = new Map(TRAITS.map(t => [t.label, t.id]));
+const ID_TO_LABEL = new Map(Traits.map(t => [t.id, t.label]));
+const LABEL_TO_ID = new Map(Traits.map(t => [t.label, t.id]));
 
 const ageStages = [
   { value: 'baby', label: 'Baby' },
@@ -115,9 +115,9 @@ export function SimForm({
     });
   };
 
-  const groupByCategory = (traits: TraitDef[]) =>
-    traits.reduce<Record<string, TraitDef[]>>((acc, t) => {
-      (acc[t.category] ||= []).push(t);
+  const groupByCategory = (traits: TraitDefinition[]) =>
+    traits.reduce<Record<string, TraitDefinition[]>>((acc, t) => {
+      (acc[t.category ?? ''] ||= []).push(t);
       return acc;
     }, {});
 
@@ -145,7 +145,7 @@ export function SimForm({
     setValue('traits', next); // store IDs in the form while editing
   };;
 
-  const traitsByCat = groupByCategory(TRAITS);
+  const traitsByCat = groupByCategory(Traits);
 
   return (
     <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6">
@@ -283,7 +283,7 @@ export function SimForm({
           </label>
 
           <div className="space-y-5 rounded-lg bg-gray-50 p-3 dark:bg-zinc-900/40">
-            {Object.entries(groupByCategory(TRAITS)).map(([category, traits]) => (
+            {Object.entries(groupByCategory(Traits)).map(([category, traits]) => (
               <section key={category}>
                 <div className="mb-2">
                   <h4 className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">

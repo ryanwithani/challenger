@@ -117,6 +117,12 @@ export function GoalForm({
       ...data,
       challenge_id: challengeId,
       order_index: nextOrderIndex,
+      // Required fields for GoalInsert that aren't collected in this form
+      goal_type: 'binary',
+      current_value: 0,
+      thresholds: '[]',
+      max_points: data.point_value,
+      target_value: 1,
     })
   }
 
