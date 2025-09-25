@@ -1,224 +1,407 @@
+// app/sims/page.tsx (or wherever your Sims list route lives)
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { useSimStore } from '@/src/lib/store/simStore'
-import { useChallengeStore } from '@/src/lib/store/challengeStore'
+import clsx from 'clsx'
+import { createSupabaseBrowserClient } from '@/src/lib/supabase/client'
+import { Database } from '@/src/types/database.types'
 import { SimCard } from '@/src/components/ui/SimCard'
-import { Button } from '@/src/components/ui/Button'
+import { Traits } from '@/src/components/sim/TraitsCatalog'
+
+type Sim = Database['public']['Tables']['sims']['Row']
+type Challenge = Database['public']['Tables']['challenges']['Row']
+type ChallengeSim = Database['public']['Tables']['challenge_sims']['Row']
+
+type ViewTab = 'all' | 'by_challenge'
 
 export default function SimsPage() {
-    const [searchTerm, setSearchTerm] = useState('')
-    const [selectedChallenge, setSelectedChallenge] = useState<string>('all')
-    const [generationFilter, setGenerationFilter] = useState<string>('all')
+  const supabase = createSupabaseBrowserClient()
 
-    const {
-        familyMembers: allSims,
-        loading: simsLoading,
-        fetchAllSims
-    } = useSimStore()
+  // ---------- UI State ----------
+  const [tab, setTab] = useState<ViewTab>('by_challenge')
+  const [search, setSearch] = useState('')
+  const [heirsOnly, setHeirsOnly] = useState(false)
+  const [hasTraitsOnly, setHasTraitsOnly] = useState(false)
 
-    const {
-        challenges,
-        fetchChallenges
-    } = useChallengeStore()
+  // ---------- Data ----------
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-    useEffect(() => {
-        fetchAllSims()
-        fetchChallenges()
-    }, [])
+  const [sims, setSims] = useState<Sim[]>([])
+  const [challenges, setChallenges] = useState<Challenge[]>([])
+  const [challengeSims, setChallengeSims] = useState<ChallengeSim[]>([])
 
-    // Filter sims based on search and filters
-    const filteredSims = allSims.filter(sim => {
-        const matchesSearch = sim.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (sim.career && sim.career.toLowerCase().includes(searchTerm.toLowerCase())) ||
-            (sim.aspiration && sim.aspiration.toLowerCase().includes(searchTerm.toLowerCase()))
+  // Map: simId -> most recent challenge_sims row (if multiple, prefer latest updated)
+  const challengeSimBySimId = useMemo(() => {
+    const map = new Map<string, ChallengeSim>()
+    for (const cs of challengeSims) {
+      const prev = map.get(cs.sim_id)
+      if (!prev) { map.set(cs.sim_id, cs); continue }
+      // prefer newest
+      const csTime = cs.updated_at ?? cs.created_at ?? ''
+      const prevTime = prev.updated_at ?? prev.created_at ?? ''
+      if (csTime > prevTime) {
+        map.set(cs.sim_id, cs)
+      }
+    }
+    return map
+  }, [challengeSims])
 
-        const matchesChallenge = selectedChallenge === 'all' || sim.challenge_id === selectedChallenge
+  // Group sims by challenge_id via the selected challenge_sims row
+  const simsByChallenge = useMemo(() => {
+    const groups = new Map<string, Sim[]>()
+    for (const sim of sims) {
+      const cs = challengeSimBySimId.get(sim.id)
+      if (!cs) continue
+      const arr = groups.get(cs.challenge_id) ?? []
+      arr.push(sim)
+      groups.set(cs.challenge_id, arr)
+    }
+    return groups
+  }, [sims, challengeSimBySimId])
 
-        const matchesGeneration = generationFilter === 'all' || sim.generation.toString() === generationFilter
+  const unassignedSims = useMemo(
+    () => sims.filter(s => !challengeSimBySimId.has(s.id)),
+    [sims, challengeSimBySimId]
+  )
 
-        return matchesSearch && matchesChallenge && matchesGeneration
+  const challengeById = useMemo(() => {
+    const m = new Map<string, Challenge>()
+    challenges.forEach(c => m.set(c.id, c))
+    return m
+  }, [challenges])
+
+  // ---------- Fetch ----------
+  useEffect(() => {
+    let mounted = true
+    ;(async () => {
+      setLoading(true); setError(null)
+      try {
+        // pull sims
+        const { data: simsData, error: simsErr } = await supabase
+          .from('sims')
+          .select('*')
+          .order('created_at', { ascending: false })
+        if (simsErr) throw simsErr
+
+        // pull all challenges for this user (or visible)
+        const { data: chData, error: chErr } = await supabase
+          .from('challenges')
+          .select('*')
+          .order('created_at', { ascending: false })
+        if (chErr) throw chErr
+
+        // pull join rows for all sims shown
+        const simIds = (simsData ?? []).map(s => s.id)
+        let csData: ChallengeSim[] = []
+        if (simIds.length) {
+          const { data, error } = await supabase
+            .from('challenge_sims')
+            .select('*')
+            .in('sim_id', simIds)
+          if (error) throw error
+          csData = data as ChallengeSim[]
+        }
+
+        if (!mounted) return
+        setSims(simsData ?? [])
+        setChallenges(chData ?? [])
+        setChallengeSims(csData ?? [])
+      } catch (e: any) {
+        if (!mounted) return
+        setError(e.message ?? 'Failed to load Sims')
+      } finally {
+        if (!mounted) return
+        setLoading(false)
+      }
+    })()
+    return () => { mounted = false }
+  }, [supabase])
+
+  // ---------- Derived: search & chips filters ----------
+  const normalizedQuery = search.trim().toLowerCase()
+  function passesSearch(sim: Sim) {
+    if (!normalizedQuery) return true
+    const hay = `${sim.name} ${sim.career ?? ''} ${sim.aspiration ?? ''}`.toLowerCase()
+    return hay.includes(normalizedQuery)
+  }
+  function passesHeir(sim: Sim) {
+    if (!heirsOnly) return true
+    const cs = challengeSimBySimId.get(sim.id)
+    return !!cs?.is_heir
+  }
+  function passesTraits(sim: Sim) {
+    if (!hasTraitsOnly) return true
+    return Array.isArray(sim.traits) && (sim.traits as unknown as string[]).length > 0
+  }
+
+  const filteredUnassigned = useMemo(
+    () => unassignedSims.filter(s => passesSearch(s) && passesHeir(s) && passesTraits(s)),
+    [unassignedSims, passesHeir, passesTraits, normalizedQuery]
+  )
+
+  const filteredGroups = useMemo(() => {
+    const out: Array<{ challenge: Challenge; sims: Sim[] }> = []
+    for (const [challengeId, list] of Array.from(simsByChallenge.entries())) {
+      const ch = challengeById.get(challengeId)
+      if (!ch) continue
+      const simsFiltered = list.filter((s: Sim) => passesSearch(s) && passesHeir(s) && passesTraits(s))
+      if (simsFiltered.length) out.push({ challenge: ch, sims: simsFiltered })
+    }
+    // sort groups by challenge created_at desc
+    out.sort((a, b) => (b.challenge.created_at ?? '').localeCompare(a.challenge.created_at ?? ''))
+    return out
+  }, [simsByChallenge, challengeById, passesHeir, passesTraits, normalizedQuery])
+
+  // ---------- Actions: link/unlink (lightweight) ----------
+  async function linkToChallenge(sim: Sim, challengeId: string) {
+    const { data, error } = await supabase
+      .from('challenge_sims')
+      .upsert({ sim_id: sim.id, challenge_id: challengeId }, { onConflict: 'challenge_id,sim_id' })
+      .select('*')
+      .single()
+    if (error) { console.error(error); return }
+    setChallengeSims(prev => {
+      // drop any previous rows for this sim (rare) and add/replace
+      const next = prev.filter(cs => !(cs.sim_id === sim.id && cs.challenge_id === challengeId))
+      return [...next, data as ChallengeSim]
     })
+  }
 
-    // Group sims by challenge
-    const simsByChallenge = filteredSims.reduce((acc, sim) => {
-        const challenge = challenges.find(c => c.id === sim.challenge_id)
-        const challengeName = challenge?.name || 'Unknown Challenge'
-        if (!acc[challengeName]) acc[challengeName] = []
-        acc[challengeName].push(sim)
-        return acc
-    }, {} as Record<string, typeof allSims>)
+  async function unlinkFromChallenge(sim: Sim) {
+    const cs = challengeSimBySimId.get(sim.id)
+    if (!cs) return
+    const { error } = await supabase
+      .from('challenge_sims')
+      .delete()
+      .eq('id', cs.id)
+    if (error) { console.error(error); return }
+    setChallengeSims(prev => prev.filter(row => row.id !== cs.id))
+  }
 
-    // Get unique generations
-    const generations = Array.from(new Set(allSims.map(sim => sim.generation))).sort((a, b) => a - b)
+  // ---------- Render ----------
+  return (
+    <div className="flex h-full flex-col">
+      {/* Toolbar */}
+      <div className="sticky top-0 z-10 border-b bg-white/90 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3">
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl font-semibold">Sims</h1>
+            <span className="text-sm text-gray-500">({sims.length})</span>
+          </div>
+          <div className="flex items-center gap-2">
+            {/* Tabs */}
+            <nav className="rounded-lg border bg-white p-1 text-sm">
+              <button
+                className={clsx('rounded-md px-3 py-1', tab === 'by_challenge' ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-100')}
+                onClick={() => setTab('by_challenge')}
+              >
+                By Challenge
+              </button>
+              <button
+                className={clsx('rounded-md px-3 py-1', tab === 'all' ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-100')}
+                onClick={() => setTab('all')}
+              >
+                All Sims
+              </button>
+            </nav>
 
-    return (
-        <div className="space-y-6">
-            {/* Header */}
-            <div className="flex justify-between items-center">
-                <div>
-                    <h1 className="text-3xl font-bold text-gray-900">All Sims</h1>
-                    <p className="text-gray-600">
-                        {filteredSims.length} of {allSims.length} sims
-                        {searchTerm && ` matching "${searchTerm}"`}
-                    </p>
-                </div>
-                <div className="flex space-x-3">
-                    <Link href="/challenge/new">
-                        <Button variant="outline">New Challenge</Button>
-                    </Link>
-                    <Link href="/sim/new">
-                        <Button>Add Sim</Button>
-                    </Link>
-                </div>
-            </div>
+            {/* Search */}
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search name, career, aspiration…"
+              className="w-64 rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
 
-            {/* Filters */}
-            <div className="bg-white p-4 rounded-lg border border-gray-200">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    {/* Search */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Search Sims
-                        </label>
-                        <input
-                            type="text"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            placeholder="Search by name, career, or aspiration..."
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sims-green"
-                        />
-                    </div>
-
-                    {/* Challenge Filter */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Challenge
-                        </label>
-                        <select
-                            value={selectedChallenge}
-                            onChange={(e) => setSelectedChallenge(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sims-green"
-                        >
-                            <option value="all">All Challenges</option>
-                            {challenges.map((challenge) => (
-                                <option key={challenge.id} value={challenge.id}>
-                                    {challenge.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    {/* Generation Filter */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Generation
-                        </label>
-                        <select
-                            value={generationFilter}
-                            onChange={(e) => setGenerationFilter(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sims-green"
-                        >
-                            <option value="all">All Generations</option>
-                            {generations.map((gen) => (
-                                <option key={gen} value={gen.toString()}>
-                                    Generation {gen}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    {/* Clear Filters */}
-                    <div className="flex items-end">
-                        <Button
-                            variant="outline"
-                            onClick={() => {
-                                setSearchTerm('')
-                                setSelectedChallenge('all')
-                                setGenerationFilter('all')
-                            }}
-                            className="w-full"
-                        >
-                            Clear Filters
-                        </Button>
-                    </div>
-                </div>
-            </div>
-
-            {/* Content */}
-            {simsLoading ? (
-                <div className="text-center py-12">
-                    <p className="text-gray-500">Loading sims...</p>
-                </div>
-            ) : allSims.length === 0 ? (
-                <div className="text-center py-12">
-                    <div className="text-6xl mb-4">👤</div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">No sims yet</h3>
-                    <p className="text-gray-600 mb-4">Add sims to your challenges to start building your legacy</p>
-                    <div className="flex justify-center space-x-3">
-                        <Link href="/challenge/new">
-                            <Button variant="outline">Create Challenge First</Button>
-                        </Link>
-                        {challenges.length > 0 && (
-                            <Link href="/sim/new">
-                                <Button>Add Your First Sim</Button>
-                            </Link>
-                        )}
-                    </div>
-                </div>
-            ) : filteredSims.length === 0 ? (
-                <div className="text-center py-12">
-                    <div className="text-4xl mb-4">🔍</div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">No sims match your filters</h3>
-                    <p className="text-gray-600 mb-4">Try adjusting your search or filter criteria</p>
-                    <Button
-                        onClick={() => {
-                            setSearchTerm('')
-                            setSelectedChallenge('all')
-                            setGenerationFilter('all')
-                        }}
-                    >
-                        Clear All Filters
-                    </Button>
-                </div>
-            ) : (
-                <div className="space-y-8">
-                    {Object.entries(simsByChallenge).map(([challengeName, sims]) => (
-                        <div key={challengeName}>
-                            <div className="flex items-center justify-between mb-4">
-                                <h3 className="text-lg font-semibold flex items-center">
-                                    <span className="mr-2">🎯</span>
-                                    {challengeName}
-                                    <span className="ml-2 px-2 py-1 bg-gray-100 text-gray-600 text-sm rounded-full">
-                                        {sims.length} sim{sims.length !== 1 ? 's' : ''}
-                                    </span>
-                                </h3>
-
-                                {/* Quick stats for this challenge */}
-                                <div className="flex items-center space-x-4 text-sm text-gray-600">
-                                    <span>👑 {sims.filter(s => s.is_heir).length} heir{sims.filter(s => s.is_heir).length !== 1 ? 's' : ''}</span>
-                                    <span>🏠 {Math.max(...sims.map(s => s.generation))} generation{Math.max(...sims.map(s => s.generation)) !== 1 ? 's' : ''}</span>
-                                </div>
-                            </div>
-
-                            <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                                {sims
-                                    .sort((a, b) => {
-                                        // Sort by: heirs first, then by generation, then by creation date
-                                        if (a.is_heir && !b.is_heir) return -1
-                                        if (!a.is_heir && b.is_heir) return 1
-                                        if (a.generation !== b.generation) return a.generation - b.generation
-                                        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-                                    })
-                                    .map((sim) => (
-                                        <SimCard key={sim.id} sim={sim} />
-                                    ))}
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            )}
+            {/* Add Sim */}
+            <Link href="/sims/new" className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700">
+              Add Sim
+            </Link>
+          </div>
         </div>
-    )
+
+        {/* Filter chips row */}
+        <div className="mx-auto max-w-7xl px-4 pb-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              className={clsx(
+                'rounded-full border px-3 py-1 text-xs',
+                heirsOnly ? 'border-indigo-300 bg-indigo-50 text-indigo-700' : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+              )}
+              onClick={() => setHeirsOnly(v => !v)}
+              title="Show only current heirs"
+            >
+              Heirs only
+            </button>
+            <button
+              className={clsx(
+                'rounded-full border px-3 py-1 text-xs',
+                hasTraitsOnly ? 'border-indigo-300 bg-indigo-50 text-indigo-700' : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+              )}
+              onClick={() => setHasTraitsOnly(v => !v)}
+              title="Show Sims that have traits"
+            >
+              Has traits
+            </button>
+
+            {(heirsOnly || hasTraitsOnly || search) && (
+              <button
+                className="ml-2 rounded-full border border-gray-300 px-3 py-1 text-xs text-gray-600 hover:bg-gray-50"
+                onClick={() => { setHeirsOnly(false); setHasTraitsOnly(false); setSearch('') }}
+              >
+                Reset
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Body */}
+      <div className="mx-auto w-full max-w-7xl flex-1 px-4 py-6">
+        {loading ? (
+          <div className="text-sm text-gray-500">Loading…</div>
+        ) : error ? (
+          <div className="rounded-md border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">{error}</div>
+        ) : sims.length === 0 ? (
+          <EmptyState />
+        ) : tab === 'all' ? (
+          <Section title="All Sims">
+            <SimGrid
+              sims={sims.filter(s => passesSearch(s) && passesHeir(s) && passesTraits(s))}
+              challengeSimBySimId={challengeSimBySimId}
+              challengesMap={challengeById}
+              onLinkToChallenge={(sim) => {
+                // Quick link: choose the most recent challenge (or pop a dialog in your real app)
+                const latest = challenges[0]
+                if (latest) linkToChallenge(sim, latest.id)
+              }}
+              onUnlinkFromChallenge={unlinkFromChallenge}
+            />
+          </Section>
+        ) : (
+          <>
+            {/* Unassigned first */}
+            {filteredUnassigned.length > 0 && (
+              <Section title="Unassigned Sims" subtitle="Not linked to any challenge">
+                <SimGrid
+                  sims={filteredUnassigned}
+                  challengeSimBySimId={challengeSimBySimId}
+                  challengesMap={challengeById}
+                  onLinkToChallenge={(sim) => {
+                    const latest = challenges[0]
+                    if (latest) linkToChallenge(sim, latest.id)
+                  }}
+                  onUnlinkFromChallenge={unlinkFromChallenge}
+                />
+              </Section>
+            )}
+
+            {/* Groups by challenge */}
+            {filteredGroups.map(({ challenge, sims }) => (
+              <Section
+                key={challenge.id}
+                title={challenge.challenge_type ?? ''}
+                subtitle={challenge.description ?? undefined}
+                action={<Link className="text-sm text-indigo-600 hover:underline" href={`/challenges/${challenge.id}`}>Open</Link>}
+              >
+                <SimGrid
+                  sims={sims}
+                  challenge={challenge}
+                  challengeSimBySimId={challengeSimBySimId}
+                  challengesMap={challengeById}
+                  onLinkToChallenge={(sim) => linkToChallenge(sim, challenge.id)}
+                  onUnlinkFromChallenge={unlinkFromChallenge}
+                />
+              </Section>
+            ))}
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
+/* ---------- Small Presentational Bits ---------- */
+
+function Section({
+  title,
+  subtitle,
+  action,
+  children,
+}: {
+  title: string
+  subtitle?: string
+  action?: React.ReactNode
+  children: React.ReactNode
+}) {
+  return (
+    <section className="mb-8">
+      <div className="mb-3 flex items-end justify-between">
+        <div>
+          <h2 className="text-lg font-semibold">{title}</h2>
+          {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
+        </div>
+        {action}
+      </div>
+      {children}
+    </section>
+  )
+}
+
+function EmptyState() {
+  return (
+    <div className="rounded-2xl border-2 border-dashed border-gray-200 p-10 text-center">
+      <div className="text-2xl">🧑‍🤝‍🧑</div>
+      <h3 className="mt-2 text-base font-semibold text-gray-900">No Sims yet</h3>
+      <p className="mt-1 text-sm text-gray-500">Create your first Sim to get started.</p>
+      <div className="mt-6">
+        <Link href="/sims/new" className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
+          Add Sim
+        </Link>
+      </div>
+    </div>
+  )
+}
+
+function SimGrid({
+  sims,
+  challenge,
+  challengeSimBySimId,
+  challengesMap,
+  onLinkToChallenge,
+  onUnlinkFromChallenge,
+}: {
+  sims: Sim[]
+  challenge?: Challenge | null
+  challengeSimBySimId: Map<string, ChallengeSim>
+  challengesMap: Map<string, Challenge>
+  onLinkToChallenge: (sim: Sim) => void
+  onUnlinkFromChallenge: (sim: Sim) => void
+}) {
+  return (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+      {sims.map(sim => (
+        <SimCard
+          key={sim.id}
+          sim={sim}
+          challenge={challenge ?? null}
+          challengeSim={challengeSimBySimId.get(sim.id) ?? null}
+          traitCatalog={Traits}
+          onEdit={(s) => { window.location.href = `/sims/${s.id}` }}
+          onToggleFavorite={async (id, next) => {
+            // quick optimistic favorite toggle
+            const supabase = createSupabaseBrowserClient()
+            const { error } = await supabase.from('sims').update({ is_favorite: next }).eq('id', id)
+            if (error) console.error(error)
+          }}
+          onLinkToChallenge={onLinkToChallenge}
+          onUnlinkFromChallenge={onUnlinkFromChallenge}
+          compact={false}
+        />
+      ))}
+    </div>
+  )
 }
