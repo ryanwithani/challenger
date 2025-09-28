@@ -71,7 +71,7 @@ export default function SimProfilePage() {
             <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                     <Button
-                        variant="outline"
+                        variant="secondary"
                         onClick={() => router.back()}
                         className="flex items-center space-x-2"
                     >
@@ -95,7 +95,7 @@ export default function SimProfilePage() {
 
                 <div className="flex space-x-2">
                     <Button
-                        variant="outline"
+                        variant="secondary"
                         onClick={() => setShowEditModal(true)}
                         className="flex items-center space-x-2"
                     >
@@ -105,7 +105,7 @@ export default function SimProfilePage() {
                         <span>Edit</span>
                     </Button>
                     <Button
-                        variant="outline"
+                        variant="secondary"
                         onClick={() => setShowDeleteConfirm(true)}
                         className="flex items-center space-x-2 text-red-600 border-red-200 hover:bg-red-50"
                     >
@@ -126,28 +126,20 @@ export default function SimProfilePage() {
 
             {/* Edit Modal */}
             <Modal
-                isOpen={showEditModal}
+                open={showEditModal}
                 onClose={() => setShowEditModal(false)}
                 title={`Edit ${currentSim.name}`}
             >
                 <SimForm
-                    challengeId={currentSim.challenge_id}
+                    sim={currentSim}
                     onSubmit={handleEditSim}
-                    initialData={{
-                        name: currentSim.name,
-                        age_stage: currentSim.age_stage as any,
-                        generation: currentSim.generation,
-                        career: currentSim.career || '',
-                        aspiration: currentSim.aspiration || '',
-                        traits: Array.isArray(currentSim.traits) ? currentSim.traits as string[] : [],
-                        is_heir: currentSim.is_heir,
-                    }}
+                    showChallengePicker={false}
                 />
             </Modal>
 
             {/* Delete Confirmation Modal */}
             <Modal
-                isOpen={showDeleteConfirm}
+                open={showDeleteConfirm}
                 onClose={() => setShowDeleteConfirm(false)}
                 title="Delete Sim"
             >
@@ -158,7 +150,7 @@ export default function SimProfilePage() {
                     </p>
                     <div className="flex justify-end space-x-3">
                         <Button
-                            variant="outline"
+                            variant="secondary"
                             onClick={() => setShowDeleteConfirm(false)}
                         >
                             Cancel

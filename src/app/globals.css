@@ -50,11 +50,11 @@
 
 @layer components {
   .btn-primary {
-    @apply bg-sims-green hover:bg-sims-green/90 text-white font-bold py-2 px-4 rounded transition-colors;
+    @apply bg-green-600 hover:bg-green-600/90 text-white font-bold py-2 px-4 rounded transition-colors;
   }
 
   .btn-secondary {
-    @apply bg-sims-blue hover:bg-sims-blue/90 text-white font-bold py-2 px-4 rounded transition-colors;
+    @apply bg-blue-600 hover:bg-blue-600/90 text-white font-bold py-2 px-4 rounded transition-colors;
   }
 
   .card {
@@ -65,11 +65,11 @@
 
   /* Dark mode variants for components */
   .dark .btn-primary {
-    @apply bg-sims-green/90 hover:bg-sims-green;
+    @apply bg-green-600/90 hover:bg-green-600;
   }
 
   .dark .btn-secondary {
-    @apply bg-sims-blue/90 hover:bg-sims-blue;
+    @apply bg-blue-600/90 hover:bg-blue-600;
   }
 }
 

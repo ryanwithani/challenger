@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import DOMPurify from 'dompurify'
 
 // Define your environment variable schema
 const envSchema = z.object({
@@ -18,6 +19,35 @@ export const env = envSchema.parse({
   NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
   NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
 })
+
+// Sanitization helpers
+export function sanitizeText(input: string | null | undefined): string {
+  if (!input) return ''
+  // Strip all HTML tags and encode special characters
+  return DOMPurify.sanitize(input, { ALLOWED_TAGS: [] })
+}
+
+export function sanitizeHtml(input: string | null | undefined): string {
+  if (!input) return ''
+  // Allow only safe HTML tags if you need basic formatting
+  return DOMPurify.sanitize(input, { 
+    ALLOWED_TAGS: ['b', 'i', 'em', 'strong'],
+    ALLOWED_ATTR: []
+  })
+}
+
+export const simNameSchema = z.string()
+  .min(1, 'Name is required')
+  .max(100, 'Name too long')
+  .transform(sanitizeText)
+
+export const textFieldSchema = z.string()
+  .max(500, 'Text too long')
+  .transform(sanitizeText)
+
+export const notesFieldSchema = z.string()
+  .max(1000, 'Notes too long')
+  .transform(sanitizeText)
 
 
 export const PASSWORD_MIN = 12;
@@ -128,4 +158,27 @@ export const signUpSchema = z.object({
   message: "Passwords don't match",
   path: ["confirmPassword"],
 });
+
+export const avatarFileSchema = z.object({
+  file: z.instanceof(File)
+    .refine((file) => file.size <= 5 * 1024 * 1024, "File size must be less than 5MB")
+    .refine((file) => ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(file.type), 
+      "Only JPEG, PNG, and WebP images are allowed"),
+  simId: z.string().uuid("Invalid sim ID format")
+})
+
+const SAFE_EXTENSIONS: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/jpg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp'
+}
+
+export function getSafeFileExtension(mimeType: string): string {
+  const extension = SAFE_EXTENSIONS[mimeType]
+  if (!extension) {
+    throw new Error('Unsupported file type')
+  }
+  return extension
+}
 

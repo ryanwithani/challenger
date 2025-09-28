@@ -1,30 +1,16 @@
-import { forwardRef } from 'react'
-import { clsx } from 'clsx'
+import * as React from 'react'
+import { cn } from '@/src/lib/utils/cn'
 
-interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
-  variant?: 'default' | 'bordered' | 'elevated'
+
+export function Card({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+return <div className={cn('rounded-2xl bg-white shadow-card', className)} {...props} />
 }
-
-export const Card = forwardRef<HTMLDivElement, CardProps>(
-  ({ className, variant = 'default', children, ...props }, ref) => {
-    return (
-      <div
-        ref={ref}
-        className={clsx(
-          'rounded-lg p-6',
-          {
-            'bg-white shadow-md border border-gray-200': variant === 'default',
-            'bg-white border-2 border-gray-300': variant === 'bordered',
-            'bg-white shadow-lg hover:shadow-xl transition-shadow': variant === 'elevated',
-          },
-          className
-        )}
-        {...props}
-      >
-        {children}
-      </div>
-    )
-  }
-)
-
-Card.displayName = 'Card'
+export function CardHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+return <div className={cn('p-4 border-b border-gray-100', className)} {...props} />
+}
+export function CardContent({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+return <div className={cn('p-4', className)} {...props} />
+}
+export function CardFooter({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+return <div className={cn('p-4 border-t border-gray-100', className)} {...props} />
+}

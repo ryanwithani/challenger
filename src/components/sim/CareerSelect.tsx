@@ -34,6 +34,15 @@ export function CareerSelect({
   // keep internal state in sync if parent controls it
   useEffect(() => { if (value) { setBaseId(value.baseId); setBranchId(value.branchId) } }, [value?.baseId, value?.branchId])
 
+useEffect(() => {
+        const nonWorking = simAgeStage === 'infant' || simAgeStage === 'toddler' || simAgeStage === 'child'
+        if (nonWorking && (baseId || branchId)) {
+          setBaseId(undefined)
+          setBranchId(undefined)
+          onChange({ baseId: undefined, branchId: undefined, label: null })
+        }
+      }, [simAgeStage]) // eslint-disable-line react-hooks/exhaustive-deps
+
   const branches = useMemo(() => baseId ? getBranchesForBase(baseId) : [], [baseId])
   const chosenLabel = useMemo(() => careerLabelFromIds(baseId, branchId), [baseId, branchId])
   const pack = useMemo(() => packForCareerIds(baseId, branchId), [baseId, branchId])
@@ -50,7 +59,7 @@ export function CareerSelect({
   }
 
   const wholeControlDisabled =
-    simAgeStage === 'infant' || simAgeStage === 'toddler'
+    simAgeStage === 'infant' || simAgeStage === 'toddler' || simAgeStage === 'child'
 
   return (
     <div className={clsx('grid grid-cols-1 gap-2 md:grid-cols-3', className)}>

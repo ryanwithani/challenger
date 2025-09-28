@@ -1,5 +1,6 @@
 // lib/utils/avatarUpload.ts
 import { createSupabaseBrowserClient } from '@/src/lib/supabase/client'
+import { avatarFileSchema, getSafeFileExtension } from './validators'
 
 export async function uploadSimAvatar(
     simId: string,
@@ -10,9 +11,15 @@ export async function uploadSimAvatar(
 
     if (!user) throw new Error('User not authenticated')
 
-    // Create file path: userId/simId/avatar.extension
-    const fileExtension = file.name.split('.').pop()
-    const filePath = `${user.id}/${simId}/avatar.${fileExtension}`
+        const validation = avatarFileSchema.safeParse({ file, simId })
+        if (!validation.success) {
+            const firstError = validation.error.errors[0]
+            throw new Error(firstError.message)
+        }
+    
+
+    const safeExtension = getSafeFileExtension(file.type)
+    const filePath = `${user.id}/${simId}/avatar.${safeExtension}`
 
     // Upload file
     const { data, error } = await supabase.storage

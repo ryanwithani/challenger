@@ -329,6 +329,7 @@ export type Database = {
       }
       sim_achievements: {
         Row: {
+          notes: any
           achieved_at: string | null
           completion_method: string
           goal_title: string

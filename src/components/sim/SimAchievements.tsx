@@ -1,4 +1,5 @@
 import { Database } from '@/src/types/database.types'
+import { SafeText } from '../ui/SafeText'
 
 type Sim = Database['public']['Tables']['sims']['Row']
 type SimAchievement = Database['public']['Tables']['sim_achievements']['Row']
@@ -9,7 +10,7 @@ interface SimAchievementsProps {
 }
 
 export function SimAchievements({ sim, achievements }: SimAchievementsProps) {
-    const totalPoints = achievements.reduce((sum, achievement) => sum + achievement.points_earned, 0)
+    const totalPoints = achievements.reduce((sum, achievement) => sum + (achievement.points_earned ?? 0), 0)
 
     const getMethodIcon = (method: string) => {
         const iconMap: Record<string, string> = {
@@ -70,7 +71,7 @@ export function SimAchievements({ sim, achievements }: SimAchievementsProps) {
             <div className="bg-gradient-to-r from-sims-green to-sims-blue rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 text-white">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h2 className="text-2xl font-bold">{sim.name}'s Achievements</h2>
+                        <h2><SafeText className="text-2xl font-bold">{sim.name}</SafeText>'s Achievements</h2>
                         <p className="opacity-90">Legacy contributions and accomplishments</p>
                     </div>
                     <div className="text-right">
@@ -107,7 +108,7 @@ export function SimAchievements({ sim, achievements }: SimAchievementsProps) {
 
                             <div className="space-y-3">
                                 {categoryAchievements
-                                    .sort((a, b) => new Date(b.achieved_at).getTime() - new Date(a.achieved_at).getTime())
+                                    .sort((a, b) => new Date(b.achieved_at ?? '').getTime() - new Date(a.achieved_at ?? '').getTime())
                                     .map((achievement) => (
                                         <div
                                             key={achievement.id}
@@ -127,7 +128,11 @@ export function SimAchievements({ sim, achievements }: SimAchievementsProps) {
                                                             </div>
                                                         )}
                                                         <div className="text-xs opacity-60 mt-2">
-                                                            Achieved on {new Date(achievement.achieved_at).toLocaleDateString()}
+                                                            {achievement.achieved_at ? (
+                                                                <>Achieved on {new Date(achievement.achieved_at).toLocaleDateString()}</>
+                                                            ) : (
+                                                                <>Not yet achieved</>
+                                                            )}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -148,7 +153,7 @@ export function SimAchievements({ sim, achievements }: SimAchievementsProps) {
                     <div className="text-6xl mb-4">🏆</div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">No Achievements Yet</h3>
                     <p className="text-gray-600 mb-4">
-                        {sim.name} hasn't completed any goals yet. Start playing and achieving goals to see them here!
+                        <SafeText>{sim.name}</SafeText> hasn't completed any goals yet. Start playing and achieving goals to see them here!
                     </p>
                     <div className="bg-gray-50 rounded-xl p-4 max-w-md mx-auto">
                         <p className="text-sm text-gray-600">

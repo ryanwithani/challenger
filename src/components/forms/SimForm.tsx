@@ -144,6 +144,7 @@ export function SimForm({
   <CareerSelect
     value={careerSel}
     onChange={setCareerSel}
+    simAgeStage={ageStage}
   />
   <p className="mt-1 text-xs text-gray-500">Pick a base career; add a branch if applicable.</p>
 </div>
