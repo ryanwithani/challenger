@@ -1,4 +1,5 @@
 import { Database } from '@/src/types/database.types'
+import { SafeText } from '../SafeText'
 
 type Challenge = Database['public']['Tables']['challenges']['Row']
 
@@ -11,8 +12,8 @@ export function ChallengeTile({ challenge }: ChallengeTileProps) {
 
   return (
     <div className={`card mb-4 hover:shadow-lg transition-shadow cursor-pointer ${isActive
-        ? 'border-2 border-brand-primary bg-brand-primary/10 shadow-md'
-        : ''
+      ? 'border-2 border-brand-primary bg-brand-primary/10 shadow-md'
+      : ''
       }`}>
       {/* Active status indicator */}
       {isActive && (
@@ -26,20 +27,24 @@ export function ChallengeTile({ challenge }: ChallengeTileProps) {
 
       <h3 className={`text-xl font-semibold mb-2 ${isActive ? 'text-brand-primary' : ''
         }`}>
-        {challenge.name}
+        <SafeText>{challenge.name}</SafeText>
       </h3>
 
       {challenge.description && (
         <p className={`text-sm mb-4 ${isActive ? 'text-brand-primary' : 'text-gray-600'
           }`}>
-          {challenge.description}
+          <SafeText>{challenge.description}</SafeText>
         </p>
       )}
 
       <div className={`flex justify-between items-center text-sm ${isActive ? 'text-brand-primary' : 'text-gray-500'
         }`}>
         <span className="capitalize">{challenge.challenge_type || 'Custom'}</span>
-        <span>{new Date(challenge.created_at).toLocaleDateString()}</span>
+        <span>
+          {challenge.created_at
+            ? new Date(challenge.created_at).toLocaleDateString()
+            : ''}
+        </span>
       </div>
     </div>
   )

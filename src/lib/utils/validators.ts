@@ -30,11 +30,17 @@ export function sanitizeText(input: string | null | undefined): string {
 export function sanitizeHtml(input: string | null | undefined): string {
   if (!input) return ''
   // Allow only safe HTML tags if you need basic formatting
-  return DOMPurify.sanitize(input, { 
+  return DOMPurify.sanitize(input, {
     ALLOWED_TAGS: ['b', 'i', 'em', 'strong'],
     ALLOWED_ATTR: []
   })
 }
+
+export const goalSchema = z.object({
+  title: z.string().max(200).transform(sanitizeText),
+  description: z.string().max(1000).transform(sanitizeText),
+  category: z.string().max(50).transform(sanitizeText),
+})
 
 export const simNameSchema = z.string()
   .min(1, 'Name is required')
@@ -162,7 +168,7 @@ export const signUpSchema = z.object({
 export const avatarFileSchema = z.object({
   file: z.instanceof(File)
     .refine((file) => file.size <= 5 * 1024 * 1024, "File size must be less than 5MB")
-    .refine((file) => ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(file.type), 
+    .refine((file) => ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(file.type),
       "Only JPEG, PNG, and WebP images are allowed"),
   simId: z.string().uuid("Invalid sim ID format")
 })

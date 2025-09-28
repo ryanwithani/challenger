@@ -75,32 +75,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   signIn: async (email: string, password: string) => {
-    // Check if we're rate limited (from localStorage tracking)
-    const rateLimitKey = `rate_limit_${email}`
-    const attempts = JSON.parse(localStorage.getItem(rateLimitKey) || '[]')
-    const now = Date.now()
-    const recentAttempts = attempts.filter((time: number) => now - time < 900000) // 15 min
-
-    if (recentAttempts.length >= 5) {
-      throw new Error('Too many login attempts. Please try again in 15 minutes.')
-    }
-
-    const supabase = createSupabaseBrowserClient()
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
+    // Remove client-side rate limiting code
+    const response = await fetch('/api/auth/signin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
     })
 
-    if (error) {
-      // Track failed attempt
-      recentAttempts.push(now)
-      localStorage.setItem(rateLimitKey, JSON.stringify(recentAttempts))
-      throw error
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Sign in failed')
     }
 
-    // Clear attempts on success
-    localStorage.removeItem(rateLimitKey)
-    set({ user: data.user })
+    set({ user: result.user })
   },
 
   signUp: async (email: string, password: string) => {
@@ -138,25 +126,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   // ADD THIS: Request password reset
   requestPasswordReset: async (email: string) => {
-    // Use localStorage for rate limiting (consistent with your signIn method)
-    const rateLimitKey = `reset_request_${email}`
-    const attempts = JSON.parse(localStorage.getItem(rateLimitKey) || '[]')
-    const now = Date.now()
-    const recentAttempts = attempts.filter((time: number) => now - time < 7200000) // 1 hour
+    // Remove client-side rate limiting code
+    const response = await fetch('/api/auth/reset-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    })
 
-    if (recentAttempts.length >= 3) {
-      throw new Error('Too many reset attempts. Please try again in an hour.')
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Password reset failed')
     }
-
-    const supabase = createSupabaseBrowserClient()
-
-    const { error } = await supabase.auth.resetPasswordForEmail(email)
-
-    if (error) throw error
-
-    // Track successful attempt
-    recentAttempts.push(now)
-    localStorage.setItem(rateLimitKey, JSON.stringify(recentAttempts))
   },
 
   // ADD THIS: Update password after reset

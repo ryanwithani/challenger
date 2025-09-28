@@ -7,7 +7,8 @@ import { useSimStore } from '@/src/lib/store/simStore'
 import { Button } from '@/src/components/ui/Button'
 import { ChallengeSim } from '@/src/types/sims'
 import TraitPickerModal, { CatalogTrait as Trait } from '@/src/components/sim/TraitPickerModal'
-import { Traits } from '@/src/components/sim/TraitsCatalog'
+import { Traits } from '@/src/components/sim/traitsCatalog'
+import { SafeText } from '../ui/SafeText'
 
 // ---------- Types (align with your models; adjust if you already export these) ----------
 export type AgeStage =
@@ -96,42 +97,42 @@ function getRelationshipIcon(rel?: string | null) {
 }
 
 function normalizeSelectedToIds(
-    selected: (string | null | undefined)[] | null | undefined,
-    catalog: { id: string; label: string }[]
-  ): string[] {
-    if (!selected?.length) return []
-    const byId = new Map(catalog.map(t => [t.id, t]))
-    const byLabel = new Map(catalog.map(t => [t.label.toLowerCase(), t]))
-    const out: string[] = []
-    for (const raw of selected) {
-      if (!raw) continue
-      const s = String(raw)
-      if (byId.has(s)) { out.push(s); continue }
-      const t = byLabel.get(s.toLowerCase())
-      if (t) out.push(t.id)
-    }
-    // dedupe
-    return Array.from(new Set(out))
+  selected: (string | null | undefined)[] | null | undefined,
+  catalog: { id: string; label: string }[]
+): string[] {
+  if (!selected?.length) return []
+  const byId = new Map(catalog.map(t => [t.id, t]))
+  const byLabel = new Map(catalog.map(t => [t.label.toLowerCase(), t]))
+  const out: string[] = []
+  for (const raw of selected) {
+    if (!raw) continue
+    const s = String(raw)
+    if (byId.has(s)) { out.push(s); continue }
+    const t = byLabel.get(s.toLowerCase())
+    if (t) out.push(t.id)
   }
+  // dedupe
+  return Array.from(new Set(out))
+}
 
 // ---------- Component ----------
 export default function SimOverview({ sim, challenge }: SimOverviewProps) {
-    const {                // you already use this for Sim-only fields
-        fetchChallengeSim,
-        linkSimToChallenge,
-        updateChallengeSim,
-        fetchLatestChallengeSimForSim,
-        fetchChallengeById,
-      } = useSimStore()
+  const {                // you already use this for Sim-only fields
+    fetchChallengeSim,
+    linkSimToChallenge,
+    updateChallengeSim,
+    fetchLatestChallengeSimForSim,
+    fetchChallengeById,
+  } = useSimStore()
 
-const updateSim = useSimStore(s => s.updateSim)
-    
-const [challengeSim, setChallengeSim] = useState<ChallengeSim | null>(null)
-const [challengeState, setChallengeState] = useState<Challenge | null>(challenge || null)
-const [traitModalOpen, setTraitModalOpen] = useState(false)
-const isLinked = Boolean(challengeState?.id && challengeSim?.id)
+  const updateSim = useSimStore(s => s.updateSim)
 
-useEffect(() => {
+  const [challengeSim, setChallengeSim] = useState<ChallengeSim | null>(null)
+  const [challengeState, setChallengeState] = useState<Challenge | null>(challenge || null)
+  const [traitModalOpen, setTraitModalOpen] = useState(false)
+  const isLinked = Boolean(challengeState?.id && challengeSim?.id)
+
+  useEffect(() => {
     let cancelled = false
     async function load() {
       if (challenge?.id) {
@@ -157,28 +158,28 @@ useEffect(() => {
     return () => { cancelled = true }
   }, [sim.id, challenge?.id, fetchChallengeSim, fetchLatestChallengeSimForSim, fetchChallengeById])
 
-  
+
   // Helper: create the link (used by the CTA button when not linked)
   async function handleLink() {
     if (!challenge?.id) return
     const row = await linkSimToChallenge(sim.id, challenge.id)
     setChallengeSim(row as ChallengeSim)
   }
-  
+
   // Save helpers
   const saveSimField =
     <K extends keyof typeof sim>(key: K) =>
-    async (value: (typeof sim)[K]) => updateSim(sim.id, { [key]: value } as any)
-  
+      async (value: (typeof sim)[K]) => updateSim(sim.id, { [key]: value } as any)
+
   const saveChallengeField =
     (key: 'generation' | 'is_heir' | 'relationship_to_heir') =>
-    async (value: any) => {
-      if (!challengeSim) return
-      const saved = await updateChallengeSim(challengeSim.id, { [key]: value } as any)
-      setChallengeSim(saved as ChallengeSim) // keep local in sync
-    }
+      async (value: any) => {
+        if (!challengeSim) return
+        const saved = await updateChallengeSim(challengeSim.id, { [key]: value } as any)
+        setChallengeSim(saved as ChallengeSim) // keep local in sync
+      }
 
-const initialIds = normalizeSelectedToIds(sim.traits as any, Traits)
+  const initialIds = normalizeSelectedToIds(sim.traits as any, Traits)
 
 
   return (
@@ -256,141 +257,141 @@ const initialIds = normalizeSelectedToIds(sim.traits as any, Traits)
 
           {/* Traits (example: read-only badges here; keep your existing editor elsewhere) */}
           <div className="mt-6">
-  <div className="flex items-center justify-between mb-2">
-    <span className="block text-sm font-medium text-gray-700">Traits</span>
-    <button
-      type="button"
-      onClick={() => setTraitModalOpen(true)}
-      className="text-sm text-indigo-600 hover:underline"
-    >
-      Edit traits
-    </button>
-  </div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="block text-sm font-medium text-gray-700">Traits</span>
+              <button
+                type="button"
+                onClick={() => setTraitModalOpen(true)}
+                className="text-sm text-indigo-600 hover:underline"
+              >
+                Edit traits
+              </button>
+            </div>
 
-  {(!sim.traits || sim.traits.length === 0) ? (
-    <p className="text-sm text-gray-500">No traits selected.</p>
-  ) : (
-    <div className="flex flex-wrap gap-2">
-      {sim.traits.map((traitId: string) => {
-        const t = (Traits as unknown as Trait[]).find(tt => tt.id === traitId)
-        return (
-          <span key={traitId} className="inline-flex items-center rounded-full border border-gray-300 px-2 py-0.5 text-xs text-gray-700">
-            {t?.icon ? <span className="mr-1">{t.icon}</span> : null}
-            {t?.label ?? traitId}
-          </span>
-        )
-      })}
-    </div>
-  )}
-</div>
+            {(!sim.traits || sim.traits.length === 0) ? (
+              <p className="text-sm text-gray-500">No traits selected.</p>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {sim.traits.map((traitId: string) => {
+                  const t = (Traits as unknown as Trait[]).find(tt => tt.id === traitId)
+                  return (
+                    <span key={traitId} className="inline-flex items-center rounded-full border border-gray-300 px-2 py-0.5 text-xs text-gray-700">
+                      {t?.icon ? <span className="mr-1">{t.icon}</span> : null}
+                      {t?.label ?? traitId}
+                    </span>
+                  )
+                })}
+              </div>
+            )}
+          </div>
 
 
 
-<TraitPickerModal
-  isOpen={traitModalOpen}
-  onClose={() => setTraitModalOpen(false)}
-  initialSelected={initialIds}                // ✅ now guaranteed IDs
-  catalog={Traits}
-  simAgeStage={sim.age_stage ?? 'young_adult'}
-  // ownedPacks={undefined} // omit if you don't want pack gating
-  maxSelectable={3}                           // or remove if you don't want a cap
-  onSave={async (nextIds) => {
-    await updateSim(sim.id, { traits: nextIds as any }) // ✅ always store IDs
-  }}
-/>
+          <TraitPickerModal
+            isOpen={traitModalOpen}
+            onClose={() => setTraitModalOpen(false)}
+            initialSelected={initialIds}                // ✅ now guaranteed IDs
+            catalog={Traits}
+            simAgeStage={sim.age_stage ?? 'young_adult'}
+            // ownedPacks={undefined} // omit if you don't want pack gating
+            maxSelectable={3}                           // or remove if you don't want a cap
+            onSave={async (nextIds) => {
+              await updateSim(sim.id, { traits: nextIds as any }) // ✅ always store IDs
+            }}
+          />
 
         </section>
 
         {/* Challenge / Context Card */}
         <section className="bg-white rounded-2xl border-2 border-gray-100 p-6 shadow-lg hover:shadow-xl transition-all">
-  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">🏁 Challenge</h3>
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">🏁 Challenge</h3>
 
-  {!challengeState ? (
-    <p className="text-gray-500">This Sim is not in a challenge context.</p>
-  ) : !isLinked ? (
-    <div className="space-y-3">
-      <p className="text-gray-500">This Sim isn't linked to "{challengeState.title}".</p>
-      <button
-        type="button"
-        onClick={handleLink}
-        className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-      >
-        Link to Challenge
-      </button>
-    </div>
-  ) : (
-    <div className="grid grid-cols-1 gap-4">
-      {/* Generation */}
-      <InlineEditable
-        id="cs-generation"
-        label="Generation"
-        type="number"
-        value={challengeSim?.generation ?? 1}
-        min={1}
-        max={50}
-        validate={(n) =>
-          Number.isInteger(n) && n >= 1 && n <= 50 ? null : 'Enter 1–50'
-        }
-        onSave={(n) => saveChallengeField('generation')(n as number)}
-      />
+          {!challengeState ? (
+            <p className="text-gray-500">This Sim is not in a challenge context.</p>
+          ) : !isLinked ? (
+            <div className="space-y-3">
+              <p className="text-gray-500">This Sim isn't linked to "<SafeText>{challengeState.title}</SafeText>".</p>
+              <button
+                type="button"
+                onClick={handleLink}
+                className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                Link to Challenge
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-4">
+              {/* Generation */}
+              <InlineEditable
+                id="cs-generation"
+                label="Generation"
+                type="number"
+                value={challengeSim?.generation ?? 1}
+                min={1}
+                max={50}
+                validate={(n) =>
+                  Number.isInteger(n) && n >= 1 && n <= 50 ? null : 'Enter 1–50'
+                }
+                onSave={(n) => saveChallengeField('generation')(n as number)}
+              />
 
-      {/* Heir */}
-      <InlineEditable
-        id="cs-is-heir"
-        label="Heir"
-        type="checkbox"
-        value={!!challengeSim?.is_heir}
-        format={(v) => (v ? '👑 Current Heir' : '—')}
-        onSave={(v) => saveChallengeField('is_heir')(v as boolean)}
-      />
+              {/* Heir */}
+              <InlineEditable
+                id="cs-is-heir"
+                label="Heir"
+                type="checkbox"
+                value={!!challengeSim?.is_heir}
+                format={(v) => (v ? '👑 Current Heir' : '—')}
+                onSave={(v) => saveChallengeField('is_heir')(v as boolean)}
+              />
 
-      {/* Relationship to Heir (only if not heir) */}
-      {!challengeSim?.is_heir && (
-        <InlineEditable
-          id="cs-rel-to-heir"
-          label="Relationship to Heir"
-          type="select"
-          value={challengeSim?.relationship_to_heir ?? ''}
-          options={[
-            { value: '', label: 'Family Member' },
-            { value: 'spouse', label: 'Spouse' },
-            { value: 'child', label: 'Child' },
-            { value: 'parent', label: 'Parent' },
-            { value: 'sibling', label: 'Sibling' },
-            { value: 'partner', label: 'Partner' },
-            { value: 'roommate', label: 'Roommate' },
-            { value: 'other', label: 'Other' },
-          ]}
-          onSave={(v) => saveChallengeField('relationship_to_heir')(v as string | null)}
-        />
-      )}
+              {/* Relationship to Heir (only if not heir) */}
+              {!challengeSim?.is_heir && (
+                <InlineEditable
+                  id="cs-rel-to-heir"
+                  label="Relationship to Heir"
+                  type="select"
+                  value={challengeSim?.relationship_to_heir ?? ''}
+                  options={[
+                    { value: '', label: 'Family Member' },
+                    { value: 'spouse', label: 'Spouse' },
+                    { value: 'child', label: 'Child' },
+                    { value: 'parent', label: 'Parent' },
+                    { value: 'sibling', label: 'Sibling' },
+                    { value: 'partner', label: 'Partner' },
+                    { value: 'roommate', label: 'Roommate' },
+                    { value: 'other', label: 'Other' },
+                  ]}
+                  onSave={(v) => saveChallengeField('relationship_to_heir')(v as string | null)}
+                />
+              )}
 
-      {/* Optional: challenge info */}
-      <div className="pt-2 border-t border-gray-100 space-y-2">
-        <div className="flex items-center gap-2">
-          <span className="text-gray-500">Challenge:</span>
-          <span className="font-medium">{challengeState.title}</span>
-        </div>
-        {challengeState.generation_goal && (
-          <div className="flex items-start gap-2">
-            <span className="text-gray-500 mt-0.5">Generation goal:</span>
-            <span>{challengeState.generation_goal}</span>
-          </div>
-        )}
-        {challengeState.rules_url && (
-          <a
-            href={challengeState.rules_url}
-            target="_blank"
-            rel="noreferrer"
-            className="text-indigo-600 hover:underline"
-          >
-            View rules
-          </a>
-        )}
-      </div>
-    </div>
-  )}
-</section>
+              {/* Optional: challenge info */}
+              <div className="pt-2 border-t border-gray-100 space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-gray-500">Challenge:</span>
+                  <span className="font-medium"><SafeText>{challengeState.title}</SafeText></span>
+                </div>
+                {challengeState.generation_goal && (
+                  <div className="flex items-start gap-2">
+                    <span className="text-gray-500 mt-0.5">Generation goal:</span>
+                    <span>{challengeState.generation_goal}</span>
+                  </div>
+                )}
+                {challengeState.rules_url && (
+                  <a
+                    href={challengeState.rules_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-indigo-600 hover:underline"
+                  >
+                    View rules
+                  </a>
+                )}
+              </div>
+            </div>
+          )}
+        </section>
 
 
         {/* you can keep/add other cards (skills, relationships, achievements) here */}
@@ -432,8 +433,8 @@ const initialIds = normalizeSelectedToIds(sim.traits as any, Traits)
 
           {/* quick actions (optional) */}
           <div className="mt-4 flex gap-2">
-            <Button variant="outline" size="sm">View Family</Button>
-            <Button variant="outline" size="sm">Open Gallery</Button>
+            <Button>View Family</Button>
+            <Button>Open Gallery</Button>
           </div>
         </section>
 

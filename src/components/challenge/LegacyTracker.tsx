@@ -5,6 +5,7 @@ import { Button } from '@/src/components/ui/Button'
 import { Database } from '@/src/types/database.types'
 import { LEGACY_CATEGORIES } from '@/src/components/challenge/GoalsSeeder'
 import { GoalCompletionModal } from './GoalCompletionModal'
+import { SafeText } from '../ui/SafeText'
 
 type Challenge = Database['public']['Tables']['challenges']['Row']
 type Sim = Database['public']['Tables']['sims']['Row']
@@ -38,8 +39,8 @@ interface GenerationCardProps {
 function GenerationCard({ generation, heir, spouse, children, isActive, onSelectHeir }: GenerationCardProps) {
   return (
     <div className={`relative rounded-2xl p-6 border-2 transition-all duration-300 hover:shadow-lg ${isActive
-        ? 'border-emerald-400 bg-gradient-to-br from-emerald-50 to-teal-50 shadow-lg'
-        : 'border-gray-200 bg-white hover:border-gray-300'
+      ? 'border-emerald-400 bg-gradient-to-br from-emerald-50 to-teal-50 shadow-lg'
+      : 'border-gray-200 bg-white hover:border-gray-300'
       }`}>
       {/* Generation Header */}
       <div className="flex items-center justify-between mb-6">
@@ -68,10 +69,10 @@ function GenerationCard({ generation, heir, spouse, children, isActive, onSelect
         {heir ? (
           <div className="flex items-center space-x-3 p-3 bg-white rounded-xl border border-amber-200">
             <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-amber-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
-              {heir.name.charAt(0)}
+              <SafeText>{heir.name.charAt(0)}</SafeText>
             </div>
             <div>
-              <div className="font-semibold text-gray-900">{heir.name}</div>
+              <div className="font-semibold text-gray-900"><SafeText>{heir.name}</SafeText></div>
               <div className="text-sm text-gray-500">Age: {heir.age_stage}</div>
             </div>
           </div>
@@ -93,7 +94,7 @@ function GenerationCard({ generation, heir, spouse, children, isActive, onSelect
               {spouse.name.charAt(0)}
             </div>
             <div>
-              <div className="font-semibold text-gray-900">{spouse.name}</div>
+              <div className="font-semibold text-gray-900"><SafeText>{spouse.name}</SafeText></div>
               <div className="text-sm text-gray-500">Age: {spouse.age_stage}</div>
             </div>
           </div>
@@ -120,10 +121,10 @@ function GenerationCard({ generation, heir, spouse, children, isActive, onSelect
               <div key={child.id} className="flex items-center justify-between p-3 bg-white rounded-xl border border-blue-200">
                 <div className="flex items-center space-x-3">
                   <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                    {child.name.charAt(0)}
+                    <SafeText>{child.name.charAt(0)}</SafeText>
                   </div>
                   <div>
-                    <div className="font-medium text-gray-900">{child.name}</div>
+                    <div className="font-medium text-gray-900"><SafeText>{child.name}</SafeText></div>
                     <div className="text-xs text-gray-500">Age: {child.age_stage}</div>
                   </div>
                 </div>
@@ -363,8 +364,8 @@ function GoalComponent({
 
   return (
     <div className={`relative rounded-2xl p-6 border-2 transition-all duration-300 ${isCompleted
-        ? 'border-emerald-200 bg-gradient-to-br from-emerald-50 to-green-50'
-        : 'border-gray-200 bg-white hover:border-gray-300'
+      ? 'border-emerald-200 bg-gradient-to-br from-emerald-50 to-green-50'
+      : 'border-gray-200 bg-white hover:border-gray-300'
       }`}>
       {/* Goal Header */}
       <div className="flex items-start justify-between mb-4">
@@ -567,7 +568,7 @@ export function LegacyTracker({
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                {challenge.name}
+                <SafeText>{challenge.name}</SafeText>
               </h1>
               <div className="flex items-center space-x-6 mt-4 text-lg text-gray-600">
                 <div className="flex items-center space-x-2">
@@ -577,8 +578,8 @@ export function LegacyTracker({
                   <span>Total Score: {totalPoints}/100</span>
                 </div>
                 <span className={`px-4 py-2 rounded-full text-sm font-semibold text-white ${config.start_type === 'ultra_extreme' ? 'bg-gradient-to-r from-red-500 to-red-700' :
-                    config.start_type === 'extreme' ? 'bg-gradient-to-r from-yellow-500 to-orange-600' :
-                      'bg-gradient-to-r from-green-400 to-green-600'
+                  config.start_type === 'extreme' ? 'bg-gradient-to-r from-yellow-500 to-orange-600' :
+                    'bg-gradient-to-r from-green-400 to-green-600'
                   }`}>
                   {(config.start_type || 'regular').replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())} Start
                 </span>
@@ -604,8 +605,8 @@ export function LegacyTracker({
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`flex-1 py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 flex items-center justify-center space-x-2 ${activeTab === tab.id
-                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
-                    : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
                   }`}
               >
                 <span className="text-2xl">{tab.icon}</span>

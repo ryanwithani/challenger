@@ -6,7 +6,7 @@ import Link from 'next/link'
 import clsx from 'clsx'
 import { createSupabaseBrowserClient } from '@/src/lib/supabase/client'
 import { Database } from '@/src/types/database.types'
-import { SimCard } from '@/src/components/ui/SimCard'
+import { SimCard } from '@/src/components/ui/sim/SimCard'
 import { Traits } from '@/src/components/sim/TraitsCatalog'
 
 type Sim = Database['public']['Tables']['sims']['Row']
@@ -75,47 +75,47 @@ export default function SimsPage() {
   // ---------- Fetch ----------
   useEffect(() => {
     let mounted = true
-    ;(async () => {
-      setLoading(true); setError(null)
-      try {
-        // pull sims
-        const { data: simsData, error: simsErr } = await supabase
-          .from('sims')
-          .select('*')
-          .order('created_at', { ascending: false })
-        if (simsErr) throw simsErr
-
-        // pull all challenges for this user (or visible)
-        const { data: chData, error: chErr } = await supabase
-          .from('challenges')
-          .select('*')
-          .order('created_at', { ascending: false })
-        if (chErr) throw chErr
-
-        // pull join rows for all sims shown
-        const simIds = (simsData ?? []).map(s => s.id)
-        let csData: ChallengeSim[] = []
-        if (simIds.length) {
-          const { data, error } = await supabase
-            .from('challenge_sims')
+      ; (async () => {
+        setLoading(true); setError(null)
+        try {
+          // pull sims
+          const { data: simsData, error: simsErr } = await supabase
+            .from('sims')
             .select('*')
-            .in('sim_id', simIds)
-          if (error) throw error
-          csData = data as ChallengeSim[]
-        }
+            .order('created_at', { ascending: false })
+          if (simsErr) throw simsErr
 
-        if (!mounted) return
-        setSims(simsData ?? [])
-        setChallenges(chData ?? [])
-        setChallengeSims(csData ?? [])
-      } catch (e: any) {
-        if (!mounted) return
-        setError(e.message ?? 'Failed to load Sims')
-      } finally {
-        if (!mounted) return
-        setLoading(false)
-      }
-    })()
+          // pull all challenges for this user (or visible)
+          const { data: chData, error: chErr } = await supabase
+            .from('challenges')
+            .select('*')
+            .order('created_at', { ascending: false })
+          if (chErr) throw chErr
+
+          // pull join rows for all sims shown
+          const simIds = (simsData ?? []).map(s => s.id)
+          let csData: ChallengeSim[] = []
+          if (simIds.length) {
+            const { data, error } = await supabase
+              .from('challenge_sims')
+              .select('*')
+              .in('sim_id', simIds)
+            if (error) throw error
+            csData = data as ChallengeSim[]
+          }
+
+          if (!mounted) return
+          setSims(simsData ?? [])
+          setChallenges(chData ?? [])
+          setChallengeSims(csData ?? [])
+        } catch (e: any) {
+          if (!mounted) return
+          setError(e.message ?? 'Failed to load Sims')
+        } finally {
+          if (!mounted) return
+          setLoading(false)
+        }
+      })()
     return () => { mounted = false }
   }, [supabase])
 

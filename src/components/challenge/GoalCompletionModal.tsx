@@ -267,16 +267,16 @@ export function GoalCompletionModal({
                         <div className="text-sm text-blue-800">
                             {needsSimSelection && selectedSim && (
                                 <div>
-                                    <strong>Sim:</strong> {eligibleSims.find(s => s.id === selectedSim)?.name}
+                                    <strong>Sim:</strong> {JSON.parse(completionProgress.completion_details).sim_name}
                                 </div>
                             )}
-                            <div>
-                                <strong>Method:</strong> {selectedMethodData?.icon} {selectedMethodData?.label}
-                            </div>
-                            {notes && (
+                            {selectedMethod && (
                                 <div>
-                                    <strong>Notes:</strong> {notes}
+                                    <strong>Method:</strong> {JSON.parse(completionProgress.completion_details).method} {selectedMethodData?.icon} {selectedMethodData?.label}
                                 </div>
+                            )}
+                            {notes && (
+                                <div><strong>Notes:</strong> {JSON.parse(completionProgress.completion_details).notes}</div>
                             )}
                         </div>
                     </div>

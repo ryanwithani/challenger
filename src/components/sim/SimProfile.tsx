@@ -6,6 +6,7 @@ import SimOverview from '@/src/components/sim/SimOverview'
 import { SimAchievements } from '@/src/components/sim/SimAchievements'
 import { SimRelationships } from '@/src/components/sim/SimRelationships'
 import { SimTimeline } from '@/src/components/sim/SimTimeline'
+import { SafeText } from '@/src/components/ui/SafeText'
 
 type Sim = Database['public']['Tables']['sims']['Row']
 type Challenge = Database['public']['Tables']['challenges']['Row']

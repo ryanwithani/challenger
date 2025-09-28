@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { useChallengeStore } from '@/src/lib/store/challengeStore'
-import { SimCard } from '@/src/components/ui/SimCard'
+import { SimCard } from '@/src/components/ui/sim/SimCard'
 import { GoalCard } from '@/src/components/ui/GoalCard'
 import { PointTracker } from '@/src/components/ui/PointTracker'
 import { Button } from '@/src/components/ui/Button'

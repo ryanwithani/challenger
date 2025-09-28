@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Database } from '@/src/types/database.types'
 import { useSimStore } from '@/src/lib/store/simStore'
-import { SimCard } from '@/src/components/ui/SimCard'
+import { SimCard } from '@/src/components/ui/sim/SimCard'
 
 type Sim = Database['public']['Tables']['sims']['Row']
 type Challenge = Database['public']['Tables']['challenges']['Row']

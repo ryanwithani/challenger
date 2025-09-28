@@ -57,23 +57,23 @@ type SelectOption = { value: string; label: string }
 
 type InlineEditableProps =
   | (BaseProps<string> & {
-      type?: 'text' | 'textarea'
-      inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode']
-      maxLength?: number
-    })
+    type?: 'text' | 'textarea'
+    inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode']
+    maxLength?: number
+  })
   | (BaseProps<number> & {
-      type: 'number'
-      min?: number
-      max?: number
-      step?: number
-    })
+    type: 'number'
+    min?: number
+    max?: number
+    step?: number
+  })
   | (BaseProps<boolean> & {
-      type: 'checkbox'
-    })
+    type: 'checkbox'
+  })
   | (BaseProps<string> & {
-      type: 'select'
-      options: SelectOption[]
-    })
+    type: 'select'
+    options: SelectOption[]
+  })
 
 export function InlineEditable(props: InlineEditableProps) {
   const {
@@ -88,6 +88,10 @@ export function InlineEditable(props: InlineEditableProps) {
     className,
   } = props as BaseProps<any>
 
+
+  // Use specific refs for each element type
+
+
   const [editing, setEditing] = useState(false)
   const [local, setLocal] = useState<any>(
     value ?? (props.type === 'number' ? 0 : props.type === 'checkbox' ? false : '')
@@ -96,7 +100,10 @@ export function InlineEditable(props: InlineEditableProps) {
   const [error, setError] = useState<string | null>(null)
 
   const containerRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const selectRef = useRef<HTMLSelectElement>(null)
+
 
   const display = useMemo(() => {
     return format ? format(value) : (value ?? '—')
@@ -122,7 +129,7 @@ export function InlineEditable(props: InlineEditableProps) {
   useEffect(() => {
     if (editing && inputRef.current) {
       inputRef.current.focus()
-      ;(inputRef.current as any).select?.()
+        ; (inputRef.current as any).select?.()
     }
   }, [editing])
 
@@ -201,7 +208,7 @@ export function InlineEditable(props: InlineEditableProps) {
           {props.type === 'textarea' && (
             <textarea
               id={id}
-              ref={el => { inputRef.current = el as HTMLTextAreaElement }}
+              ref={textareaRef}
               className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               rows={3}
               maxLength={(props as any).maxLength}
@@ -219,7 +226,6 @@ export function InlineEditable(props: InlineEditableProps) {
           {(props.type === undefined || props.type === 'text') && (
             <Input
               id={id}
-              ref={el => { inputRef.current = el as HTMLInputElement }}
               placeholder={placeholder}
               value={local ?? ''}
               maxLength={(props as any).maxLength}
@@ -235,7 +241,6 @@ export function InlineEditable(props: InlineEditableProps) {
           {props.type === 'number' && (
             <Input
               id={id}
-              ref={el => { inputRef.current = el as HTMLInputElement }}
               type="number"
               placeholder={placeholder}
               value={local ?? 0}
@@ -253,7 +258,7 @@ export function InlineEditable(props: InlineEditableProps) {
           {props.type === 'select' && (
             <select
               id={id}
-              ref={el => { inputRef.current = el as HTMLSelectElement }}
+              ref={selectRef}
               className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
               value={local ?? ''}
               onChange={(e) => setLocal(e.target.value)}
@@ -272,7 +277,7 @@ export function InlineEditable(props: InlineEditableProps) {
             <div className="flex items-center gap-2">
               <input
                 id={id}
-                ref={el => { inputRef.current = el as HTMLInputElement }}
+                ref={inputRef}
                 type="checkbox"
                 className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                 checked={!!local}

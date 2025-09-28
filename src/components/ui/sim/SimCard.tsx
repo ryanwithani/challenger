@@ -8,6 +8,7 @@ import clsx from 'clsx'
 import { Database } from '@/src/types/database.types'
 import { PackIcon } from '@/src/components/sim/PackIcon'
 import { TraitIcon } from '@/src/components/sim/TraitIcon'
+import { SafeText } from '../SafeText'
 
 // Types
 type Sim = Database['public']['Tables']['sims']['Row']
@@ -160,7 +161,7 @@ export const SimCard = memo(function SimCard({
         <div className="flex items-start justify-between gap-2">
           <div>
             <Link href={`/sims/${sim.id}`} className="block text-base font-semibold text-gray-900 hover:underline">
-              {sim.name}
+              <SafeText>{sim.name}</SafeText>
             </Link>
             <div className="mt-0.5 text-xs text-gray-600">
               {titleCaseAge(sim.age_stage)}{sim.career ? ` • ${sim.career}` : ''}{sim.aspiration ? ` • ${sim.aspiration}` : ''}

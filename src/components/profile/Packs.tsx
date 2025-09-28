@@ -4,8 +4,6 @@
 import { Fragment } from 'react';
 
 export type PacksValue = {
-  // Always enabled; we render it locked-on
-  base_game: boolean;
 
   // Expansion examples — add/remove keys to match your schema
   get_to_work: boolean;
@@ -49,7 +47,6 @@ export type PackDef = {
 };
 
 export const PACKS: PackDef[] = [
-  { key: 'base_game', name: 'The Sims 4 (Base Game)', category: 'Kits/Other', alwaysOn: true },
   { key: 'get_to_work', name: 'Get to Work', category: 'Expansion Pack' },
   { key: 'get_together', name: 'Get Together', category: 'Expansion Pack' },
   { key: 'city_living', name: 'City Living', category: 'Expansion Pack' },
@@ -78,9 +75,9 @@ export const PACKS: PackDef[] = [
   { key: 'jungle_adventure', name: 'Jungle Adventure', category: 'Game Pack' },
   { key: 'realm_of_magic', name: 'Realm of Magic', category: 'Game Pack' },
   { key: 'journey_to_batuu', name: 'Journey to Batuu', category: 'Game Pack' },
-  {key: 'dream_home_decorator', name: 'Dream Home Decorator', category: 'Game Pack' },
-  {key: 'my_wedding_stories', name: 'My Wedding Stories', category: 'Game Pack' },
-  {key: 'werewolves', name: 'Werewolves', category: 'Game Pack' },
+  { key: 'dream_home_decorator', name: 'Dream Home Decorator', category: 'Game Pack' },
+  { key: 'my_wedding_stories', name: 'My Wedding Stories', category: 'Game Pack' },
+  { key: 'werewolves', name: 'Werewolves', category: 'Game Pack' },
 ];
 
 type Props = {
@@ -104,12 +101,7 @@ export function Packs({
     if (readOnly) return;
     if (!onChange) return;
 
-    // base_game is always on
-    if (key === 'base_game') return;
-
     const next: PacksValue = { ...value, [key]: !value[key] };
-    // Ensure base game never becomes false
-    next.base_game = true;
     onChange(next);
   };
 

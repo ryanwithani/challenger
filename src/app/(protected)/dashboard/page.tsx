@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useChallengeStore } from '@/src/lib/store/challengeStore'
 import { useSimStore } from '@/src/lib/store/simStore'
-import { ChallengeTile } from '@/src/components/ui/ChallengeTile'
-import { SimCard } from '@/src/components/ui/SimCard'
+import { ChallengeTile } from '@/src/components/ui/challenge/ChallengeTile'
+import { SimCard } from '@/src/components/ui/sim/SimCard'
 import { Button } from '@/src/components/ui/Button'
 
 export default function DashboardPage() {
