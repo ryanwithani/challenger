@@ -405,12 +405,12 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
       if (goal.goal_type === 'milestone') {
         // Milestone goals: completed = full points
         const isCompleted = progress.some(p => p.goal_id === goal.id)
-        return isCompleted ? total + goal.point_value : total
+        return isCompleted ? total + (goal.point_value || 0) : total
       }
       else if (goal.goal_type === 'counter') {
         // Counter goals: current_value * point_value, capped at max_points
         const currentValue = goal.current_value || 0
-        const points = currentValue * goal.point_value
+        const points = currentValue * (goal.point_value || 0)
         const maxPoints = goal.max_points || Infinity
         return total + Math.min(points, maxPoints)
       }
@@ -432,7 +432,7 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
 
       // Fallback for legacy goals without types
       const isCompleted = progress.some(p => p.goal_id === goal.id)
-      return isCompleted ? total + goal.point_value : total
+      return isCompleted ? total + (goal.point_value || 0) : total
     }, 0)
   },
 
@@ -443,11 +443,11 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
     return categoryGoals.reduce((total, goal) => {
       if (goal.goal_type === 'milestone') {
         const isCompleted = progress.some(p => p.goal_id === goal.id)
-        return isCompleted ? total + goal.point_value : total
+        return isCompleted ? total + (goal.point_value || 0) : total
       }
       else if (goal.goal_type === 'counter') {
         const currentValue = goal.current_value || 0
-        const points = currentValue * goal.point_value
+        const points = currentValue * (goal.point_value || 0)
         const maxPoints = goal.max_points || Infinity
         return total + Math.min(points, maxPoints)
       }
@@ -467,7 +467,7 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
       }
 
       const isCompleted = progress.some(p => p.goal_id === goal.id)
-      return isCompleted ? total + goal.point_value : total
+      return isCompleted ? total + (goal.point_value || 0) : total
     }, 0)
   },
 
@@ -511,7 +511,7 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
 
     if (completion?.completion_details) {
       try {
-        return JSON.parse(completion.completion_details)
+        return JSON.parse(completion.completion_details as string)
       } catch {
         return null
       }
@@ -614,7 +614,7 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
           goal_id: goalId,
           goal_title: goal.title,
           method,
-          points_earned: goal.point_value,
+          points_earned: goal.point_value || 0,
           notes
         })
       }

@@ -71,10 +71,11 @@ function LegacyConfigurationStep({
                             {STARTING_OPTIONS.map((option) => (
                                 <label
                                     key={option.value}
-                                    className={`p-4 border-2 rounded-xl cursor-pointer transition-all ${watchedValues.start_type === option.value
+                                    className={`p-4 border-2 rounded-xl cursor-pointer transition-all ${
+                                        watchedValues.start_type === option.value
                                             ? 'border-brand-500 bg-brand-500/5'
                                             : 'border-gray-200 hover:border-gray-300'
-                                        }`}
+                                    }`}
                                 >
                                     <input
                                         type="radio"
@@ -84,10 +85,11 @@ function LegacyConfigurationStep({
                                     />
                                     <div className="text-center">
                                         <div className="font-semibold text-gray-900 mb-1">{option.label}</div>
-                                        <div className={`inline-block px-2 py-1 rounded-full text-xs font-medium mb-2 ${option.difficulty === 'Easy' ? 'bg-green-100 text-green-800' :
-                                                option.difficulty === 'Hard' ? 'bg-yellow-100 text-yellow-800' :
-                                                    'bg-red-100 text-red-800'
-                                            }`}>
+                                        <div className={`inline-block px-2 py-1 rounded-full text-xs font-medium mb-2 ${
+                                            option.difficulty === 'Easy' ? 'bg-green-100 text-green-800' :
+                                            option.difficulty === 'Hard' ? 'bg-yellow-100 text-yellow-800' :
+                                            'bg-red-100 text-red-800'
+                                        }`}>
                                             {option.difficulty}
                                         </div>
                                         <div className="text-sm text-gray-600 mb-2">{option.description}</div>
@@ -119,8 +121,9 @@ function LegacyConfigurationStep({
                             <CollapsibleContent>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
                                     {LEGACY_RULES.genderLaw.map((law) => (
-                                        <label key={law.value} className={`p-3 border rounded-xl cursor-pointer transition-all ${watchedValues.gender_law === law.value ? 'border-brand-500 bg-brand-500/5' : 'border-gray-200 hover:border-gray-300'
-                                            }`}>
+                                        <label key={law.value} className={`p-3 border rounded-xl cursor-pointer transition-all ${
+                                            watchedValues.gender_law === law.value ? 'border-brand-500 bg-brand-500/5' : 'border-gray-200 hover:border-gray-300'
+                                        }`}>
                                             <input
                                                 type="radio"
                                                 {...register('gender_law')}
@@ -143,8 +146,9 @@ function LegacyConfigurationStep({
                             <CollapsibleContent>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
                                     {LEGACY_RULES.bloodlineLaw.map((law) => (
-                                        <label key={law.value} className={`p-3 border rounded-xl cursor-pointer transition-all ${watchedValues.bloodline_law === law.value ? 'border-brand-500 bg-brand-500/5' : 'border-gray-200 hover:border-gray-300'
-                                            }`}>
+                                        <label key={law.value} className={`p-3 border rounded-xl cursor-pointer transition-all ${
+                                            watchedValues.bloodline_law === law.value ? 'border-brand-500 bg-brand-500/5' : 'border-gray-200 hover:border-gray-300'
+                                        }`}>
                                             <input
                                                 type="radio"
                                                 {...register('bloodline_law')}
@@ -167,8 +171,9 @@ function LegacyConfigurationStep({
                             <CollapsibleContent>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
                                     {LEGACY_RULES.heirSelection.map((method) => (
-                                        <label key={method.value} className={`p-3 border rounded-xl cursor-pointer transition-all ${watchedValues.heir_selection === method.value ? 'border-brand-500 bg-brand-500/5' : 'border-gray-200 hover:border-gray-300'
-                                            }`}>
+                                        <label key={method.value} className={`p-3 border rounded-xl cursor-pointer transition-all ${
+                                            watchedValues.heir_selection === method.value ? 'border-brand-500 bg-brand-500/5' : 'border-gray-200 hover:border-gray-300'
+                                        }`}>
                                             <input
                                                 type="radio"
                                                 {...register('heir_selection')}
@@ -191,8 +196,9 @@ function LegacyConfigurationStep({
                             <CollapsibleContent>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
                                     {LEGACY_RULES.speciesRule.map((rule) => (
-                                        <label key={rule.value} className={`p-3 border rounded-xl cursor-pointer transition-all ${watchedValues.species_rule === rule.value ? 'border-brand-500 bg-brand-500/5' : 'border-gray-200 hover:border-gray-300'
-                                            }`}>
+                                        <label key={rule.value} className={`p-3 border rounded-xl cursor-pointer transition-all ${
+                                            watchedValues.species_rule === rule.value ? 'border-brand-500 bg-brand-500/5' : 'border-gray-200 hover:border-gray-300'
+                                        }`}>
                                             <input
                                                 type="radio"
                                                 {...register('species_rule')}
@@ -215,8 +221,9 @@ function LegacyConfigurationStep({
                             <CollapsibleContent>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
                                     {LEGACY_RULES.lifespan.map((lifespan) => (
-                                        <label key={lifespan.value} className={`p-3 border rounded-xl cursor-pointer transition-all ${watchedValues.lifespan === lifespan.value ? 'border-brand-500 bg-brand-500/5' : 'border-gray-200 hover:border-gray-300'
-                                            }`}>
+                                        <label key={lifespan.value} className={`p-3 border rounded-xl cursor-pointer transition-all ${
+                                            watchedValues.lifespan === lifespan.value ? 'border-brand-500 bg-brand-500/5' : 'border-gray-200 hover:border-gray-300'
+                                        }`}>
                                             <input
                                                 type="radio"
                                                 {...register('lifespan')}

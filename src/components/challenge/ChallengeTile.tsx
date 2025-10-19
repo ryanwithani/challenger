@@ -1,5 +1,5 @@
 import { Database } from '@/src/types/database.types'
-import { SafeText } from '../SafeText'
+import { SafeText } from '../ui/SafeText'
 
 type Challenge = Database['public']['Tables']['challenges']['Row']
 

@@ -1,4 +1,4 @@
-import { TraitPickerPanel } from '@/src/components/ui/sim/TraitPickerPanel'
+import { TraitPickerPanel } from '@/src/components/sim/TraitPickerPanel'
 import { isInfant, isToddler } from '@/src/lib/sim/age'
 import { useSimCAS } from '../useSimCAS'
 

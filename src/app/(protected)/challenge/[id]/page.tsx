@@ -1,40 +1,59 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import { useChallengeStore } from '@/src/lib/store/challengeStore'
-import { SimCard } from '@/src/components/ui/sim/SimCard'
-import { GoalCard } from '@/src/components/ui/GoalCard'
-import { PointTracker } from '@/src/components/ui/PointTracker'
+import { SimCard } from '@/src/components/sim/SimCard'
+import { GoalCard } from '@/src/components/challenge/GoalCard'
+import { PointTracker } from '@/src/components/challenge/PointTracker'
 import { Button } from '@/src/components/ui/Button'
 import { SimForm } from '@/src/components/forms/SimForm'
 import { GoalForm } from '@/src/components/forms/GoalForm'
-import { Modal } from '@/src/components/ui/Modal'
+import { Modal } from '@/src/components/sim/SimModal'
 import { LegacyTracker } from '@/src/components/challenge/LegacyTracker'
+import { Traits } from '@/src/components/sim/TraitsCatalog'
 
 export default function ChallengePage() {
   const params = useParams()
   const challengeId = params.id as string
 
-  const {
-    currentChallenge,
-    sims,
-    goals,
-    progress,
-    fetchChallenge,
-    addSim,
-    addGoal,
-    updateSim,
-    toggleGoalProgress,
-    updateGoalValue,
-    completeGoalWithDetails,
-    calculatePoints,
-    calculateCategoryPoints,
-    loading,
-  } = useChallengeStore()
+  // Subscribe to store values separately to minimize re-renders
+  const currentChallenge = useChallengeStore(state => state.currentChallenge)
+  const sims = useChallengeStore(state => state.sims)
+  const goals = useChallengeStore(state => state.goals)
+  const progress = useChallengeStore(state => state.progress)
+  const loading = useChallengeStore(state => state.loading)
+  
+  // Get functions separately and memoize them to prevent re-renders
+  const fetchChallenge = useCallback(useChallengeStore.getState().fetchChallenge, [])
+  const addSim = useCallback(useChallengeStore.getState().addSim, [])
+  const addGoal = useCallback(useChallengeStore.getState().addGoal, [])
+  const updateSim = useCallback(useChallengeStore.getState().updateSim, [])
+  const toggleGoalProgress = useCallback(useChallengeStore.getState().toggleGoalProgress, [])
+  const updateGoalValue = useCallback(useChallengeStore.getState().updateGoalValue, [])
+  const completeGoalWithDetails = useCallback(useChallengeStore.getState().completeGoalWithDetails, [])
+  const calculatePoints = useCallback(useChallengeStore.getState().calculatePoints, [])
+  const calculateCategoryPoints = useCallback(useChallengeStore.getState().calculateCategoryPoints, [])
+  const handleAddSim = useCallback(() => setShowSimForm(true), [])
+  const handleToggleGoal = useCallback((goalId: string) => toggleGoalProgress(goalId), [toggleGoalProgress])
 
   const [showSimForm, setShowSimForm] = useState(false)
   const [showGoalForm, setShowGoalForm] = useState(false)
+
+
+
+  // Removed debugging - multiple renders in dev mode are normal
+
+  // Functions are now stable, no need to memoize them
+
+  // Memoize arrays to prevent unnecessary re-renders when content is the same
+  const simsIds = useMemo(() => sims.map(s => s.id).join(','), [sims])
+  const goalsIds = useMemo(() => goals.map(g => g.id).join(','), [goals])
+  const progressIds = useMemo(() => progress.map(p => p.id).join(','), [progress])
+  
+  const memoizedSims = useMemo(() => sims, [simsIds])
+  const memoizedGoals = useMemo(() => goals, [goalsIds])
+  const memoizedProgress = useMemo(() => progress, [progressIds])
 
   // FIXED: Removed fetchChallenge from dependencies to prevent infinite loop
   useEffect(() => {
@@ -42,25 +61,18 @@ export default function ChallengePage() {
   }, [challengeId])
 
   // Helper function to update sim as heir
-  const updateSimAsHeir = async (simId: string) => {
-    try {
-      // First, remove heir status from all other sims in this challenge
-      const updatePromises = sims.map(sim => {
-        if (sim.id === simId) {
-          // Set this sim as heir
-          return updateSim(sim.id, { is_heir: true })
-        } else if (sim.is_heir) {
-          // Remove heir status from other sims
-          return updateSim(sim.id, { is_heir: false })
-        }
+  const updateSimAsHeir = useCallback(async (simId: string) => {
+    // Read latest sims inside the callback so we don't need `sims` in deps
+    const { sims: currentSims, updateSim } = useChallengeStore.getState()
+    await Promise.all(
+      currentSims.map(sim => {
+        if (sim.id === simId) return updateSim(sim.id, { is_heir: true })
+        if (sim.is_heir)   return updateSim(sim.id, { is_heir: false })
         return Promise.resolve()
       })
-
-      await Promise.all(updatePromises)
-    } catch (error) {
-      console.error('Error updating sim as heir:', error)
-    }
-  }
+    )
+  }, [])
+  
 
   if (loading || !currentChallenge) {
     return (
@@ -79,11 +91,11 @@ export default function ChallengePage() {
       <div>
         <LegacyTracker
           challenge={currentChallenge}
-          sims={sims}
-          goals={goals}
-          progress={progress}
-          onAddSim={() => setShowSimForm(true)}
-          onToggleGoal={toggleGoalProgress}
+          sims={memoizedSims}
+          goals={memoizedGoals}
+          progress={memoizedProgress}
+          onAddSim={handleAddSim}
+          onToggleGoal={handleToggleGoal}
           onUpdateGoalValue={updateGoalValue}
           onCompleteGoalWithDetails={completeGoalWithDetails}
           calculatePoints={calculatePoints}
@@ -93,21 +105,24 @@ export default function ChallengePage() {
 
         {/* Modals */}
         <Modal
-          isOpen={showSimForm}
+          open={showSimForm}
           onClose={() => setShowSimForm(false)}
           title="Add New Sim"
         >
           <SimForm
-            challengeId={challengeId}
             onSubmit={async (data) => {
-              await addSim(data)
+              await addSim({ 
+                ...data, 
+                challenge_id: challengeId,
+                career: data.career ? String(data.career) : null
+              })
               setShowSimForm(false)
             }}
           />
         </Modal>
 
         <Modal
-          isOpen={showGoalForm}
+          open={showGoalForm}
           onClose={() => setShowGoalForm(false)}
           title="Add New Goal"
         >
@@ -139,7 +154,7 @@ export default function ChallengePage() {
           <section>
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-2xl font-semibold">Sims</h2>
-              <Button onClick={() => setShowSimForm(true)} size="sm">
+              <Button onClick={handleAddSim} size="sm">
                 Add Sim
               </Button>
             </div>
@@ -149,7 +164,7 @@ export default function ChallengePage() {
             ) : (
               <div className="grid md:grid-cols-2 gap-4">
                 {sims.map((sim) => (
-                  <SimCard key={sim.id} sim={sim} />
+                  <SimCard key={sim.id} sim={sim} traitCatalog={Traits} />
                 ))}
               </div>
             )}
@@ -159,7 +174,7 @@ export default function ChallengePage() {
           <section>
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-2xl font-semibold">Goals</h2>
-              <Button onClick={() => setShowGoalForm(true)} size="sm">
+              <Button onClick={handleAddGoal} size="sm">
                 Add Goal
               </Button>
             </div>
@@ -173,7 +188,7 @@ export default function ChallengePage() {
                     key={goal.id}
                     goal={goal}
                     isCompleted={progress.some(p => p.goal_id === goal.id)}
-                    onToggle={() => toggleGoalProgress(goal.id)}
+                    onToggle={handleToggleGoal}
                   />
                 ))}
               </div>
@@ -185,28 +200,31 @@ export default function ChallengePage() {
         <div className="lg:col-span-1">
           <PointTracker
             totalPoints={calculatePoints()}
-            possiblePoints={goals.reduce((sum, g) => sum + g.point_value, 0)}
+            possiblePoints={goals.reduce((sum, g) => sum + (g.point_value || 0), 0)}
           />
         </div>
       </div>
 
       {/* Modals */}
       <Modal
-        isOpen={showSimForm}
+        open={showSimForm}
         onClose={() => setShowSimForm(false)}
         title="Add New Sim"
       >
         <SimForm
-          challengeId={challengeId}
           onSubmit={async (data) => {
-            await addSim(data)
+            await addSim({ 
+              ...data, 
+              challenge_id: challengeId,
+              career: data.career ? String(data.career) : null
+            })
             setShowSimForm(false)
           }}
         />
       </Modal>
 
       <Modal
-        isOpen={showGoalForm}
+        open={showGoalForm}
         onClose={() => setShowGoalForm(false)}
         title="Add New Goal"
       >

@@ -362,67 +362,78 @@ export const LEGACY_CATEGORIES = {
         name: 'Family',
         color: 'bg-red-500',
         maxPoints: 10,
-        description: 'Generations, children, and family milestones'
+        description: 'Generations, children, and family milestones',
+        icon: '/traits/Family Oriented.png'
     },
     creative: {
         name: 'Creative',
         color: 'bg-purple-500',
         maxPoints: 10,
-        description: 'Memorialize family, complete creative aspirations'
+        description: 'Memorialize family, complete creative aspirations',
+        icon: '/traits/Creative.png'
     },
     fortune: {
         name: 'Fortune',
         color: 'bg-yellow-500',
         maxPoints: 10,
-        description: 'Net worth milestones and financial success'
+        description: 'Net worth milestones and financial success',
+        icon: '/traits/Materialistic.png'
     },
     love: {
         name: 'Love',
         color: 'bg-pink-500',
         maxPoints: 10,
-        description: 'Unique spouse traits and relationships'
+        description: 'Unique spouse traits and relationships',
+        icon: '/traits/Romantic.png'
     },
     knowledge: {
         name: 'Knowledge',
         color: 'bg-blue-500',
         maxPoints: 10,
-        description: 'Skills mastered across all family members'
+        description: 'Skills mastered across all family members',
+        icon: '/traits/Curious.png'
     },
     athletic: {
         name: 'Athletic',
         color: 'bg-green-500',
         maxPoints: 10,
-        description: 'Aspirations completed by family members'
+        description: 'Aspirations completed by family members',
+        icon: '/traits/Active.png'
     },
     nature: {
         name: 'Nature',
         color: 'bg-emerald-500',
         maxPoints: 10,
-        description: 'Collections, careers, and natural achievements'
+        description: 'Collections, careers, and natural achievements',
+        icon: '/traits/Nurturing.png'
     },
     food: {
         name: 'Food',
         color: 'bg-orange-500',
         maxPoints: 10,
-        description: 'Cooking achievements and culinary success'
+        description: 'Cooking achievements and culinary success',
+        icon: '/traits/Foodie.png'
     },
     popularity: {
         name: 'Popularity',
         color: 'bg-indigo-500',
         maxPoints: 10,
-        description: 'Party medals and social achievements'
+        description: 'Party medals and social achievements',
+        icon: '/traits/Outgoing.png'
     },
     deviance: {
         name: 'Deviance',
         color: 'bg-gray-500',
         maxPoints: 10,
-        description: 'Unused Potions of Youth stored'
+        description: 'Unused Potions of Youth stored',
+        icon: '/PotionPurple2.png'
     },
     penalty: {
         name: 'Penalties',
         color: 'bg-red-600',
         maxPoints: 0,
-        description: 'Negative points for setbacks'
+        description: 'Negative points for setbacks',
+        icon: '/Dislike.png'
     }
 }
 

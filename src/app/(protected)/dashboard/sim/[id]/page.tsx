@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Button } from '@/src/components/ui/Button'
-import { Modal } from '@/src/components/ui/Modal'
+import { Modal } from '@/src/components/sim/SimModal'
 import { SimForm } from '@/src/components/forms/SimForm'
 import { SimProfile } from '@/src/components/sim/SimProfile'
 import { useChallengeStore } from '@/src/lib/store/challengeStore'

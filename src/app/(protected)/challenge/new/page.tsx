@@ -19,7 +19,7 @@ export default function NewChallengePage() {
     console.log('Submitting challenge data:', data)
     try {
       await createChallenge(data)
-      router.push('/dashboard')
+      router.push('/dashboard/challenges')
     } catch (error: any) {
       console.error('Failed to create challenge:', error)
       setError(error.message || 'Failed to create challenge')
@@ -33,7 +33,7 @@ export default function NewChallengePage() {
       <h1 className="text-3xl font-bold text-gray-900 mb-8">Create New Challenge</h1>
       <div className="card">
         <ErrorMessage error={error} className="mb-4" />
-        <ChallengeWizard onSubmit={handleSubmit} onCancel={() => router.push('/dashboard')} loading={loading} />
+        <ChallengeWizard onSubmit={handleSubmit} onCancel={() => router.push('/dashboard/challenges')} loading={loading} />
       </div>
     </div>
   )

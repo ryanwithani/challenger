@@ -5,7 +5,7 @@ import { createSupabaseBrowserClient } from '@/src/lib/supabase/client'
 import type { Database } from '@/src/types/database.types'
 import { useSimCAS } from '../useSimCAS'
 
-import { AvatarUploader } from '@/src/components/ui/AvatarUpload'
+import { AvatarUploader } from '@/src/components/profile/AvatarUpload'
 
 type ChallengeRow = Database['public']['Tables']['challenges']['Row']
 const AGE_OPTS = [

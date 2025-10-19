@@ -1,15 +1,13 @@
-// src/components/profile/ExpansionPacks.tsx
+// src/components/profile/Packs.tsx
 'use client';
 
 import { Fragment } from 'react';
 
 export type PacksValue = {
-
-  // Expansion examples — add/remove keys to match your schema
   get_to_work: boolean;
   get_together: boolean;
   city_living: boolean;
-  cats_dogs: boolean;
+  cats_and_dogs: boolean;
   seasons: boolean;
   get_famous: boolean;
   island_living: boolean;
@@ -22,7 +20,7 @@ export type PacksValue = {
   horse_ranch: boolean;
   for_rent: boolean;
   lovestruck?: boolean;
-  life_death?: boolean;
+  life_and_death?: boolean;
   enchanted_by_nature?: boolean;
   businesses_and_hobbies?: boolean;
   outdoor_retreat?: boolean;
@@ -43,14 +41,14 @@ export type PackDef = {
   key: keyof PacksValue;
   name: string;
   category: 'Expansion Pack' | 'Game Pack' | 'Stuff Pack' | 'Kits/Other';
-  alwaysOn?: boolean; // for base game
+  alwaysOn?: boolean;
 };
 
 export const PACKS: PackDef[] = [
   { key: 'get_to_work', name: 'Get to Work', category: 'Expansion Pack' },
   { key: 'get_together', name: 'Get Together', category: 'Expansion Pack' },
   { key: 'city_living', name: 'City Living', category: 'Expansion Pack' },
-  { key: 'cats_dogs', name: 'Cats and Dogs', category: 'Expansion Pack' },
+  { key: 'cats_and_dogs', name: 'Cats and Dogs', category: 'Expansion Pack' },
   { key: 'seasons', name: 'Seasons', category: 'Expansion Pack' },
   { key: 'get_famous', name: 'Get Famous', category: 'Expansion Pack' },
   { key: 'island_living', name: 'Island Living', category: 'Expansion Pack' },
@@ -63,7 +61,7 @@ export const PACKS: PackDef[] = [
   { key: 'horse_ranch', name: 'Horse Ranch', category: 'Expansion Pack' },
   { key: 'for_rent', name: 'For Rent', category: 'Expansion Pack' },
   { key: 'lovestruck', name: 'Lovestruck', category: 'Expansion Pack' },
-  { key: 'life_death', name: 'Life & Death', category: 'Expansion Pack' },
+  { key: 'life_and_death', name: 'Life and Death', category: 'Expansion Pack' },
   { key: 'enchanted_by_nature', name: 'Enchanted by Nature', category: 'Expansion Pack' },
   { key: 'businesses_and_hobbies', name: 'Businesses and Hobbies', category: 'Expansion Pack' },
   { key: 'outdoor_retreat', name: 'Outdoor Retreat', category: 'Game Pack' },
@@ -98,14 +96,11 @@ export function Packs({
   hint,
 }: Props) {
   const toggle = (key: keyof PacksValue) => {
-    if (readOnly) return;
-    if (!onChange) return;
-
+    if (readOnly || !onChange) return;
     const next: PacksValue = { ...value, [key]: !value[key] };
     onChange(next);
   };
 
-  // Group packs by category for nicer reading
   const byCategory = PACKS.reduce<Record<string, PackDef[]>>((acc, p) => {
     (acc[p.category] ||= []).push(p);
     return acc;
@@ -147,7 +142,6 @@ export function Packs({
                       'focus:outline-none focus:ring-2 focus:ring-sims-blue',
                     ].join(' ')}
                   >
-                    {/* Check mark */}
                     {checked && (
                       <span
                         className="absolute right-1.5 top-1.5 grid h-5 w-5 place-items-center rounded-full bg-sims-purple text-white text-[11px]"

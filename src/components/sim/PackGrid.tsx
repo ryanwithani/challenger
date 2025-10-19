@@ -1,4 +1,4 @@
-import { SelectableCard } from "./SelectableCard";
+import { SelectableCard } from "../challenge/SelectableCard";
 
 // PATCH: responsive auto-fit grid + pass compact cards
 export function PacksGrid({ packs, value, onChange }: {

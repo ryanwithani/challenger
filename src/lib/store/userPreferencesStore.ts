@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { createSupabaseBrowserClient } from '@/src/lib/supabase/client'
 
-interface ExpansionPacks {
+export interface ExpansionPacks {
   base_game: boolean
   get_to_work: boolean
   get_together: boolean
@@ -18,8 +18,22 @@ interface ExpansionPacks {
   growing_together: boolean
   horse_ranch: boolean
   for_rent: boolean
-  lovestruck: boolean
-  life_death: boolean
+  lovestruck: boolean  // These are already optional
+  life_and_death: boolean
+  enchanted_by_nature: boolean
+  businesses_and_hobbies: boolean
+  outdoor_retreat: boolean
+  spa_day: boolean
+  strangerville: boolean
+  dine_out: boolean
+  vampires: boolean
+  parenthood: boolean
+  jungle_adventure: boolean
+  realm_of_magic: boolean
+  journey_to_batuu: boolean
+  dream_home_decorator: boolean
+  my_wedding_stories: boolean
+  werewolves: boolean
 }
 
 interface UserPreferences {
@@ -37,27 +51,6 @@ interface UserPreferencesState {
   fetchPreferences: () => Promise<void>
   updateExpansionPacks: (expansionPacks: ExpansionPacks) => Promise<void>
   createInitialPreferences: (expansionPacks: ExpansionPacks) => Promise<void>
-}
-
-const defaultExpansionPacks: ExpansionPacks = {
-  base_game: true,
-  get_to_work: false,
-  get_together: false,
-  city_living: false,
-  cats_dogs: false,
-  seasons: false,
-  get_famous: false,
-  island_living: false,
-  discover_university: false,
-  eco_lifestyle: false,
-  snowy_escape: false,
-  cottage_living: false,
-  high_school_years: false,
-  growing_together: false,
-  horse_ranch: false,
-  for_rent: false,
-  lovestruck: false,
-  life_death: false,
 }
 
 export const useUserPreferencesStore = create<UserPreferencesState>((set, get) => ({
@@ -84,7 +77,40 @@ export const useUserPreferencesStore = create<UserPreferencesState>((set, get) =
       set({ preferences: data, loading: false })
     } else if (error?.code === 'PGRST116') {
       // No preferences found, create default ones
-      await get().createInitialPreferences(defaultExpansionPacks)
+      await get().createInitialPreferences({
+        base_game: true,
+        get_to_work: false,
+        get_together: false,
+        city_living: false,
+        cats_dogs: false,
+        seasons: false,
+        get_famous: false,
+        island_living: false,
+        discover_university: false,
+        eco_lifestyle: false,
+        snowy_escape: false,
+        cottage_living: false,
+        high_school_years: false,
+        growing_together: false,
+        horse_ranch: false,
+        for_rent: false,
+        lovestruck: false,
+        life_and_death: false,
+        enchanted_by_nature: false,
+        businesses_and_hobbies: false,
+        outdoor_retreat: false,
+        spa_day: false,
+        strangerville: false,
+        dine_out: false,
+        vampires: false,
+        parenthood: false,
+        jungle_adventure: false,
+        realm_of_magic: false,
+        journey_to_batuu: false,
+        dream_home_decorator: false,
+        my_wedding_stories: false,
+        werewolves: false
+      })
     } else {
       set({ loading: false })
     }

@@ -2,15 +2,28 @@ import { create } from 'zustand'
 import { createSupabaseBrowserClient } from '@/src/lib/supabase/client'
 import { User } from '@supabase/supabase-js'
 
+
+interface UserProfile {
+  id: string
+  email: string
+  username: string
+  display_name: string
+  avatar_url: string
+}
+
 interface AuthState {
   user: User | null
+  userProfile: UserProfile | null
   loading: boolean
+  isFetchingProfile: boolean
+  profileFetched: boolean
   initialized: boolean
   showPasswordUpdateModal: boolean // ADD THIS
   signIn: (email: string, password: string) => Promise<void>
   signUp: (email: string, password: string) => Promise<void>
   signOut: () => Promise<void>
   fetchUser: () => Promise<void>
+  fetchUserProfile: () => Promise<void>
   initialize: () => Promise<void>
   getAuthErrorMessage: (error: any) => string
   requestPasswordReset: (email: string) => Promise<void> // ADD THIS
@@ -20,20 +33,22 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
+  userProfile: null,
   loading: true,
   initialized: false,
+  isFetchingProfile: false,
+  profileFetched: false,
   showPasswordUpdateModal: false, // ADD THIS
 
   initialize: async () => {
     console.log('🔵 Initialize called')
     const supabase = createSupabaseBrowserClient()
-
+  
+    // Handle password reset code exchange
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search)
       const code = urlParams.get('code')
-      console.log('🔵 Code from URL:', code)
-
-
+  
       if (code) {
         console.log('🟢 Attempting code exchange...')
         const { data, error } = await supabase.auth.exchangeCodeForSession(code)
@@ -45,34 +60,106 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             loading: false,
             initialized: true
           })
-          console.log('🟢 State after set:', get().showPasswordUpdateModal)
+          // ✅ Profile will be fetched by listener below
           window.history.replaceState({}, document.title, '/')
-          return // Important: return early
+          // Don't return early - let listener be registered
         }
       }
     }
-
+  
     const { data: { session } } = await supabase.auth.getSession()
-
+  
     set({
       user: session?.user ?? null,
       loading: false,
       initialized: true
     })
-
-    // Listen for auth changes
-    supabase.auth.onAuthStateChange((event, session) => {
+  
+    // ✅ REMOVED: Manual profile fetch
+    // The listener below will handle it
+  
+    // ✅ Single source of truth for profile fetching
+    supabase.auth.onAuthStateChange(async (event, session) => {
       set({ user: session?.user ?? null })
-
-      // ADD THIS: Handle password recovery event
+  
+      if (session?.user) {
+        await get().fetchUserProfile() // ✅ Only place that triggers fetch
+      } else {
+        set({ 
+          userProfile: null,
+          profileFetched: false,  // ✅ Reset cache on logout
+          isFetchingProfile: false 
+        })
+      }
+  
       if (event === 'PASSWORD_RECOVERY') {
         set({ showPasswordUpdateModal: true })
       }
     })
-
-    // ADD THIS: Check if we're coming from a password reset link
-
+    
+    // ✅ NEW: If we have a session on init, manually trigger profile fetch once
+    // (because listener only fires on *changes*, not initial state)
+    if (session?.user) {
+      await get().fetchUserProfile()
+    }
   },
+
+  fetchUserProfile: async () => {
+    const state = get()
+    
+    // ✅ GUARD 1: Don't fetch if already fetching
+    if (state.isFetchingProfile) {
+      console.log('⚠️ Profile fetch already in progress, skipping')
+      return
+    }
+    
+    const supabase = createSupabaseBrowserClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    // ✅ GUARD 2: No user means clear profile and exit
+    if (!user) {
+      set({ 
+        userProfile: null, 
+        profileFetched: false,
+        isFetchingProfile: false 
+      })
+      return
+    }
+    
+    // ✅ GUARD 3: Already have profile for this user? Skip fetch.
+    if (state.profileFetched && state.userProfile?.id === user.id) {
+      console.log('✓ Profile already loaded for this user')
+      return
+    }
+    
+    // ✅ Mark as fetching to prevent concurrent calls
+    set({ isFetchingProfile: true })
+    
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('id, username, display_name, avatar_url, email')
+        .eq('id', user.id)
+        .single()
+  
+      if (error) throw error
+  
+      if (data) {
+        set({ 
+          userProfile: data,
+          profileFetched: true,  // ✅ Mark as successfully fetched
+          isFetchingProfile: false 
+        })
+      }
+    } catch (error) {
+      console.error('Failed to fetch profile:', error)
+      set({ 
+        isFetchingProfile: false,
+        profileFetched: false 
+      })
+    }
+  },
+
 
   signIn: async (email: string, password: string) => {
     // Remove client-side rate limiting code
@@ -99,18 +186,27 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     })
     if (error) throw error
     set({ user: data.user })
+
   },
 
   signOut: async () => {
     const supabase = createSupabaseBrowserClient()
     await supabase.auth.signOut()
-    set({ user: null })
+    set({ user: null, userProfile: null })
   },
 
   fetchUser: async () => {
     const supabase = createSupabaseBrowserClient()
     const { data: { user } } = await supabase.auth.getUser()
-    set({ user, loading: false })
+    set({ 
+      user: null,
+      userProfile: null, 
+      profileFetched: false,
+      isFetchingProfile: false })
+
+    if (user) {
+      await get().fetchUserProfile()
+    }
   },
 
   getAuthErrorMessage: (error: any): string => {

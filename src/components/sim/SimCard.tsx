@@ -8,7 +8,7 @@ import clsx from 'clsx'
 import { Database } from '@/src/types/database.types'
 import { PackIcon } from '@/src/components/sim/PackIcon'
 import { TraitIcon } from '@/src/components/sim/TraitIcon'
-import { SafeText } from '../SafeText'
+import { SafeText } from '../ui/SafeText'
 
 // Types
 type Sim = Database['public']['Tables']['sims']['Row']

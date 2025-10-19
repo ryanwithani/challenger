@@ -5,7 +5,7 @@ import { packIconPath } from '@/src/components/sim/packAssets'
 
 export function PackIcon({
   name,
-  size = 16,
+  size = 8,
   owned = true,
   className = '',
 }: {
@@ -18,9 +18,10 @@ export function PackIcon({
     <Image
       src={packIconPath(name)}
       alt={name}
-      width={size}
-      height={size}
+      width={size * 2}    // 2x for retina
+      height={size * 2}   // 2x for retina
       className={`${owned ? '' : 'opacity-50 grayscale'} ${className}`}
+      quality={100}       // Maximum quality
     />
   )
 }

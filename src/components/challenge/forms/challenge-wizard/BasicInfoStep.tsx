@@ -26,7 +26,7 @@ export function BasicInfoStep({ data, onNext, onCancel }: BasicInfoStepProps) {
         defaultValues: {
             name: data?.name || '',
             description: data?.description || '',
-            challenge_type: data?.challenge_type || 'custom',
+            challenge_type: data?.challenge_type || 'legacy',
         },
     })
 
@@ -45,34 +45,49 @@ export function BasicInfoStep({ data, onNext, onCancel }: BasicInfoStepProps) {
                 {/* Template Selection */}
                 <FormField label="Challenge Template" className="mb-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {CHALLENGE_TEMPLATES.map((template) => (
-                            <label
-                                key={template.value}
-                                className={`relative flex cursor-pointer rounded-2xl border-2 p-6 transition-all hover:shadow-md ${templateType === template.value
-                                    ? 'border-brand-500 bg-brand-500/5 shadow-lg'
-                                    : 'border-gray-200 hover:border-gray-300'
+                        {CHALLENGE_TEMPLATES.map((template) => {
+                            const isDisabled = template.value !== 'legacy'
+                            const isSelected = templateType === template.value
+                            
+                            return (
+                                <label
+                                    key={template.value}
+                                    className={`relative flex rounded-2xl border-2 p-6 transition-all ${
+                                        isDisabled 
+                                            ? 'cursor-not-allowed opacity-50 bg-gray-50 border-gray-200' 
+                                            : isSelected
+                                                ? 'cursor-pointer border-brand-500 bg-brand-500/5 shadow-lg'
+                                                : 'cursor-pointer border-gray-200 hover:border-gray-300 hover:shadow-md'
                                     }`}
-                            >
-                                <input
-                                    type="radio"
-                                    {...register('challenge_type')}
-                                    value={template.value}
-                                    className="sr-only"
-                                />
-                                <div className="flex items-start space-x-4 w-full">
-                                    <div className="text-3xl">{template.icon}</div>
-                                    <div className="flex-1">
-                                        <div className="font-semibold text-gray-900 mb-1">{template.label}</div>
-                                        <div className="text-sm text-gray-600">{template.description}</div>
+                                >
+                                    <input
+                                        type="radio"
+                                        {...register('challenge_type')}
+                                        value={template.value}
+                                        disabled={isDisabled}
+                                        className="sr-only"
+                                    />
+                                    <div className="flex items-start space-x-4 w-full">
+                                        <div className="flex-1 min-w-0">
+                                            <div className={`font-semibold mb-1 ${isDisabled ? 'text-gray-500' : 'text-gray-900'}`}>
+                                                <div className="flex items-start gap-2">
+                                                    <span className="flex-1 leading-tight">{template.label}</span>
+                                                    {isDisabled && <span className="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-full whitespace-nowrap flex-shrink-0 mt-0.5">Coming Soon</span>}
+                                                </div>
+                                            </div>
+                                            <div className={`text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-600'}`}>
+                                                {template.description}
+                                            </div>
+                                        </div>
+                                        {isSelected && !isDisabled && (
+                                            <svg className="h-6 w-6 text-brand-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                            </svg>
+                                        )}
                                     </div>
-                                    {templateType === template.value && (
-                                        <svg className="h-6 w-6 text-brand-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                        </svg>
-                                    )}
-                                </div>
-                            </label>
-                        ))}
+                                </label>
+                            )
+                        })}
                     </div>
                 </FormField>
 

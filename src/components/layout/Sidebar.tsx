@@ -14,13 +14,13 @@ const navigation = [
   },
   {
     name: 'Challenges',
-    href: '/challenges',
+    href: '/dashboard/challenges',
     icon: TbTarget,
     description: 'Manage your challenges'
   },
   {
     name: 'Sims',
-    href: '/sims',
+    href: '/dashboard/sims',
     icon: TbUsers,
     description: 'View all your sims'
   },
@@ -35,15 +35,13 @@ const navigation = [
 const quickActions = [
   {
     name: 'New Challenge',
-    href: '/challenge/new',
+    href: '/dashboard/new/challenge',
     icon: TbTarget,
-    color: 'bg-sims-green hover:bg-sims-green/90 dark:bg-sims-green-dark dark:hover:bg-sims-green-dark/90'
   },
   {
     name: 'Add Sim',
-    href: '/sim/new',
+    href: '/dashboard/new/sim',
     icon: TbPlus,
-    color: 'bg-sims-blue hover:bg-sims-blue/90 dark:bg-sims-blue-dark dark:hover:bg-sims-blue-dark/90'
   }
 ]
 
@@ -71,10 +69,10 @@ export function Sidebar() {
                   key={item.name}
                   href={item.href}
                   className={clsx(
-                    'group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors',
+                    'group flex items-center px-3 py-2 text-sm font-medium rounded-xl transition-all duration-300',
                     {
-                      'bg-sims-green text-white dark:bg-sims-green-dark': isActive,
-                      'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-gray-100': !isActive,
+                      'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg': isActive,
+                      'text-gray-600 hover:bg-gray-50 hover:text-gray-900': !isActive,
                     }
                   )}
                 >
@@ -82,7 +80,7 @@ export function Sidebar() {
                     className={clsx(
                       'mr-3 h-5 w-5 flex-shrink-0',
                       {
-                        'text-white': isActive,
+                        'text-white': isActive,  // Keep white for active
                         'text-gray-400 group-hover:text-gray-500 dark:text-gray-400 dark:group-hover:text-gray-300': !isActive,
                       }
                     )}
@@ -101,28 +99,6 @@ export function Sidebar() {
             })}
           </div>
         </nav>
-
-        {/* Quick Actions Section */}
-        <div className="px-2 mt-8">
-          <h3 className="px-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-            Quick Actions
-          </h3>
-          <div className="mt-3 space-y-2">
-            {quickActions.map((action) => (
-              <Link
-                key={action.name}
-                href={action.href}
-                className={clsx(
-                  'group flex items-center px-3 py-2 text-sm font-medium rounded-lg text-white transition-colors',
-                  action.color
-                )}
-              >
-                <action.icon className="mr-3 h-4 w-4 flex-shrink-0" aria-hidden="true" />
-                {action.name}
-              </Link>
-            ))}
-          </div>
-        </div>
       </div>
 
       {/* User Section */}

@@ -6,7 +6,7 @@ import Link from 'next/link'
 import clsx from 'clsx'
 import { createSupabaseBrowserClient } from '@/src/lib/supabase/client'
 import { Database } from '@/src/types/database.types'
-import { SimCard } from '@/src/components/ui/sim/SimCard'
+import { SimCard } from '@/src/components/sim/SimCard'
 import { Traits } from '@/src/components/sim/TraitsCatalog'
 
 type Sim = Database['public']['Tables']['sims']['Row']

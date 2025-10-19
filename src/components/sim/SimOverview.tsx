@@ -2,12 +2,12 @@
 
 import React, { useEffect, useState } from 'react'
 import Image from 'next/image'
-import { InlineEditable } from '@/src/components/ui/InlineEditable'
+import { InlineEditable } from '@/src/components/forms/InlineEditable'
 import { useSimStore } from '@/src/lib/store/simStore'
 import { Button } from '@/src/components/ui/Button'
-import { ChallengeSim } from '@/src/types/sims'
+import { ChallengeSim } from '@/src/types/database.types'
 import TraitPickerModal, { CatalogTrait as Trait } from '@/src/components/sim/TraitPickerModal'
-import { Traits } from '@/src/components/sim/traitsCatalog'
+import { Traits } from '@/src/components/sim/TraitsCatalog'
 import { SafeText } from '../ui/SafeText'
 
 // ---------- Types (align with your models; adjust if you already export these) ----------

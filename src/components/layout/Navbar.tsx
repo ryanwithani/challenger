@@ -5,15 +5,13 @@ import Link from 'next/link'
 import { useAuthStore } from '@/src/lib/store/authStore'
 import { Button } from '@/src/components/ui/Button'
 import { LoginModal } from '@/src/components/auth/LoginModal'
-import { SignUpModal } from '@/src/components/auth/SignUpModal'
-import { PasswordResetModal } from '../auth/PasswordResetModal'
 import { PasswordUpdateModal } from '../auth/PasswordUpdateModal'
+import { useRouter } from 'next/navigation'
 
 export function Navbar() {
-  const { user, signOut, showPasswordUpdateModal, setShowPasswordUpdateModal } = useAuthStore()
+  const { user, userProfile, signOut, showPasswordUpdateModal, setShowPasswordUpdateModal } = useAuthStore()
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
-  const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false)
-
+  const router = useRouter()
   const handleSignOut = async () => {
     try {
       await signOut()
@@ -36,10 +34,10 @@ export function Navbar() {
           </div>
 
           <div className="flex items-center space-x-4">
-            {user ? (
+            {userProfile ? (
               <div className="flex items-center space-x-3">
                 <div className="text-sm text-gray-600">
-                  Welcome, {user.email}
+                  Welcome, {userProfile?.display_name || userProfile?.username || 'User'}
                 </div>
                 <Link href="/dashboard">
                   <Button variant="outline" size="sm">
@@ -59,7 +57,7 @@ export function Navbar() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setIsSignUpModalOpen(true)}
+                  onClick={() => router.push('/signup')}
                 >
                   Sign Up
                 </Button>
@@ -84,10 +82,6 @@ export function Navbar() {
             setIsLoginModalOpen(false)
           }
         }
-      />
-      <SignUpModal
-        isOpen={isSignUpModalOpen}
-        onClose={() => setIsSignUpModalOpen(false)}
       />
 
       <PasswordUpdateModal

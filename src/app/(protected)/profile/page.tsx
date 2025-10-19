@@ -5,7 +5,7 @@ import { useAuthStore } from '@/src/lib/store/authStore'
 import { createSupabaseBrowserClient } from '@/src/lib/supabase/client'
 import { Input } from '@/src/components/ui/Input'
 import { Button } from '@/src/components/ui/Button'
-import { ThemeToggle } from '@/src/components/ui/ThemeToggle'
+import { ThemeToggle } from '@/src/components/layout/ThemeToggle'
 import ExpansionPacks, { ExpansionPacksValue } from '@/src/components/profile/Packs'
 import { useUserPreferencesStore } from '@/src/lib/store/userPreferencesStore'
 

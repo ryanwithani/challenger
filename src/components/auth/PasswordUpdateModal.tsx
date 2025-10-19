@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/src/lib/store/authStore'
 import { Button } from '@/src/components/ui/Button'
 import { PasswordInput } from '@/src/components/auth/PasswordInput'
-import { Modal } from '@/src/components/ui/Modal'
+import { Modal } from '@/src/components/sim/SimModal'
 
 interface PasswordUpdateModalProps {
     isOpen: boolean

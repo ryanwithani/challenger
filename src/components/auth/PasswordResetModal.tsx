@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useAuthStore } from '@/src/lib/store/authStore'
 import { Input } from '@/src/components/ui/Input'
 import { Button } from '@/src/components/ui/Button'
-import { Modal } from '@/src/components/ui/Modal'
+import { Modal } from '@/src/components/sim/SimModal'
 
 interface PasswordResetModalProps {
     isOpen: boolean

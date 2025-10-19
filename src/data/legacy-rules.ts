@@ -3,7 +3,7 @@ import { StartingOption, LegacyRules } from '@/src/types/legacy'
 export const STARTING_OPTIONS: StartingOption[] = [
     {
         value: 'regular',
-        label: 'Regular Start',
+        label: 'Regular',
         description: 'Start with $1,800 on 50x50 lot',
         detail: 'Classic Legacy experience with standard starting funds',
         difficulty: 'Easy',
@@ -11,7 +11,7 @@ export const STARTING_OPTIONS: StartingOption[] = [
     },
     {
         value: 'extreme',
-        label: 'Extreme Start',
+        label: 'Extreme',
         description: 'Start with $0 on 64x64 lot in winter',
         detail: 'No starting funds, larger lot, harsh weather conditions',
         difficulty: 'Hard',
@@ -19,7 +19,7 @@ export const STARTING_OPTIONS: StartingOption[] = [
     },
     {
         value: 'ultra_extreme',
-        label: 'Ultra Extreme Start',
+        label: 'Ultra Extreme',
         description: 'Start with $0 and $35k debt to repay',
         detail: 'No funds plus significant debt burden to overcome',
         difficulty: 'Expert',

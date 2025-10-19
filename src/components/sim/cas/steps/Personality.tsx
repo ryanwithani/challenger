@@ -1,5 +1,5 @@
-import { CareerPicker, CareerSelection } from '@/src/components/ui/sim/CareerPicker'
-import { AspirationPicker } from '@/src/components/ui/sim/AspirationPicker'
+import { CareerPicker, CareerSelection } from '@/src/components/sim/CareerPicker'
+import { AspirationPicker } from '@/src/components/sim/AspirationPicker'
 import { isToddlerOrInfant } from '@/src/lib/sim/age'
 import { useSimCAS } from '../useSimCAS'
 

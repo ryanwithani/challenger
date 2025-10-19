@@ -1,5 +1,5 @@
 import { Database } from '@/src/types/database.types'
-import { Button } from './Button'
+import { Button } from '../ui/Button'
 
 type Goal = Database['public']['Tables']['goals']['Row']
 

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useChallengeStore } from '@/src/lib/store/challengeStore'
-import { ChallengeTile } from '@/src/components/ui/challenge/ChallengeTile'
+import { ChallengeTile } from '@/src/components/challenge/ChallengeTile'
 import { Button } from '@/src/components/ui/Button'
 
 export default function ChallengesPage() {

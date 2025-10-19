@@ -1,7 +1,7 @@
 'use client'
 import { useMemo, useState } from 'react'
 import clsx from 'clsx'
-import { Modal } from '@/src/components/ui/sim/Modal'
+import { Modal } from '@/src/components/sim/Modal'
 import { isToddlerOrInfant } from '@/src/lib/sim/age'
 import {
   BASE_CAREERS, getBranchesForBase, careerLabelFromIds, packForCareerIds,
