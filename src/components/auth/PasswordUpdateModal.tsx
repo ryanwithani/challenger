@@ -6,13 +6,14 @@ import { useAuthStore } from '@/src/lib/store/authStore'
 import { Button } from '@/src/components/ui/Button'
 import { PasswordInput } from '@/src/components/auth/PasswordInput'
 import { Modal } from '@/src/components/sim/SimModal'
+import { passwordSchema, PASSWORD_MIN } from '@/src/lib/utils/validators'
 
 interface PasswordUpdateModalProps {
-    isOpen: boolean
+    open: boolean
     onClose: () => void
 }
 
-export function PasswordUpdateModal({ isOpen, onClose }: PasswordUpdateModalProps) {
+export function PasswordUpdateModal({ open, onClose }: PasswordUpdateModalProps) {
     const router = useRouter()
     const { updatePassword } = useAuthStore()
     const [password, setPassword] = useState('')
@@ -25,13 +26,21 @@ export function PasswordUpdateModal({ isOpen, onClose }: PasswordUpdateModalProp
         e.preventDefault()
         setError('')
 
-        if (password.length < 8) {
-            setError('Password must be at least 8 characters')
+        // Use consistent password validation
+        const passwordValidation = passwordSchema.safeParse(password)
+        if (!passwordValidation.success) {
+            setError(passwordValidation.error.errors[0].message)
             return
         }
 
         if (password !== confirmPassword) {
             setError('Passwords do not match')
+            return
+        }
+
+        // Password length validation
+        if (password.length > 128) {
+            setError('Password is too long')
             return
         }
 
@@ -63,7 +72,7 @@ export function PasswordUpdateModal({ isOpen, onClose }: PasswordUpdateModalProp
     }
 
     return (
-        <Modal isOpen={isOpen} onClose={handleClose}>
+        <Modal open={open} onClose={handleClose}>
             <div className="w-full max-w-md">
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-2xl font-bold text-gray-900 dark:text-white">

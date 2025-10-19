@@ -66,6 +66,7 @@ export const PASSWORD_REGEX = {
 
 export const passwordSchema = z.string()
   .min(PASSWORD_MIN, `Use at least ${PASSWORD_MIN} characters.`)
+  .max(128, 'Password is too long')
   .regex(PASSWORD_REGEX.upper, "Add an uppercase letter.")
   .regex(PASSWORD_REGEX.lower, "Add a lowercase letter.")
   .regex(PASSWORD_REGEX.number, "Add a number.")
@@ -153,7 +154,7 @@ export function validateEmail(email: string) {
 
 export const signInSchema = z.object({
   email: emailSchema,
-  password: z.string().min(1, 'Password is required'),
+  password: z.string().min(1, 'Password is required').max(128, 'Password is too long'),
 })
 
 export const signUpSchema = z.object({

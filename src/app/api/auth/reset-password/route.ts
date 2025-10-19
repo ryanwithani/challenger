@@ -1,26 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import rateLimit from '@/src/lib/utils/rateLimit'
-import { createSupabaseBrowserClient } from '@/src/lib/supabase/client'
+import { createSupabaseServerClient } from '@/src/lib/supabase/server'
+import { getClientIP } from '@/src/lib/utils/ip-utils'
 
 const resetLimiter = rateLimit({
     interval: 60 * 60 * 1000, // 1 hour
     uniqueTokenPerInterval: 500,
 })
 
-function getClientIP(request: NextRequest): string {
-    // Check headers in order of preference
-    const forwarded = request.headers.get('x-forwarded-for')
-    const realIP = request.headers.get('x-real-ip')
-    const cfConnectingIP = request.headers.get('cf-connecting-ip') // Cloudflare
-
-    if (cfConnectingIP) return cfConnectingIP.trim()
-    if (forwarded) return forwarded.split(',')[0].trim()
-    if (realIP) return realIP.trim()
-
-    return 'unknown'
-}
-
-export async function POST(request: NextRequest) {
+async function resetPasswordHandler(request: NextRequest) {
     try {
         const clientIP = getClientIP(request)
 
@@ -36,6 +24,14 @@ export async function POST(request: NextRequest) {
             )
         }
 
+        // Email length validation
+        if (email.length > 254) {
+            return NextResponse.json(
+                { error: 'Email address is too long' },
+                { status: 400 }
+            )
+        }
+
         // Basic email validation
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
         if (!emailRegex.test(email)) {
@@ -45,7 +41,7 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        const supabase = createSupabaseBrowserClient()
+        const supabase = await createSupabaseServerClient()
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
             redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
         })
@@ -76,3 +72,7 @@ export async function POST(request: NextRequest) {
         )
     }
 }
+
+// Note: reset-password is excluded from CSRF protection in the middleware
+// as it's a public endpoint, but you can still wrap it if needed
+export const POST = resetPasswordHandler

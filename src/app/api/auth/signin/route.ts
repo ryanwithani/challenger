@@ -1,27 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import rateLimit from '@/src/lib/utils/rateLimit'
-import { createSupabaseBrowserClient } from '@/src/lib/supabase/client'
+import { createSupabaseServerClient } from '@/src/lib/supabase/server'
+import { withCSRFProtection } from '@/src/lib/middleware/csrf'
+import { z } from 'zod'
+import { emailSchema } from '@/src/lib/utils/validators'
+import { PASSWORD_REGEX } from '@/src/lib/utils/validators'
+import { PASSWORD_MIN } from '@/src/lib/utils/validators'
+import { getClientIP } from '@/src/lib/utils/ip-utils'
 
 const limiter = rateLimit({
     interval: 15 * 60 * 1000, // 15 minutes
     uniqueTokenPerInterval: 500,
 })
 
-function getClientIP(request: NextRequest): string {
-    // Check headers in order of preference
-    const forwarded = request.headers.get('x-forwarded-for')
-    const realIP = request.headers.get('x-real-ip')
-    const cfConnectingIP = request.headers.get('cf-connecting-ip') // Cloudflare
-
-    if (cfConnectingIP) return cfConnectingIP.trim()
-    if (forwarded) return forwarded.split(',')[0].trim()
-    if (realIP) return realIP.trim()
-
-    // Fallback to connection info (may not be available in all deployments)
-    return 'unknown'
-}
-
-export async function POST(request: NextRequest) {
+async function signinHandler(request: NextRequest) {
     try {
         const clientIP = getClientIP(request)
 
@@ -37,7 +29,23 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        const supabase = createSupabaseBrowserClient()
+        // Email length validation
+        if (email.length > 254) {
+            return NextResponse.json(
+                { error: 'Email address is too long' },
+                { status: 400 }
+            )
+        }
+
+        // Password length validation
+        if (password.length > 128) {
+            return NextResponse.json(
+                { error: 'Password is too long' },
+                { status: 400 }
+            )
+        }
+
+        const supabase = await createSupabaseServerClient()
         const { data, error } = await supabase.auth.signInWithPassword({
             email,
             password,
@@ -65,3 +73,6 @@ export async function POST(request: NextRequest) {
         )
     }
 }
+
+// Export the CSRF-protected handler
+export const POST = withCSRFProtection(signinHandler)

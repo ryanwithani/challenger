@@ -43,12 +43,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   initialize: async () => {
     console.log('🔵 Initialize called')
     const supabase = createSupabaseBrowserClient()
-  
+
     // Handle password reset code exchange
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search)
       const code = urlParams.get('code')
-  
+
       if (code) {
         console.log('🟢 Attempting code exchange...')
         const { data, error } = await supabase.auth.exchangeCodeForSession(code)
@@ -66,37 +66,37 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         }
       }
     }
-  
+
     const { data: { session } } = await supabase.auth.getSession()
-  
+
     set({
       user: session?.user ?? null,
       loading: false,
       initialized: true
     })
-  
+
     // ✅ REMOVED: Manual profile fetch
     // The listener below will handle it
-  
+
     // ✅ Single source of truth for profile fetching
     supabase.auth.onAuthStateChange(async (event, session) => {
       set({ user: session?.user ?? null })
-  
+
       if (session?.user) {
         await get().fetchUserProfile() // ✅ Only place that triggers fetch
       } else {
-        set({ 
+        set({
           userProfile: null,
           profileFetched: false,  // ✅ Reset cache on logout
-          isFetchingProfile: false 
+          isFetchingProfile: false
         })
       }
-  
+
       if (event === 'PASSWORD_RECOVERY') {
         set({ showPasswordUpdateModal: true })
       }
     })
-    
+
     // ✅ NEW: If we have a session on init, manually trigger profile fetch once
     // (because listener only fires on *changes*, not initial state)
     if (session?.user) {
@@ -106,56 +106,56 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   fetchUserProfile: async () => {
     const state = get()
-    
+
     // ✅ GUARD 1: Don't fetch if already fetching
     if (state.isFetchingProfile) {
       console.log('⚠️ Profile fetch already in progress, skipping')
       return
     }
-    
+
     const supabase = createSupabaseBrowserClient()
     const { data: { user } } = await supabase.auth.getUser()
-    
+
     // ✅ GUARD 2: No user means clear profile and exit
     if (!user) {
-      set({ 
-        userProfile: null, 
+      set({
+        userProfile: null,
         profileFetched: false,
-        isFetchingProfile: false 
+        isFetchingProfile: false
       })
       return
     }
-    
+
     // ✅ GUARD 3: Already have profile for this user? Skip fetch.
     if (state.profileFetched && state.userProfile?.id === user.id) {
       console.log('✓ Profile already loaded for this user')
       return
     }
-    
+
     // ✅ Mark as fetching to prevent concurrent calls
     set({ isFetchingProfile: true })
-    
+
     try {
       const { data, error } = await supabase
         .from('users')
         .select('id, username, display_name, avatar_url, email')
         .eq('id', user.id)
         .single()
-  
+
       if (error) throw error
-  
+
       if (data) {
-        set({ 
+        set({
           userProfile: data,
           profileFetched: true,  // ✅ Mark as successfully fetched
-          isFetchingProfile: false 
+          isFetchingProfile: false
         })
       }
     } catch (error) {
       console.error('Failed to fetch profile:', error)
-      set({ 
+      set({
         isFetchingProfile: false,
-        profileFetched: false 
+        profileFetched: false
       })
     }
   },
@@ -198,11 +198,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   fetchUser: async () => {
     const supabase = createSupabaseBrowserClient()
     const { data: { user } } = await supabase.auth.getUser()
-    set({ 
+    set({
       user: null,
-      userProfile: null, 
+      userProfile: null,
       profileFetched: false,
-      isFetchingProfile: false })
+      isFetchingProfile: false
+    })
 
     if (user) {
       await get().fetchUserProfile()
@@ -214,7 +215,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       case 'Invalid login credentials':
         return 'Invalid email or password'
       case 'Email not confirmed':
-        return 'Please check your email and confirm your account'
+        return 'If your account exists, a confirmation email has been sent to your email address.'
       default:
         return 'Something went wrong. Please try again.'
     }
