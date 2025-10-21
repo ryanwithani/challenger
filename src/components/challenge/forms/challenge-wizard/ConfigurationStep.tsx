@@ -38,6 +38,7 @@ function LegacyConfigurationStep({
         register,
         handleSubmit,
         watch,
+        formState: { errors, isSubmitting },
     } = useForm<LegacyConfigData>({
         resolver: zodResolver(legacyConfigSchema),
         defaultValues: {
@@ -48,7 +49,21 @@ function LegacyConfigurationStep({
             species_rule: data?.species_rule || 'human_only',
             lifespan: data?.lifespan || 'normal',
         },
+        mode: 'onBlur',
     })
+
+    if (Object.keys(errors).length > 0) {
+        <div className="mb-6 p-4 bg-amber-50 border-2 border-amber-200 rounded-xl">
+            <div className="flex items-start gap-3">
+                <span className="text-xl">⚠️</span>
+                <div>
+                    <p className="text-amber-800 font-semibold">
+                        Please review your selections
+                    </p>
+                </div>
+            </div>
+        </div>
+    }
 
     const watchedValues = watch()
 
@@ -244,11 +259,11 @@ function LegacyConfigurationStep({
 
             {/* Navigation */}
             <div className="flex justify-between pt-6">
-                <Button variant="outline" onClick={onBack}>
+                <Button variant="outline" onClick={onBack} type="button" disabled={isSubmitting}>
                     Back
                 </Button>
-                <Button variant="primary" type="submit">
-                    Next: Expansion Packs
+                <Button variant="primary" type="submit" disabled={isSubmitting} loading={isSubmitting} loadingText="Submitting...">
+                    Next: Review
                 </Button>
             </div>
         </form>

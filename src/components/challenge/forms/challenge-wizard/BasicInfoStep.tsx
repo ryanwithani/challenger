@@ -19,8 +19,9 @@ export function BasicInfoStep({ data, onNext, onCancel }: BasicInfoStepProps) {
     const {
         register,
         handleSubmit,
-        formState: { errors },
+        formState: { errors, isSubmitting },
         watch,
+        trigger, // Add trigger for manual validation
     } = useForm<BasicInfoData>({
         resolver: zodResolver(basicInfoSchema),
         defaultValues: {
@@ -28,12 +29,19 @@ export function BasicInfoStep({ data, onNext, onCancel }: BasicInfoStepProps) {
             description: data?.description || '',
             challenge_type: data?.challenge_type || 'legacy',
         },
+        mode: 'onBlur', // Validate on blur for better UX
     })
 
     const templateType = watch('challenge_type')
     const description = watch('description')
+    const name = watch('name')
 
-    const onSubmit = (formData: BasicInfoData) => {
+    const onSubmit = async (formData: BasicInfoData) => {
+        // Validate all fields before submitting
+        const isValid = await trigger()
+        if (!isValid) {
+            return
+        }
         onNext(formData)
     }
 
@@ -42,8 +50,34 @@ export function BasicInfoStep({ data, onNext, onCancel }: BasicInfoStepProps) {
             <div>
                 <h2 className="text-xl font-semibold text-gray-900 mb-6">Choose Your Challenge</h2>
 
+                {/* Show form-level errors */}
+                {Object.keys(errors).length > 0 && (
+                    <div className="mb-6 p-4 bg-amber-50 border-2 border-amber-200 rounded-xl">
+                        <div className="flex items-start gap-3">
+                            <span className="text-xl">⚠️</span>
+                            <div>
+                                <p className="text-amber-800 font-semibold mb-2">
+                                    Please fix the following errors:
+                                </p>
+                                <ul className="text-sm text-amber-700 space-y-1 list-disc list-inside">
+                                    {errors.challenge_type && (
+                                        <li>{errors.challenge_type.message}</li>
+                                    )}
+                                    {errors.name && <li>{errors.name.message}</li>}
+                                    {errors.description && <li>{errors.description.message}</li>}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* Template Selection */}
-                <FormField label="Challenge Template" className="mb-6">
+                <FormField 
+                    label="Challenge Template" 
+                    className="mb-6"
+                    error={errors.challenge_type?.message}
+                    required
+                >
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {CHALLENGE_TEMPLATES.map((template) => {
                             const isDisabled = template.value !== 'legacy'
@@ -57,7 +91,9 @@ export function BasicInfoStep({ data, onNext, onCancel }: BasicInfoStepProps) {
                                             ? 'cursor-not-allowed opacity-50 bg-gray-50 border-gray-200' 
                                             : isSelected
                                                 ? 'cursor-pointer border-brand-500 bg-brand-500/5 shadow-lg'
-                                                : 'cursor-pointer border-gray-200 hover:border-gray-300 hover:shadow-md'
+                                                : errors.challenge_type
+                                                    ? 'cursor-pointer border-red-300 hover:border-red-400'
+                                                    : 'cursor-pointer border-gray-200 hover:border-gray-300 hover:shadow-md'
                                     }`}
                                 >
                                     <input
@@ -91,8 +127,14 @@ export function BasicInfoStep({ data, onNext, onCancel }: BasicInfoStepProps) {
                     </div>
                 </FormField>
 
-                {/* Challenge Name */}
-                <FormField label="Challenge Name" error={errors.name?.message} required className="mb-4">
+                {/* Challenge Name with character counter */}
+                <FormField 
+                    label="Challenge Name" 
+                    error={errors.name?.message} 
+                    required 
+                    className="mb-4"
+                    description={name ? `${name.length}/100 characters` : ''}
+                >
                     <Input
                         {...register('name')}
                         placeholder={
@@ -104,10 +146,17 @@ export function BasicInfoStep({ data, onNext, onCancel }: BasicInfoStepProps) {
                                         ? 'The 100 Baby Challenge'
                                         : 'My Custom Challenge'
                         }
+                        className={errors.name ? 'border-red-300 focus:border-red-500' : ''}
+                        maxLength={100}
+                        aria-invalid={!!errors.name}
+                        aria-describedby={errors.name ? 'name-error' : undefined}
                     />
+                    {errors.name && (
+                        <p id="name-error" className="sr-only">{errors.name.message}</p>
+                    )}
                 </FormField>
 
-                {/* Description */}
+                {/* Description with character counter */}
                 <FormField
                     label="Description (Optional)"
                     error={errors.description?.message}
@@ -117,17 +166,35 @@ export function BasicInfoStep({ data, onNext, onCancel }: BasicInfoStepProps) {
                         {...register('description')}
                         rows={3}
                         placeholder="Describe your challenge goals, rules, or story..."
+                        className={errors.description ? 'border-red-300 focus:border-red-500' : ''}
+                        maxLength={500}
+                        aria-invalid={!!errors.description}
+                        aria-describedby={errors.description ? 'description-error' : undefined}
                     />
+                    {errors.description && (
+                        <p id="description-error" className="sr-only">{errors.description.message}</p>
+                    )}
                 </FormField>
             </div>
 
             {/* Navigation */}
             <div className="flex justify-between pt-6">
-                <Button variant="outline" onClick={onCancel}>
+                <Button 
+                    variant="outline" 
+                    onClick={onCancel}
+                    type="button"
+                    disabled={isSubmitting}
+                >
                     Cancel
                 </Button>
-                <Button variant="primary">
-                    Next: {CHALLENGE_TEMPLATES.find(t => t.value === templateType)?.needsConfiguration ? 'Configuration' : 'Expansion Packs'}
+                <Button 
+                    variant="primary"
+                    type="submit"
+                    disabled={isSubmitting}
+                    loading={isSubmitting}
+                    loadingText="Validating..."
+                >
+                    Next: {CHALLENGE_TEMPLATES.find(t => t.value === templateType)?.needsConfiguration ? 'Configuration' : 'Review'}
                 </Button>
             </div>
         </form>

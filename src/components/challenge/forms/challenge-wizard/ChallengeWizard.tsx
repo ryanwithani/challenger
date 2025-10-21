@@ -72,13 +72,16 @@ export function ChallengeWizard({ onSubmit, onCancel, loading }: ChallengeWizard
 
   const handleFinalSubmit = async (data: WizardData) => {
     const challengeData: Partial<Challenge> = {
-      name: data.basicInfo!.name,
-      description: data.basicInfo?.description,
-      challenge_type: data.basicInfo!.challenge_type,
-      configuration: data.configuration || null,
+        name: data.basicInfo!.name,
+        description: data.basicInfo?.description,
+        challenge_type: data.basicInfo!.challenge_type,
+        configuration: data.configuration || null,
+        status: 'active', // Add this
     }
+    
+    console.log('Transformed challenge data:', challengeData) // Debug
     await onSubmit(challengeData)
-  }
+}
 
   const goBack = () => {
     const needsConfig = CHALLENGE_TEMPLATES.find(t => t.value === wizardData.basicInfo?.challenge_type)?.needsConfiguration

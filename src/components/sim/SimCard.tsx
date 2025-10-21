@@ -62,7 +62,7 @@ export const SimCard = memo(function SimCard({
   onEdit,
   onLinkToChallenge,
   onUnlinkFromChallenge,
-  compact,
+  compact = false,
 }: SimCardProps) {
   const { byId } = traitMaps(traitCatalog)
   const [fav, setFav] = useState<boolean>(false)

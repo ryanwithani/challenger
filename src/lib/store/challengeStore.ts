@@ -37,6 +37,8 @@ interface ChallengeState {
   // Progress and achievement methods
   toggleGoalProgress: (goalId: string, simId?: string) => Promise<void>
   updateGoalValue: (goalId: string, newValue: number) => Promise<void>
+  incrementPenalty: (goalId: string, simId?: string) => Promise<void>
+  decrementPenalty: (goalId: string) => Promise<void>
   addSimAchievement: (simId: string, achievement: {
     goal_id: string
     goal_title: string
@@ -50,6 +52,8 @@ interface ChallengeState {
   // Calculation methods
   calculatePoints: () => number
   calculateCategoryPoints: (category: string) => number
+  hasStartedProgress: () => boolean
+  isPenaltyGoal: (goal: Goal) => boolean
 }
 
 export const useChallengeStore = create<ChallengeState>((set, get) => ({
@@ -136,6 +140,9 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
           ...challenge,
           user_id: user.id,
           status: 'active',
+          // Initialize with zero points to avoid negative starting points
+          points: 0,
+          completion_percentage: 0,
         })
         .select()
         .single()
@@ -329,6 +336,19 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
     }
   },
 
+  // Helper function to check if a goal is a penalty
+  isPenaltyGoal: (goal: Goal) => {
+    return (
+      // Check if it's marked as a penalty goal in the database
+      goal.goal_type === 'penalty' ||
+      // Or if it has negative points (legacy detection)
+      (goal.point_value !== undefined && goal.point_value && goal.point_value < 0) ||
+      // Or if it belongs to a penalties category
+      goal.category === 'penalties' ||
+      goal.category === 'penalty'
+    );
+  },
+
   toggleGoalProgress: async (goalId: string, simId?: string) => {
     try {
       const supabase = createSupabaseBrowserClient()
@@ -336,6 +356,15 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
 
       if (!user) throw new Error('User not authenticated')
 
+      const goal = get().goals.find(g => g.id === goalId);
+      
+      // If this is a penalty goal, don't allow toggling - penalties should only be incremented/decremented
+      if (goal && get().isPenaltyGoal(goal)) {
+        console.warn("Penalties should be incremented/decremented, not toggled");
+        return;
+      }
+
+      // Check if progress already exists
       const existingProgress = get().progress.find(p =>
         p.goal_id === goalId && p.user_id === user.id
       )
@@ -376,6 +405,134 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
     }
   },
 
+  // Add a new penalty occurrence
+  incrementPenalty: async (goalId: string, simId?: string) => {
+    try {
+      const goal = get().goals.find(g => g.id === goalId);
+      
+      // Verify this is a penalty goal
+      if (!goal || !get().isPenaltyGoal(goal)) {
+        console.error("Attempted to increment a non-penalty goal");
+        return;
+      }
+      
+      const supabase = createSupabaseBrowserClient()
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) throw new Error('User not authenticated')
+
+      // For counter-type penalties, we update the counter
+      if (goal.goal_type === 'counter') {
+        const currentValue = goal.current_value || 0;
+        await get().updateGoalValue(goalId, currentValue + 1);
+      } else {
+        // For non-counter penalties, we add a progress entry
+        // Check if this is the first time tracking this penalty
+        const existingPenalties = get().progress.filter(p => 
+          p.goal_id === goalId && p.user_id === user.id
+        );
+        
+        // Add a new penalty occurrence
+        const { data, error } = await supabase
+          .from('progress')
+          .insert({
+            user_id: user.id,
+            goal_id: goalId,
+            sim_id: simId,
+            // Store the timestamp to track when penalties occurred
+            completion_details: JSON.stringify({
+              occurred_at: new Date().toISOString(),
+              sim_id: simId
+            })
+          })
+          .select()
+          .single()
+
+        if (error) throw error
+
+        if (data) {
+          set({ progress: [...get().progress, data] })
+        }
+      }
+    } catch (error) {
+      console.error('Error incrementing penalty:', error)
+      throw error
+    }
+  },
+  
+  // Remove the last penalty occurrence
+  decrementPenalty: async (goalId: string) => {
+    try {
+      const goal = get().goals.find(g => g.id === goalId);
+      
+      // Verify this is a penalty goal
+      if (!goal || !get().isPenaltyGoal(goal)) {
+        console.error("Attempted to decrement a non-penalty goal");
+        return;
+      }
+      
+      const supabase = createSupabaseBrowserClient()
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) throw new Error('User not authenticated')
+
+      // For counter-type penalties, we update the counter
+      if (goal.goal_type === 'counter') {
+        const currentValue = goal.current_value || 0;
+        if (currentValue > 0) {
+          await get().updateGoalValue(goalId, currentValue - 1);
+        }
+      } else {
+        // For non-counter penalties, we remove the most recent progress entry
+        const penaltyEntries = get().progress.filter(p => 
+          p.goal_id === goalId && p.user_id === user.id
+        );
+        
+        if (penaltyEntries.length > 0) {
+          // Sort by most recent (assuming we have completion_details with timestamps)
+          const sortedEntries = [...penaltyEntries].sort((a, b) => {
+            let aDate = new Date(0);
+            let bDate = new Date(0);
+            
+            try {
+              if (a.completion_details) {
+                const aDetails = JSON.parse(a.completion_details as string);
+                if (aDetails.occurred_at) aDate = new Date(aDetails.occurred_at);
+              }
+              if (b.completion_details) {
+                const bDetails = JSON.parse(b.completion_details as string);
+                if (bDetails.occurred_at) bDate = new Date(bDetails.occurred_at);
+              }
+            } catch (e) {
+              // If parsing fails, fall back to creation date
+              aDate = a.completed_at ? new Date(a.completed_at) : new Date(0);
+              bDate = b.completed_at ? new Date(b.completed_at) : new Date(0);
+            }
+            
+            return bDate.getTime() - aDate.getTime(); // Most recent first
+          });
+          
+          // Remove the most recent entry
+          const mostRecent = sortedEntries[0];
+          
+          const { error } = await supabase
+            .from('progress')
+            .delete()
+            .eq('id', mostRecent.id)
+
+          if (error) throw error
+
+          set({
+            progress: get().progress.filter(p => p.id !== mostRecent.id)
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error decrementing penalty:', error)
+      throw error
+    }
+  },
+
   updateGoalValue: async (goalId: string, newValue: number) => {
     try {
       const supabase = createSupabaseBrowserClient()
@@ -397,11 +554,34 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
     }
   },
 
+  // Helper method to determine if the challenge has any progress
+  hasStartedProgress: () => {
+    return get().progress.length > 0;
+  },
+  
   calculatePoints: () => {
     const { goals, progress } = get()
-
+    
+    // If no goals, return 0
+    if (goals.length === 0) {
+      return 0;
+    }
+    
     return goals.reduce((total, goal) => {
-      // Handle different goal types
+      // Handle penalty goals
+      if (get().isPenaltyGoal(goal)) {
+        if (goal.goal_type === 'counter') {
+          // For counter penalties, multiply current value by point value
+          const currentValue = goal.current_value || 0;
+          return total + (currentValue * (goal.point_value || 0));
+        } else {
+          // For non-counter penalties, count each occurrence
+          const penaltyCount = progress.filter(p => p.goal_id === goal.id).length;
+          return total + (penaltyCount * (goal.point_value || 0));
+        }
+      }
+      
+      // Handle different regular goal types
       if (goal.goal_type === 'milestone') {
         // Milestone goals: completed = full points
         const isCompleted = progress.some(p => p.goal_id === goal.id)
@@ -439,8 +619,27 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
   calculateCategoryPoints: (category: string) => {
     const { goals, progress } = get()
     const categoryGoals = goals.filter(goal => goal.category === category)
-
+    
+    // If no goals in this category, return 0
+    if (categoryGoals.length === 0) {
+      return 0;
+    }
+    
     return categoryGoals.reduce((total, goal) => {
+      // Handle penalty goals
+      if (get().isPenaltyGoal(goal)) {
+        if (goal.goal_type === 'counter') {
+          // For counter penalties, multiply current value by point value
+          const currentValue = goal.current_value || 0;
+          return total + (currentValue * (goal.point_value || 0));
+        } else {
+          // For non-counter penalties, count each occurrence
+          const penaltyCount = progress.filter(p => p.goal_id === goal.id).length;
+          return total + (penaltyCount * (goal.point_value || 0));
+        }
+      }
+      
+      // Handle regular goal types
       if (goal.goal_type === 'milestone') {
         const isCompleted = progress.some(p => p.goal_id === goal.id)
         return isCompleted ? total + (goal.point_value || 0) : total
@@ -550,6 +749,14 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
 
       if (!user) throw new Error('User not authenticated')
 
+      const goal = get().goals.find(g => g.id === goalId);
+      
+      // If this is a penalty goal, don't allow completing it this way
+      if (goal && get().isPenaltyGoal(goal)) {
+        console.warn("Penalties should be incremented/decremented, not completed");
+        return;
+      }
+
       // Get sim details for the completion record
       const sim = get().sims.find(s => s.id === simId)
 
@@ -608,7 +815,6 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
       }
 
       // Also add achievement to sim (for future sim profile feature)
-      const goal = get().goals.find(g => g.id === goalId)
       if (goal && sim) {
         await get().addSimAchievement(simId, {
           goal_id: goalId,

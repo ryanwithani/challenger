@@ -14,6 +14,8 @@ import {
   isParseSuccess,
   type ChallengeConfig
 } from '@/src/lib/utils/safeParse'
+import { LEGACY_RULES } from '@/src/data/legacy-rules'
+import { LegacyRule, LegacyRules } from '@/src/types/legacy'
 
 const formatRuleName = (rule: string | undefined): string => {
   if (!rule) return 'Not Set'
@@ -21,6 +23,14 @@ const formatRuleName = (rule: string | undefined): string => {
     .split('_')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ')
+}
+
+const getRuleDescription = (
+  ruleType: keyof LegacyRules, 
+  value: string
+): string => {
+  const rule = LEGACY_RULES[ruleType].find((r: LegacyRule) => r.value === value)
+  return rule?.desc || 'No description available'
 }
 
 type Challenge = Database['public']['Tables']['challenges']['Row']
@@ -692,9 +702,7 @@ const currentGeneration = useMemo(() => {
       {/* Metadata Bar */}
       <div className="flex flex-wrap items-center gap-4 text-base text-gray-600">
         <div className="flex items-center gap-2">
-          <span className="font-semibold text-gray-900">Gen {currentGeneration}</span>
-          <span className="text-gray-400">/</span>
-          <span>10</span>
+          <span className="font-semibold text-gray-900">Generation {currentGeneration}</span>
         </div>
         
         <div className="w-px h-5 bg-gray-300" aria-hidden="true" />
@@ -728,22 +736,25 @@ const currentGeneration = useMemo(() => {
       Challenge Rules
     </h3>
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-      {[
-        { label: 'Gender Law', value: config.gender_law },
-        { label: 'Bloodline', value: config.bloodline_law },
-        { label: 'Heir Selection', value: config.heir_selection },
-        { label: 'Species', value: config.species_rule }
-      ].map((rule, index) => (
-        <div key={index} className="flex flex-col">
-          <span className="text-xs font-medium text-gray-500 mb-1">
-            {rule.label}
-          </span>
-          <span className="text-sm font-semibold text-gray-900">
-            {formatRuleName(rule.value)}
-          </span>
-        </div>
-      ))}
+  {[
+    { label: 'Gender Law', value: config.gender_law, type: 'genderLaw' as const },
+    { label: 'Bloodline', value: config.bloodline_law, type: 'bloodlineLaw' as const },
+    { label: 'Heir Selection', value: config.heir_selection, type: 'heirSelection' as const },
+    { label: 'Species', value: config.species_rule, type: 'speciesRule' as const }
+  ].map((rule, index) => (
+    <div key={index} className="flex flex-col space-y-1">
+      <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+        {rule.label}
+      </span>
+      <span className="text-sm font-semibold text-gray-900">
+        {formatRuleName(rule.value)}
+      </span>
+      <span className="text-xs text-gray-600 leading-tight">
+        {getRuleDescription(rule.type, rule.value ?? '')}
+      </span>
     </div>
+  ))}
+</div>
   </div>
 </div>
 
@@ -763,7 +774,6 @@ const currentGeneration = useMemo(() => {
                   : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
                   }`}
               >
-                <span className="text-2xl" aria-hidden="true">{tab.icon}</span>
                 <span>{tab.name}</span>
               </button>
             ))}

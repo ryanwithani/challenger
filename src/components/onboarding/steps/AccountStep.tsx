@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { Input } from '@/src/components/ui/Input'
 import { Label } from '@/src/components/ui/Label'
 import { Button } from '@/src/components/ui/Button'
-import { createSupabaseBrowserClient } from '@/src/lib/supabase/client'
 import { PASSWORD_MIN } from '@/src/lib/utils/validators'
 
 interface AccountStepProps {
@@ -54,7 +53,6 @@ export default function AccountStep({ onSuccess }: AccountStepProps) {
   }
 
   const getPasswordStrength = (password: string) => {
-    // Check for common weak patterns first
     const commonPatterns = /(password|1234|qwerty|abc123|admin|letmein)/i
     const hasSpaces = /\s/.test(password)
 
@@ -66,24 +64,19 @@ export default function AccountStep({ onSuccess }: AccountStepProps) {
       return { label: 'Invalid', color: 'bg-red-500', textColor: 'text-red-600' }
     }
 
-    // Length requirements (NIST 2024 standards)
     if (password.length < PASSWORD_MIN) {
       return { label: 'Too Short', color: 'bg-red-500', textColor: 'text-red-600' }
     }
 
-    // Check complexity criteria
     const hasLower = /[a-z]/.test(password)
     const hasUpper = /[A-Z]/.test(password)
     const hasNumber = /[0-9]/.test(password)
     const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]/.test(password)
 
     const complexityScore = [hasLower, hasUpper, hasNumber, hasSpecial].filter(Boolean).length
-
-    // Length bonus for longer passwords
     const lengthBonus = password.length >= 12 ? 1 : 0
     const totalScore = complexityScore + lengthBonus
 
-    // Determine strength based on modern standards
     if (totalScore >= 5) {
       return { label: 'Very Strong', color: 'bg-green-600', textColor: 'text-green-700' }
     } else if (totalScore >= 4) {
@@ -101,7 +94,6 @@ export default function AccountStep({ onSuccess }: AccountStepProps) {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
 
-    // Update password strength in real-time
     if (name === 'password') {
       const strength = getPasswordStrength(value)
       setPasswordStrength(strength)
@@ -129,13 +121,14 @@ export default function AccountStep({ onSuccess }: AccountStepProps) {
     e.preventDefault()
     setGlobalError(null)
 
-    // Check honeypot first - if filled, it's likely a bot
+    // Check honeypot
     const honeypotValue = (e.target as HTMLFormElement).website?.value
     if (honeypotValue) {
       setGlobalError('Submission blocked - please try again')
-      return // Prevent form submission
+      return
     }
 
+    // Validate all fields
     const newErrors: Record<string, string> = {}
     Object.entries(formData).forEach(([name, value]) => {
       const error = validateField(name, value)
@@ -150,45 +143,35 @@ export default function AccountStep({ onSuccess }: AccountStepProps) {
     setLoading(true)
 
     try {
-      const supabase = createSupabaseBrowserClient()
-
-      // Check if username is already taken
-      const { data: _rpcData, error: _rpcError } = await supabase.rpc('create_user_with_username', {
-        p_username: formData.username,
-        p_email: formData.email,
-        p_password: formData.password,
+      // Call signup API route
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: formData.username,
+          email: formData.email,
+          password: formData.password,
+        }),
       })
 
-      // Create account - trigger will handle user profile creation
-      const { error: signUpError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            username: formData.username,
-          },
-        },
-      })
+      const result = await response.json()
 
-      if (signUpError?.code === '23505') {
-        setErrors({ username: 'This username is already taken' })
+      if (!response.ok) {
+        // Handle specific errors
+        if (result.field && result.error) {
+          setErrors({ [result.field]: result.error })
+        } else {
+          setGlobalError(result.error || 'Failed to create account')
+        }
+        return
       }
 
-      // SUCCESS - trigger created the profile automatically
+      // Success
       onSuccess()
 
     } catch (err: any) {
       console.error('Account creation error:', err)
-
-      if (err.message?.toLowerCase().includes('already registered')) {
-        setGlobalError('This email is already registered. Please sign in instead.')
-      } else if (err.message?.toLowerCase().includes('invalid email')) {
-        setErrors({ email: 'Please enter a valid email address' })
-      } else if (err.message?.toLowerCase().includes('password')) {
-        setErrors({ password: `Password must be at least ${PASSWORD_MIN} characters` })
-      } else {
-        setGlobalError(err.message || 'Failed to create account. Please try again.')
-      }
+      setGlobalError('Failed to create account. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -214,9 +197,6 @@ export default function AccountStep({ onSuccess }: AccountStepProps) {
             tabIndex={-1}
             autoComplete="off"
             aria-hidden="true"
-            onChange={(e) => {
-              // Remove the onChange handler - we'll check on submit instead
-            }}
           />
           <Label htmlFor="username" className="text-sm font-semibold text-gray-700 mb-1.5">
             Username
