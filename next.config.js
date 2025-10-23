@@ -9,6 +9,8 @@ const nextConfig = {
         pathname: '/storage/v1/object/public/**',
       },
     ],
+    // Configure allowed quality values for Next.js 16 compatibility
+    qualities: [25, 50, 75, 100],
   },
   async headers() {
     const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL

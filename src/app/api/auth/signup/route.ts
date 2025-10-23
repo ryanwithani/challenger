@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/src/lib/supabase/server'
 import { withCSRFProtection } from '@/src/lib/middleware/csrf'
-import { passwordSchema, emailSchema, PASSWORD_MIN } from '@/src/lib/utils/validators'
+import { passwordSchema, emailSchema, usernameSchema, PASSWORD_MIN } from '@/src/lib/utils/validators'
 import rateLimit from '@/src/lib/utils/rateLimit'
 import { getClientIP } from '@/src/lib/utils/ip-utils'
 
@@ -33,29 +33,15 @@ async function signupHandler(request: NextRequest) {
       )
     }
 
-    // Username validation
-    const usernameTrimmed = username.trim()
-    if (usernameTrimmed.length < 3 || usernameTrimmed.length > 20) {
+    // Username validation using Zod
+    const usernameValidation = usernameSchema.safeParse(username)
+    if (!usernameValidation.success) {
       return NextResponse.json(
-        { field: 'username', error: 'Username must be 3-20 characters' },
+        { field: 'username', error: usernameValidation.error.errors[0].message },
         { status: 400 }
       )
     }
-
-    if (!/^[a-z0-9_-]+$/i.test(usernameTrimmed)) {
-      return NextResponse.json(
-        { field: 'username', error: 'Username can only contain letters, numbers, - and _' },
-        { status: 400 }
-      )
-    }
-
-    const reserved = ['admin', 'root', 'system', 'mod', 'moderator', 'support', 'help']
-    if (reserved.includes(usernameTrimmed.toLowerCase())) {
-      return NextResponse.json(
-        { field: 'username', error: 'This username is reserved' },
-        { status: 400 }
-      )
-    }
+    const usernameTrimmed = usernameValidation.data
 
     // Email validation
     const emailValidation = emailSchema.safeParse(email)
@@ -121,6 +107,25 @@ async function signupHandler(request: NextRequest) {
       throw signUpError
     }
 
+    // Create user profile in users table if user was created successfully
+    if (data.user) {
+      const { error: profileError } = await supabase
+        .from('users')
+        .insert({
+          id: data.user.id,
+          email: data.user.email!,
+          username: usernameTrimmed,
+          display_name: usernameTrimmed, // Use username as initial display name
+          created_at: new Date().toISOString(),
+        })
+
+      if (profileError) {
+        console.error('Failed to create user profile:', profileError)
+        // Don't fail the signup if profile creation fails - user can still sign in
+        // The profile will be created on first login via the auth store
+      }
+    }
+
     return NextResponse.json({
       success: true,
       user: data.user,
@@ -146,6 +151,5 @@ async function signupHandler(request: NextRequest) {
   }
 }
 
-// Note: signup is typically excluded from CSRF protection as it's a registration flow
-// If you want CSRF protection, wrap with: export const POST = withCSRFProtection(signupHandler)
-export const POST = signupHandler
+// CSRF protection enabled for signup to prevent automated attacks
+export const POST = withCSRFProtection(signupHandler)

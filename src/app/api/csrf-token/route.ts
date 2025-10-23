@@ -3,7 +3,10 @@ import { generateCSRFToken, setCSRFTokenCookie } from '@/src/lib/utils/csrf'
 
 export async function GET(request: NextRequest) {
     try {
+        // Generate a new CSRF token
         const token = generateCSRFToken()
+
+        // Create response with token
         const response = NextResponse.json({ token })
 
         // Set the token in an HTTP-only cookie

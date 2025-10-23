@@ -1,137 +1,123 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { Input } from '@/src/components/ui/Input'
 import { Label } from '@/src/components/ui/Label'
 import { Button } from '@/src/components/ui/Button'
-import { PASSWORD_MIN } from '@/src/lib/utils/validators'
+import { PasswordInput } from '@/src/components/auth/PasswordInput'
+import { PASSWORD_MIN, signUpSchema, usernameSchema, emailSchema, passwordSchema } from '@/src/lib/utils/validators'
+import { csrfTokenManager } from '@/src/lib/utils/csrf-client'
+import { LoginModal } from '@/src/components/auth/LoginModal'
 
 interface AccountStepProps {
-  onSuccess: () => void
+  onSuccess: (accountData: { username: string; email: string; password: string }) => void
+  initialData?: { username: string; email: string; password: string }
 }
 
-export default function AccountStep({ onSuccess }: AccountStepProps) {
-  const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    password: '',
-  })
+const STORAGE_KEY = 'onboarding_account_data'
+
+export default function AccountStep({ onSuccess, initialData }: AccountStepProps) {
+  // Load saved data from localStorage or use initial data
+  const getInitialFormData = () => {
+    if (initialData) return initialData
+
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY)
+      return saved ? JSON.parse(saved) : { username: '', email: '', password: '' }
+    } catch {
+      return { username: '', email: '', password: '' }
+    }
+  }
+
+  const [formData, setFormData] = useState(getInitialFormData)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
   const [globalError, setGlobalError] = useState<string | null>(null)
-  const [passwordStrength, setPasswordStrength] = useState<{ label: string, color: string, textColor: string }>({ label: 'Weak', color: 'bg-orange-500', textColor: 'text-orange-600' })
+  const [showLoginModal, setShowLoginModal] = useState(false)
 
-  const validateField = (name: string, value: string): string | null => {
-    switch (name) {
-      case 'username':
-        const sanitized = value.trim()
-        if (!value.trim()) return 'Username is required'
-        if (sanitized.length < 3) return 'Username must be at least 3 characters'
-        if (sanitized.length > 20) return 'Username must be less than 20 characters'
-        if (!/^[a-z0-9_-]+$/.test(sanitized.toLowerCase())) {
-          return 'Username can only contain lowercase letters, numbers, - and _'
-        }
-        const reserved = ['admin', 'root', 'system', 'mod', 'moderator', 'support', 'help']
-        if (reserved.includes(sanitized)) {
-          return 'This username is reserved'
-        }
-        return null
+  // Optimized auto-save with debouncing and change detection
+  useEffect(() => {
+    // Only save if form data has meaningful content
+    const hasContent = Object.values(formData).some(value => typeof value === 'string' && value.trim() !== '')
+    if (!hasContent) return
 
-      case 'email':
-        if (!value.trim()) return 'Email is required'
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Please enter a valid email'
-        return null
+    const timeoutId = setTimeout(() => {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(formData))
+      } catch (error) {
+        console.warn('Failed to save form data:', error)
+      }
+    }, 500) // Debounce auto-save
 
-      case 'password':
-        if (!value) return 'Password is required'
-        if (value.length < PASSWORD_MIN) return `Password must be at least ${PASSWORD_MIN} characters`
-        return null
+    return () => clearTimeout(timeoutId)
+  }, [formData])
 
-      default:
-        return null
+  // Memoized validation schemas to prevent recreation on every render
+  const validationSchemas = useMemo(() => ({
+    username: usernameSchema,
+    email: emailSchema,
+    password: passwordSchema
+  }), [])
+
+  // Optimized field validation with useCallback
+  const validateField = useCallback((name: string, value: string): string | null => {
+    try {
+      const schema = validationSchemas[name as keyof typeof validationSchemas]
+      if (!schema) return null
+
+      const result = schema.safeParse(value)
+      if (!result.success) {
+        return result.error.errors[0].message
+      }
+      return null
+    } catch (error) {
+      console.error('Validation error:', error)
+      return 'Validation error occurred'
     }
-  }
+  }, [validationSchemas])
 
-  const getPasswordStrength = (password: string) => {
-    const commonPatterns = /(password|1234|qwerty|abc123|admin|letmein)/i
-    const hasSpaces = /\s/.test(password)
-
-    if (commonPatterns.test(password)) {
-      return { label: 'Very Weak', color: 'bg-red-600', textColor: 'text-red-700' }
-    }
-
-    if (hasSpaces) {
-      return { label: 'Invalid', color: 'bg-red-500', textColor: 'text-red-600' }
-    }
-
-    if (password.length < PASSWORD_MIN) {
-      return { label: 'Too Short', color: 'bg-red-500', textColor: 'text-red-600' }
-    }
-
-    const hasLower = /[a-z]/.test(password)
-    const hasUpper = /[A-Z]/.test(password)
-    const hasNumber = /[0-9]/.test(password)
-    const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]/.test(password)
-
-    const complexityScore = [hasLower, hasUpper, hasNumber, hasSpecial].filter(Boolean).length
-    const lengthBonus = password.length >= 12 ? 1 : 0
-    const totalScore = complexityScore + lengthBonus
-
-    if (totalScore >= 5) {
-      return { label: 'Very Strong', color: 'bg-green-600', textColor: 'text-green-700' }
-    } else if (totalScore >= 4) {
-      return { label: 'Strong', color: 'bg-green-500', textColor: 'text-green-600' }
-    } else if (totalScore >= 3) {
-      return { label: 'Good', color: 'bg-yellow-500', textColor: 'text-yellow-600' }
-    } else if (totalScore >= 2) {
-      return { label: 'Fair', color: 'bg-orange-500', textColor: 'text-orange-600' }
-    } else {
-      return { label: 'Weak', color: 'bg-red-500', textColor: 'text-red-600' }
-    }
-  }
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Optimized change handler with useCallback
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
+    setFormData((prev: typeof formData) => ({ ...prev, [name]: value }))
 
-    if (name === 'password') {
-      const strength = getPasswordStrength(value)
-      setPasswordStrength(strength)
-    }
-
+    // Clear field-specific errors when user starts typing
     if (errors[name]) {
-      setErrors(prev => {
+      setErrors((prev: Record<string, string>) => {
         const next = { ...prev }
         delete next[name]
         return next
       })
     }
     setGlobalError(null)
-  }
+  }, [errors])
 
-  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+  // Optimized blur handler with useCallback
+  const handleBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     const error = validateField(name, value)
     if (error) {
-      setErrors(prev => ({ ...prev, [name]: error }))
+      setErrors((prev: Record<string, string>) => ({ ...prev, [name]: error }))
     }
-  }
+  }, [validateField])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setGlobalError(null)
+    setErrors({})
 
     // Check honeypot
     const honeypotValue = (e.target as HTMLFormElement).website?.value
-    if (honeypotValue) {
+    if (honeypotValue && honeypotValue.trim() !== '') {
+      console.warn('Honeypot triggered - possible bot submission')
       setGlobalError('Submission blocked - please try again')
       return
     }
 
-    // Validate all fields
+    // Client-side validation first
     const newErrors: Record<string, string> = {}
     Object.entries(formData).forEach(([name, value]) => {
-      const error = validateField(name, value)
+      const error = validateField(name as string, value as string)
       if (error) newErrors[name] = error
     })
 
@@ -143,35 +129,44 @@ export default function AccountStep({ onSuccess }: AccountStepProps) {
     setLoading(true)
 
     try {
-      // Call signup API route
+      // Get CSRF token and headers
+      const headers = await csrfTokenManager.getHeaders()
+
+      // Call signup API directly - server will handle additional validation
       const response = await fetch('/api/auth/signup', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
-          username: formData.username,
-          email: formData.email,
+          username: formData.username.trim(),
+          email: formData.email.trim(),
           password: formData.password,
+          website: '', // Honeypot field - should always be empty
         }),
       })
 
       const result = await response.json()
 
       if (!response.ok) {
-        // Handle specific errors
+        // Handle server-side validation errors
         if (result.field && result.error) {
           setErrors({ [result.field]: result.error })
         } else {
-          setGlobalError(result.error || 'Failed to create account')
+          setGlobalError(result.error || 'Failed to create account. Please try again.')
         }
         return
       }
 
-      // Success
-      onSuccess()
+      // Success - clear saved data and proceed
+      localStorage.removeItem(STORAGE_KEY)
+      onSuccess({
+        username: formData.username.trim(),
+        email: formData.email.trim(),
+        password: formData.password,
+      })
 
     } catch (err: any) {
-      console.error('Account creation error:', err)
-      setGlobalError('Failed to create account. Please try again.')
+      console.error('Signup error:', err)
+      setGlobalError('Failed to create account. Please check your connection and try again.')
     } finally {
       setLoading(false)
     }
@@ -184,7 +179,7 @@ export default function AccountStep({ onSuccess }: AccountStepProps) {
           Welcome to Challenger!
         </h1>
         <p className="text-gray-600">
-          Create your account to start tracking your Sims 4 challenges
+          Create your account to start tracking your challenges.
         </p>
       </div>
 
@@ -193,10 +188,18 @@ export default function AccountStep({ onSuccess }: AccountStepProps) {
           <input
             type="text"
             name="website"
-            style={{ position: 'absolute', left: '-9999px' }}
+            style={{
+              position: 'absolute',
+              left: '-9999px',
+              opacity: 0,
+              pointerEvents: 'none',
+              width: '1px',
+              height: '1px'
+            }}
             tabIndex={-1}
             autoComplete="off"
             aria-hidden="true"
+            defaultValue=""
           />
           <Label htmlFor="username" className="text-sm font-semibold text-gray-700 mb-1.5">
             Username
@@ -242,40 +245,18 @@ export default function AccountStep({ onSuccess }: AccountStepProps) {
           <Label htmlFor="password" className="text-sm font-semibold text-gray-700 mb-1.5">
             Password
           </Label>
-          <Input
+          <PasswordInput
             id="password"
             name="password"
-            type="password"
             value={formData.password}
             onChange={handleChange}
             onBlur={handleBlur}
             placeholder={`At least ${PASSWORD_MIN} characters`}
-            className={errors.password ? 'border-red-500' : ''}
+            error={errors.password}
             disabled={loading}
             autoComplete="new-password"
+            showValidation={true}
           />
-          {errors.password && (
-            <p className="mt-1.5 text-sm text-red-600">{errors.password}</p>
-          )}
-          {formData.password && (
-            <div className="mt-2 flex items-center gap-2">
-              <div className="flex-1 bg-gray-200 rounded-full h-1.5">
-                <div className={`h-1.5 rounded-full transition-all duration-300 ${passwordStrength.color}`}
-                  style={{
-                    width: passwordStrength.label === 'Very Weak' ? '10%' :
-                      passwordStrength.label === 'Invalid' ? '10%' :
-                        passwordStrength.label === 'Too Short' ? '20%' :
-                          passwordStrength.label === 'Weak' ? '30%' :
-                            passwordStrength.label === 'Fair' ? '50%' :
-                              passwordStrength.label === 'Good' ? '70%' :
-                                passwordStrength.label === 'Strong' ? '85%' : '100%'
-                  }}></div>
-              </div>
-              <span className={`text-xs font-medium ${passwordStrength.textColor}`}>
-                {passwordStrength.label}
-              </span>
-            </div>
-          )}
         </div>
 
         {globalError && (
@@ -290,16 +271,26 @@ export default function AccountStep({ onSuccess }: AccountStepProps) {
           className="w-full mt-6"
           size="lg"
         >
-          {loading ? 'Creating Account...' : 'Create Account'}
+          {loading ? 'Validating...' : 'Continue'}
         </Button>
 
         <p className="text-center text-sm text-gray-600 mt-4">
           Already have an account?{' '}
-          <a href="/login" className="text-brand-600 hover:text-brand-700 font-semibold">
+          <button
+            type="button"
+            onClick={() => setShowLoginModal(true)}
+            className="text-brand-600 hover:text-brand-700 font-semibold underline"
+          >
             Sign In
-          </a>
+          </button>
         </p>
       </form>
+
+      {/* Login Modal */}
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+      />
     </div>
   )
 }

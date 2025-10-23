@@ -133,8 +133,8 @@ export function Packs({
                     disabled={disabled}
                     onClick={() => toggle(pack.key)}
                     className={[
-                      'group relative h-20 rounded-xl border bg-white dark:bg-zinc-900',
-                      'px-3 py-2 text-left transition-all',
+                      'group relative aspect-square rounded-xl border bg-white dark:bg-zinc-900',
+                      'p-2 transition-all',
                       checked
                         ? 'border-sims-purple ring-0'
                         : 'border-gray-200 hover:border-sims-blue/60',
@@ -151,15 +151,13 @@ export function Packs({
                       </span>
                     )}
 
-                    <div className="flex h-full items-center">
-                      <div className="flex-1 pr-2">
-                        <div className="text-[13px] font-medium leading-tight line-clamp-2">
-                          {pack.name}
-                        </div>
-                        {pack.alwaysOn && (
-                          <div className="mt-0.5 text-[11px] text-gray-500">Always enabled</div>
-                        )}
+                    <div className="flex flex-col items-center justify-center h-full">
+                      <div className="text-xs font-medium leading-tight text-center min-h-[42px] flex items-center">
+                        {pack.name}
                       </div>
+                      {pack.alwaysOn && (
+                        <div className="mt-1 text-[10px] text-gray-500 text-center">Always enabled</div>
+                      )}
                     </div>
                   </button>
                 );

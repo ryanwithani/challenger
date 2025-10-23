@@ -157,4 +157,21 @@
   .dark .border-gray-300 {
     border-color: rgb(75 85 99);
   }
+
+  /* Brand color utilities for dark mode */
+  .bg-brand-50 {
+    background-color: rgb(245 242 255);
+  }
+
+  .dark .bg-brand-50 {
+    background-color: rgb(44 24 114);
+  }
+
+  .bg-brand-100 {
+    background-color: rgb(236 230 255);
+  }
+
+  .dark .bg-brand-100 {
+    background-color: rgb(64 36 155);
+  }
 }

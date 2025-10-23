@@ -4,21 +4,23 @@ import { useState } from 'react';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 import { BsCheck, BsX } from 'react-icons/bs';
 import { getPasswordChecks, PASSWORD_MIN } from '@/src/lib/utils/validators';
-import { clsx } from 'clsx';
+import { cn } from '@/src/lib/utils/cn';
 
-interface PasswordInputProps {
+interface PasswordInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
   showValidation?: boolean;
-  className?: string;
-  [key: string]: any;
+  error?: string;
 }
 
 export function PasswordInput({
   value,
   onChange,
+  onBlur,
   showValidation = false,
   className,
+  error,
   ...props
 }: PasswordInputProps) {
   const [showPassword, setShowPassword] = useState(false);
@@ -27,21 +29,26 @@ export function PasswordInput({
   const checks = showValidation ? getPasswordChecks(value) : null;
 
   const togglePasswordVisibility = () => {
-    console.log('Toggle clicked:', !showPassword); // Debug log
     setShowPassword(!showPassword);
   };
 
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    setFocused(false);
+    onBlur?.(e);
+  };
+
   return (
-    <div className="space-y-2">
+    <div className="space-y-1">
       <div className="relative">
         <input
           {...props}
           value={value}
           onChange={onChange}
           onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
-          className={clsx(
-            'w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-sims-blue focus:border-transparent pr-12 text-gray-900 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white',
+          onBlur={handleBlur}
+          className={cn(
+            'h-10 w-full rounded-xl border border-gray-300 bg-white px-3 pr-12 text-sm text-gray-900 placeholder:text-gray-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-200',
+            error && 'border-red-500 focus:ring-red-200',
             className
           )}
           minLength={showValidation ? PASSWORD_MIN : undefined}
@@ -50,17 +57,19 @@ export function PasswordInput({
         <button
           type="button"
           onClick={togglePasswordVisibility}
-          className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-sims-blue z-10"
+          className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-brand-200 z-10"
           aria-label={showPassword ? 'Hide password' : 'Show password'}
           tabIndex={0}
         >
           {showPassword ? (
-            <AiOutlineEyeInvisible size={20} className="text-gray-600 dark:text-gray-300" />
+            <AiOutlineEyeInvisible size={20} className="text-gray-600" />
           ) : (
-            <AiOutlineEye size={20} className="text-gray-600 dark:text-gray-300" />
+            <AiOutlineEye size={20} className="text-gray-600" />
           )}
         </button>
       </div>
+
+      {error && <p className="text-xs text-red-600">{error}</p>}
 
       {focused && value && checks && showValidation && (
         <div className="space-y-1 text-sm">

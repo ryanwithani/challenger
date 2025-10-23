@@ -1,25 +1,6 @@
 import { z } from 'zod'
 import DOMPurify from 'dompurify'
 
-// Define your environment variable schema
-const envSchema = z.object({
-  // Public (Client-safe)
-  NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1, 'Anon key is required'),
-
-  // Private (Server-only)
-  // SUPABASE_SERVICE_ROLE_KEY: z.string().min(1, 'Service role key is required'),
-
-  // Optional: add more env variables here
-  // ADMIN_EMAIL: z.string().email().optional(),
-})
-
-// Validate and export the parsed env
-export const env = envSchema.parse({
-  NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-})
-
 // Sanitization helpers
 export function sanitizeText(input: string | null | undefined): string {
   if (!input) return ''
@@ -157,7 +138,18 @@ export const signInSchema = z.object({
   password: z.string().min(1, 'Password is required').max(128, 'Password is too long'),
 })
 
+export const usernameSchema = z.string()
+  .min(3, 'Username must be at least 3 characters')
+  .max(20, 'Username must be less than 20 characters')
+  .regex(/^[a-z0-9_-]+$/, 'Username can only contain lowercase letters, numbers, - and _')
+  .refine((username) => {
+    const reserved = ['admin', 'root', 'system', 'mod', 'moderator', 'support', 'help']
+    return !reserved.includes(username.toLowerCase())
+  }, 'This username is reserved.')
+  .transform((username) => username.toLowerCase().trim())
+
 export const signUpSchema = z.object({
+  username: usernameSchema,
   email: emailSchema,
   password: passwordSchema,
   confirmPassword: z.string(),

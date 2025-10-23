@@ -28,7 +28,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
     console.log('Login form submitted with email:', email);
     setError('');
     setLoading(true);
-  
+
     try {
       console.log('Attempting to sign in...');
       await signIn(email, password);
@@ -60,7 +60,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
         <div className="bg-white rounded-3xl shadow-xl w-full max-w-md p-8 relative">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-brand-500">Sign In</h2>
@@ -118,13 +118,6 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
               Sign In
             </Button>
           </form>
-
-          <p className="text-center mt-4 text-sm text-gray-600">
-            Don't have an account?{' '}
-            <Link href="/signup" className="text-brand-500 hover:text-purple-600">
-              Sign up
-            </Link>
-          </p>
         </div>
       </div>
 

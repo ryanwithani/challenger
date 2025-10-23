@@ -142,7 +142,42 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         .eq('id', user.id)
         .single()
 
-      if (error) throw error
+      if (error) {
+        // If profile doesn't exist (PGRST116 error), create it
+        if (error.code === 'PGRST116' || error.message?.includes('0 rows')) {
+          console.log('Profile not found, creating new profile for user:', user.id)
+
+          // Extract username from user metadata or use email prefix
+          const username = user.user_metadata?.username || user.email?.split('@')[0] || 'user'
+
+          const { data: newProfile, error: createError } = await supabase
+            .from('users')
+            .insert({
+              id: user.id,
+              email: user.email!,
+              username: username,
+              display_name: username,
+              created_at: new Date().toISOString(),
+            })
+            .select('id, username, display_name, avatar_url, email')
+            .single()
+
+          if (createError) {
+            console.error('Failed to create profile:', createError)
+            throw createError
+          }
+
+          set({
+            userProfile: newProfile,
+            profileFetched: true,
+            isFetchingProfile: false
+          })
+          return
+        }
+
+        // For other errors, throw them
+        throw error
+      }
 
       if (data) {
         set({
@@ -152,7 +187,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         })
       }
     } catch (error) {
-      console.error('Failed to fetch profile:', error)
+      console.error('Failed to fetch/create profile:', error)
       set({
         isFetchingProfile: false,
         profileFetched: false
@@ -166,27 +201,27 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       const supabase = createSupabaseBrowserClient();
       console.log('Created supabase client');
-      
+
       console.log('Directly attempting sign in with password...');
       try {
         const authResponse = await supabase.auth.signInWithPassword({
           email,
           password,
         });
-        
+
         console.log('Raw auth response:', authResponse);
         const { data, error } = authResponse;
-        
+
         if (error) {
           console.error('Supabase auth returned error:', error);
           throw error;
         }
-        
+
         if (!data || !data.user) {
           console.error('No user data returned from authentication');
           throw new Error('Authentication failed: No user data returned');
         }
-        
+
         console.log('Authentication successful for:', data.user.email);
         set({ user: data.user });
         // Don't return anything to match void return type
@@ -215,28 +250,28 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       console.log('Signing out user...');
       const supabase = createSupabaseBrowserClient();
-      
+
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error('Error during sign out:', error);
         throw error;
       }
-      
+
       console.log('Sign out successful, clearing user state');
-      
+
       // Clear all user state
-      set({ 
-        user: null, 
+      set({
+        user: null,
         userProfile: null,
         profileFetched: false,
         isFetchingProfile: false
       });
-      
+
       // Force a redirect to home page instead of /login
       if (typeof window !== 'undefined') {
         window.location.href = '/';
       }
-      
+
       console.log('User state cleared');
     } catch (error) {
       console.error('Caught error during sign out:', error);
