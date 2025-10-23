@@ -2,7 +2,6 @@
 import { useMemo, useState } from 'react'
 import clsx from 'clsx'
 import { Modal } from '@/src/components/sim/Modal'
-import { isToddlerOrInfant } from '@/src/lib/sim/age'
 import {
   BASE_CAREERS, getBranchesForBase, careerLabelFromIds, packForCareerIds,
 } from '@/src/lib/utils/careers'
@@ -11,14 +10,12 @@ import { PackIcon } from '@/src/components/sim/PackIcon'
 export type CareerSelection = { baseId?: string; branchId?: string; label: string | null }
 
 export function CareerPicker({
-  ageStage, value, onChange, ownedPacks = ['Base Game'],
+  value, onChange, ownedPacks = ['Base Game'],
 }: {
-  ageStage: string
   value: CareerSelection | null
   onChange: (v: CareerSelection | null) => void
   ownedPacks?: string[]
 }) {
-  const disabled = isToddlerOrInfant(ageStage)
   const [open, setOpen] = useState(false)
   const [q, setQ] = useState('')
   const [baseId, setBaseId] = useState<string | undefined>(value?.baseId)
@@ -51,7 +48,6 @@ export function CareerPicker({
       <div className="flex items-center gap-2">
         <button
           type="button"
-          disabled={disabled}
           onClick={() => setOpen(true)}
           className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm hover:bg-gray-50 disabled:opacity-50"
         >

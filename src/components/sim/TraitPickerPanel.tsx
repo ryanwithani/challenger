@@ -2,23 +2,18 @@
 import { useMemo, useState } from 'react'
 import Image from 'next/image'
 import clsx from 'clsx'
-import { isInfant, isToddler } from '@/src/lib/sim/age'
 import { Traits, type TraitDefinition } from '@/src/components/sim/TraitsCatalog'
 import { traitPngPath } from '@/src/components/sim/TraitAssets'
 import { PackIcon } from '@/src/components/sim/PackIcon'
 
-const INFANT_IDS = ['calm','cautious','intense','sensitive','sunny','wiggly']
-const TODDLER_IDS = ['angelic','charmer','clingy','fussy','independent','inquisitive','silly','wild']
-const CATEGORY_ORDER = ['Emotional','Lifestyle','Hobby','Social','Bonus','Infant','Toddler'] as const
+const CATEGORY_ORDER = ['Emotional','Lifestyle','Hobby','Social','Bonus'] as const
 
 export function TraitPickerPanel({
-  ageStage,
   value,
   onChange,
   max = 3,
   ownedPacks = ['Base Game'],
 }: {
-  ageStage: string
   value: string[]              // trait ids
   onChange: (ids: string[]) => void
   max?: number
@@ -29,16 +24,12 @@ export function TraitPickerPanel({
   const atCapacity = value.length >= max
 
   const pool: TraitDefinition[] = useMemo(() => {
-    if (isInfant(ageStage)) return Traits.filter(t => INFANT_IDS.includes(t.id))
-    if (isToddler(ageStage)) return Traits.filter(t => TODDLER_IDS.includes(t.id))
-    return Traits.filter(t => !INFANT_IDS.includes(t.id) && !TODDLER_IDS.includes(t.id))
-  }, [ageStage])
+    return Traits
+  }, [])
 
   const categories = useMemo(() => {
     const s = new Set<string>(['All'])
     pool.forEach(t => t.category && s.add(t.category))
-    if (isInfant(ageStage)) s.add('Infant')
-    if (isToddler(ageStage)) s.add('Toddler')
     return Array.from(s).sort((a, b) => {
       const ia = CATEGORY_ORDER.indexOf(a as any)
       const ib = CATEGORY_ORDER.indexOf(b as any)
@@ -47,12 +38,12 @@ export function TraitPickerPanel({
       if (ib === -1) return -1
       return ia - ib
     })
-  }, [pool, ageStage])
+  }, [pool])
 
   const visible = useMemo(() => {
     const term = q.trim().toLowerCase()
     return pool
-      .filter(t => tab === 'All' ? true : t.category === tab || tab === 'Infant' || tab === 'Toddler')
+      .filter(t => tab === 'All' ? true : t.category === tab)
       .filter(t => term ? (t.label.toLowerCase().includes(term) || t.id.includes(term)) : true)
       .sort((a,b) => a.label.localeCompare(b.label))
   }, [pool, tab, q])

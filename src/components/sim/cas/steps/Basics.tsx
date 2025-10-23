@@ -15,6 +15,8 @@ const AGE_OPTS = [
   { value: 'elder', label: 'Elder' },
 ] as const
 
+
+
 export function BasicsStep() {
   const supabase = useMemo(() => createSupabaseBrowserClient(), [])
   const { name, age_stage, avatar_url, challenge_id, patch, setStep } = useSimCAS()
@@ -28,10 +30,33 @@ export function BasicsStep() {
     })()
   }, [supabase])
 
-  function next() {
-    if (!name.trim()) { setError('Name is required.'); return }
-    setStep(2)
-  }
+  useEffect(() => {
+    (async () => {
+      try {
+        const supabase = createSupabaseBrowserClient();
+        
+        // Verify user is authenticated
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          throw new Error("Authentication required");
+        }
+        
+        // Only fetch challenges belonging to this user
+        const { data, error } = await supabase
+          .from('challenges')
+          .select('id, name, challenge_type, status')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        setChallenges((data ?? []) as ChallengeRow[]);
+      } catch (error) {
+        console.error('Error fetching challenges:', error);
+        // Set empty challenges array instead of showing an error
+        setChallenges([]);
+      }
+    })();
+  }, [supabase]);
 
   return (
     <div className="space-y-4">
@@ -68,15 +93,22 @@ export function BasicsStep() {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700">Link to Challenge (optional)</label>
-        <select
-          className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500"
-          value={challenge_id ?? ''} onChange={(e) => patch({ challenge_id: e.target.value || null })}
-        >
-          <option value="">— None —</option>
-          {challenges.map(c => <option key={c.id} value={c.id}>{c.challenge_type}</option>)}
-        </select>
-      </div>
+  <label className="block text-sm font-medium text-gray-700">Link to Challenge (optional)</label>
+  <select
+    className="mt-1 w-full rounded-xl border-2 border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+    value={challenge_id ?? ''} onChange={(e) => patch({ challenge_id: e.target.value || null })}
+  >
+    <option value="">— None —</option>
+    {challenges.map(c => (
+      <option key={c.id} value={c.id}>
+        {c.name || c.challenge_type} {c.status === 'active' ? '(Active)' : ''}
+      </option>
+    ))}
+  </select>
+  <p className="mt-1 text-xs text-gray-500">
+    Linking to a challenge will track this sim's progress within that challenge.
+  </p>
+</div>
     </div>
   )
 }

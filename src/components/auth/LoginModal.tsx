@@ -7,7 +7,6 @@ import { useAuthStore } from '@/src/lib/store/authStore'
 import { Input } from '@/src/components/ui/Input'
 import { Button } from '@/src/components/ui/Button'
 import { PasswordInput } from '@/src/components/auth/PasswordInput'
-import { Modal } from '@/src/components/sim/SimModal'
 import { PasswordResetModal } from '@/src/components/auth/PasswordResetModal'
 
 interface LoginModalProps {
@@ -25,20 +24,24 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [showResetModal, setShowResetModal] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
-
+    e.preventDefault();
+    console.log('Login form submitted with email:', email);
+    setError('');
+    setLoading(true);
+  
     try {
-      await signIn(email, password)
-      onClose()
-      router.push('/dashboard')
+      console.log('Attempting to sign in...');
+      await signIn(email, password);
+      console.log('Sign in successful!');
+      onClose();
+      router.push('/dashboard');
     } catch (err: any) {
-      setError(err.message || 'Failed to sign in')
+      console.error('Sign in error details:', err);
+      setError(err.message || 'Failed to sign in');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleClose = () => {
     setEmail('')
@@ -49,20 +52,21 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
   }
 
   const handleForgotPassword = () => {
-    // Pass the email to the reset modal if user already entered it
     handleClose()
     setShowResetModal(true)
   }
 
+  if (!isOpen) return null;
+
   return (
     <>
-      <Modal isOpen={isOpen} onClose={handleClose}>
-        <div className="w-full max-w-md">
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-3xl shadow-xl w-full max-w-md p-8 relative">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Sign In</h2>
+            <h2 className="text-2xl font-bold text-brand-500">Sign In</h2>
             <button
               onClick={handleClose}
-              className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
+              className="text-gray-400 hover:text-gray-600 transition-colors"
               aria-label="Close"
             >
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -77,55 +81,57 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
+              className="w-full"
               required
             />
 
-            <div className="space-y-2">
-              <PasswordInput
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
-                placeholder="Password"
-                required
-              />
-              <div className="flex justify-end">
-                <button
-                  type="button"
-                  onClick={handleForgotPassword}
-                  className="text-sm text-sims-blue hover:underline dark:text-sims-blue"
-                >
-                  Forgot password?
-                </button>
-              </div>
+            <PasswordInput
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full"
+              placeholder="Password"
+              required
+            />
+
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={handleForgotPassword}
+                className="text-sm text-brand-500 hover:text-purple-600"
+              >
+                Forgot password?
+              </button>
             </div>
 
             {error && (
-              <p className="text-red-500 dark:text-red-400 text-sm">{error}</p>
+              <p className="text-red-500 text-sm">{error}</p>
             )}
 
             <Button
               type="submit"
-              className="w-full bg-sims-green hover:bg-sims-green/90 text-white dark:bg-sims-green dark:hover:bg-sims-green/90"
+              variant="gradient"
+              className="w-full"
               disabled={loading}
+              loading={loading}
+              loadingText="Signing in..."
             >
-              {loading ? 'Signing in...' : 'Sign In'}
+              Sign In
             </Button>
           </form>
 
-          <p className="text-center mt-4 text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-center mt-4 text-sm text-gray-600">
             Don't have an account?{' '}
-            <Link href="/register" className="text-sims-blue hover:underline dark:text-sims-blue">
+            <Link href="/signup" className="text-brand-500 hover:text-purple-600">
               Sign up
             </Link>
           </p>
         </div>
-      </Modal>
+      </div>
 
       <PasswordResetModal
         isOpen={showResetModal}
         onClose={() => setShowResetModal(false)}
-        initialEmail={email} // Pass the email if user already entered it
+        initialEmail={email}
       />
     </>
   )

@@ -2,7 +2,6 @@
 import { useMemo, useState } from 'react'
 import clsx from 'clsx'
 import { Modal } from '@/src/components/sim/Modal'
-import { isToddlerOrInfant } from '@/src/lib/sim/age'
 import { Aspirations, type Aspiration } from '@/src/components/sim/AspirationsCatalog'
 import { PackIcon } from '@/src/components/sim/PackIcon'
 
@@ -14,7 +13,6 @@ export function AspirationPicker({
   onChange: (next: string | null) => void
   ownedPacks?: string[]
 }) {
-  const disabled = isToddlerOrInfant(ageStage)
   const [open, setOpen] = useState(false)
   const [q, setQ] = useState('')
   const [tab, setTab] = useState('All')
@@ -27,7 +25,6 @@ export function AspirationPicker({
   const list: Aspiration[] = useMemo(() => {
     const term = q.trim().toLowerCase()
     return Aspirations
-      .filter(a => !isToddlerOrInfant(ageStage))
       .filter(a => tab === 'All' ? true : a.category === tab)
       .filter(a => term ? (a.label.toLowerCase().includes(term) || a.id.includes(term)) : true)
       .sort((a,b) => a.label.localeCompare(b.label))
@@ -44,7 +41,6 @@ export function AspirationPicker({
       <div className="flex items-center gap-2">
         <button
           type="button"
-          disabled={disabled}
           onClick={() => setOpen(true)}
           className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm hover:bg-gray-50 disabled:opacity-50"
         >

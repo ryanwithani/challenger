@@ -27,21 +27,9 @@ export default function ProtectedLayout({
 
   useEffect(() => {
     if (initialized && !loading && !user) {
-      router.push('/login')
+      router.push('/')
     }
   }, [user, loading, initialized, router])
-
-  if (!initialized || loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-2xl text-gray-500">Loading...</div>
-      </div>
-    )
-  }
-
-  if (!user) {
-    return null
-  }
 
   if (user && !user.email_confirmed_at) {
     return (
@@ -51,6 +39,25 @@ export default function ProtectedLayout({
           <p className="text-gray-600">
             Please check your email and click the verification link to continue.
           </p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!initialized || loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <div className="text-2xl text-gray-500">Loading your dashboard...</div>
+          <div className="text-sm text-gray-400">
+            If loading takes more than 10 seconds, please 
+            <button 
+              onClick={() => window.location.reload()} 
+              className="text-purple-500 hover:underline ml-1">
+              refresh the page
+            </button>
+          </div>
         </div>
       </div>
     )

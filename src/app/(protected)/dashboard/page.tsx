@@ -1,14 +1,17 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useChallengeStore } from '@/src/lib/store/challengeStore'
 import { useSimStore } from '@/src/lib/store/simStore'
 import { ChallengeTile } from '@/src/components/challenge/ChallengeTile'
 import { SimCard } from '@/src/components/sim/SimCard'
 import { Button } from '@/src/components/ui/Button'
+import { Traits } from '@/src/components/sim/TraitsCatalog'
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<'overview' | 'challenges' | 'sims'>('overview')
   const [error, setError] = useState<string | null>(null)
 
@@ -65,6 +68,30 @@ export default function DashboardPage() {
     })
   }
 
+  // Navigation handlers
+  const navigateToChallenge = (id: string) => {
+    router.push(`/challenge/${id}`);
+  };
+
+  const navigateToSim = (id: string) => {
+    router.push(`/sim/${id}`);
+  };
+
+  useEffect(() => {
+    console.log('Dashboard component mounted');
+    
+    setError(null);
+    console.log('Fetching dashboard data...');
+    
+    Promise.all([
+      fetchChallenges().then(() => console.log('Challenges fetched successfully')),
+      fetchAllSims().then(() => console.log('Sims fetched successfully'))
+    ]).catch(error => {
+      console.error('Error in dashboard data fetching:', error);
+      setError('Failed to load dashboard data. Please try again.');
+    });
+  }, [fetchChallenges, fetchAllSims]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-blue-50">
       <div className="max-w-[1400px] mx-auto p-6 space-y-8">
@@ -78,13 +105,13 @@ export default function DashboardPage() {
               <p className="text-lg text-gray-600 mt-2">Manage your challenges and sims</p>
             </div>
             <div className="flex space-x-3">
-              <Link href="/challenge/new">
-                <Button className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-200 border-none shadow-lg">
+              <Link href="/dashboard/new/challenge">
+                <Button variant="primary" className="px-6 py-3">
                   New Challenge
                 </Button>
               </Link>
               <Link href="/dashboard/new/sim">
-                <Button className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-purple-700 transition-all duration-200 border-none shadow-lg">
+                <Button variant="secondary" className="px-6 py-3">
                   Add Sim
                 </Button>
               </Link>
@@ -104,7 +131,7 @@ export default function DashboardPage() {
             </div>
             <Button 
               onClick={handleRetry}
-              className="bg-red-600 hover:bg-red-700 text-white"
+              variant="destructive"
             >
               Retry
             </Button>
@@ -175,9 +202,13 @@ export default function DashboardPage() {
                 ) : recentChallenges.length > 0 ? (
                   <div className="space-y-4">
                     {recentChallenges.map((challenge) => (
-                      <Link key={challenge.id} href={`/challenge/${challenge.id}`}>
-                          <ChallengeTile challenge={challenge} />
-                      </Link>
+                      <div 
+                        key={challenge.id} 
+                        onClick={() => navigateToChallenge(challenge.id)}
+                        className="cursor-pointer"
+                      >
+                        <ChallengeTile challenge={challenge} />
+                      </div>
                     ))}
                   </div>
                 ) : (
@@ -185,7 +216,7 @@ export default function DashboardPage() {
                     <div className="text-6xl mb-4">🎯</div>
                     <p className="text-gray-500 mb-4">No challenges yet</p>
                     <Link href="/challenge/new">
-                      <Button className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+                      <Button variant="gradient">
                         Create Your First Challenge
                       </Button>
                     </Link>
@@ -213,11 +244,13 @@ export default function DashboardPage() {
                 ) : recentSims.length > 0 ? (
                   <div className="grid grid-cols-2 gap-4">
                     {recentSims.map((sim) => (
-                      <Link key={sim.id} href={`/sim/${sim.id}`}>
-                        <div className="p-3 rounded-xl border-2 border-gray-200 hover:border-blue-400 hover:shadow-lg transition-all duration-200 bg-gradient-to-br from-white to-blue-50">
-                          <SimCard sim={sim} compact />
-                        </div>
-                      </Link>
+                      <div 
+                        key={sim.id} 
+                        onClick={() => navigateToSim(sim.id)}
+                        className="p-3 rounded-xl border-2 border-gray-200 hover:border-blue-400 hover:shadow-lg transition-all duration-200 bg-gradient-to-br from-white to-blue-50 cursor-pointer"
+                      >
+                        <SimCard sim={sim} compact traitCatalog={Traits} />
+                      </div>
                     ))}
                   </div>
                 ) : (
@@ -225,7 +258,7 @@ export default function DashboardPage() {
                     <div className="text-6xl mb-4">👤</div>
                     <p className="text-gray-500 mb-4">No sims yet</p>
                     <Link href="/dashboard/new/sim">
-                      <Button className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+                      <Button variant="secondary">
                         Add Your First Sim
                       </Button>
                     </Link>
@@ -241,7 +274,7 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-gray-900">All Challenges</h2>
                 <Link href="/challenge/new">
-                  <Button className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+                  <Button variant="primary">
                     New Challenge
                   </Button>
                 </Link>
@@ -255,9 +288,13 @@ export default function DashboardPage() {
               ) : challenges.length > 0 ? (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {challenges.map((challenge) => (
-                    <Link key={challenge.id} href={`/challenge/${challenge.id}`}>
-                        <ChallengeTile challenge={challenge} />
-                    </Link>
+                    <div 
+                      key={challenge.id} 
+                      onClick={() => navigateToChallenge(challenge.id)}
+                      className="cursor-pointer"
+                    >
+                      <ChallengeTile challenge={challenge} />
+                    </div>
                   ))}
                 </div>
               ) : (
@@ -266,7 +303,7 @@ export default function DashboardPage() {
                   <h3 className="text-2xl font-bold text-gray-900 mb-2">No challenges yet</h3>
                   <p className="text-gray-500 mb-6">Start your journey by creating your first challenge</p>
                   <Link href="/challenge/new">
-                    <Button className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-3">
+                    <Button variant="gradient" className="px-8 py-3">
                       Create Your First Challenge
                     </Button>
                   </Link>
@@ -281,7 +318,7 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-gray-900">All Sims</h2>
                 <Link href="/dashboard/new/sim">
-                  <Button className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+                  <Button variant="secondary">
                     Add Sim
                   </Button>
                 </Link>
@@ -311,11 +348,13 @@ export default function DashboardPage() {
                   {/* Sims Grid */}
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {allSims.map((sim) => (
-                      <Link key={sim.id} href={`/sim/${sim.id}`}>
-                        <div className="p-4 rounded-xl border-2 border-gray-200 hover:border-blue-400 hover:shadow-xl transition-all duration-200 bg-gradient-to-br from-white to-blue-50 h-full">
-                          <SimCard sim={sim} />
-                        </div>
-                      </Link>
+                      <div 
+                        key={sim.id}
+                        onClick={() => navigateToSim(sim.id)}
+                        className="p-4 rounded-xl border-2 border-gray-200 hover:border-blue-400 hover:shadow-xl transition-all duration-200 bg-gradient-to-br from-white to-blue-50 h-full cursor-pointer"
+                      >
+                        <SimCard sim={sim} traitCatalog={Traits}/>
+                      </div>
                     ))}
                   </div>
                 </>
@@ -325,7 +364,7 @@ export default function DashboardPage() {
                   <h3 className="text-2xl font-bold text-gray-900 mb-2">No sims yet</h3>
                   <p className="text-gray-500 mb-6">Add your first sim to start tracking their journey</p>
                   <Link href="/dashboard/new/sim">
-                    <Button className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-3">
+                    <Button variant="secondary" className="px-8 py-3">
                       Add Your First Sim
                     </Button>
                   </Link>

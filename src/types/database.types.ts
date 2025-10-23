@@ -275,6 +275,7 @@ export type Database = {
       progress: {
         Row: {
           challenge_id: string
+          created_at: string | null
           completed_at: string | null
           completion_details: Json | null
           goal_id: string
@@ -285,6 +286,7 @@ export type Database = {
         }
         Insert: {
           challenge_id: string
+          created_at?: string | null
           completed_at?: string | null
           completion_details?: Json | null
           goal_id: string
@@ -295,6 +297,7 @@ export type Database = {
         }
         Update: {
           challenge_id?: string
+          created_at?: string | null
           completed_at?: string | null
           completion_details?: Json | null
           goal_id?: string

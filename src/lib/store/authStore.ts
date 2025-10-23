@@ -162,20 +162,42 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
 
   signIn: async (email: string, password: string) => {
-    // Remove client-side rate limiting code
-    const response = await fetch('/api/auth/signin', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    })
-
-    const result = await response.json()
-
-    if (!response.ok) {
-      throw new Error(result.error || 'Sign in failed')
+    console.log('SignIn function called in authStore');
+    try {
+      const supabase = createSupabaseBrowserClient();
+      console.log('Created supabase client');
+      
+      console.log('Directly attempting sign in with password...');
+      try {
+        const authResponse = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        
+        console.log('Raw auth response:', authResponse);
+        const { data, error } = authResponse;
+        
+        if (error) {
+          console.error('Supabase auth returned error:', error);
+          throw error;
+        }
+        
+        if (!data || !data.user) {
+          console.error('No user data returned from authentication');
+          throw new Error('Authentication failed: No user data returned');
+        }
+        
+        console.log('Authentication successful for:', data.user.email);
+        set({ user: data.user });
+        // Don't return anything to match void return type
+      } catch (innerError) {
+        console.error('Exception during Supabase auth call:', innerError);
+        throw innerError;
+      }
+    } catch (outerError: any) {
+      console.error('Outer catch - sign in error in authStore:', outerError);
+      throw outerError;
     }
-
-    set({ user: result.user })
   },
 
   signUp: async (email: string, password: string) => {
@@ -190,9 +212,36 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   signOut: async () => {
-    const supabase = createSupabaseBrowserClient()
-    await supabase.auth.signOut()
-    set({ user: null, userProfile: null })
+    try {
+      console.log('Signing out user...');
+      const supabase = createSupabaseBrowserClient();
+      
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Error during sign out:', error);
+        throw error;
+      }
+      
+      console.log('Sign out successful, clearing user state');
+      
+      // Clear all user state
+      set({ 
+        user: null, 
+        userProfile: null,
+        profileFetched: false,
+        isFetchingProfile: false
+      });
+      
+      // Force a redirect to home page instead of /login
+      if (typeof window !== 'undefined') {
+        window.location.href = '/';
+      }
+      
+      console.log('User state cleared');
+    } catch (error) {
+      console.error('Caught error during sign out:', error);
+      throw error;
+    }
   },
 
   fetchUser: async () => {
