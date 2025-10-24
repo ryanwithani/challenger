@@ -51,9 +51,9 @@ export default function ProtectedLayout({
           <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
           <div className="text-2xl text-gray-500">Loading your dashboard...</div>
           <div className="text-sm text-gray-400">
-            If loading takes more than 10 seconds, please 
-            <button 
-              onClick={() => window.location.reload()} 
+            If loading takes more than 10 seconds, please
+            <button
+              onClick={() => window.location.reload()}
               className="text-purple-500 hover:underline ml-1">
               refresh the page
             </button>
@@ -64,7 +64,7 @@ export default function ProtectedLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-blue-50 flex">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex">
       <Sidebar />
       <div className="flex-1 flex flex-col">
         <Navbar />

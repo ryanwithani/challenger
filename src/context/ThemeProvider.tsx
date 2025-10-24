@@ -17,15 +17,19 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const [actualTheme, setActualTheme] = useState<'light' | 'dark'>('light')
 
     useEffect(() => {
-        // Load theme from localStorage
-        const savedTheme = localStorage.getItem('theme') as Theme | null
-        if (savedTheme) {
-            setTheme(savedTheme)
+        // Load theme from localStorage (only on client side)
+        if (typeof window !== 'undefined') {
+            const savedTheme = localStorage.getItem('theme') as Theme | null
+            if (savedTheme) {
+                setTheme(savedTheme)
+            }
         }
     }, [])
 
     useEffect(() => {
-        // Update actualTheme when theme changes
+        // Update actualTheme when theme changes (only on client side)
+        if (typeof window === 'undefined') return
+
         const updateActualTheme = () => {
             if (theme === 'system') {
                 const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
@@ -46,7 +50,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }, [theme])
 
     useEffect(() => {
-        // Apply theme to document
+        // Apply theme to document (only on client side)
+        if (typeof window === 'undefined') return
+
         const root = document.documentElement
 
         if (actualTheme === 'dark') {
@@ -58,19 +64,20 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     const handleSetTheme = (newTheme: Theme) => {
         setTheme(newTheme)
-        localStorage.setItem('theme', newTheme)
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('theme', newTheme)
+        }
     }
 
     return (
-        <ThemeContext.Provider value= {{
-        theme,
+        <ThemeContext.Provider value={{
+            theme,
             setTheme: handleSetTheme,
-                actualTheme
-    }
-}>
-    { children }
-    </ThemeContext.Provider>
-  )
+            actualTheme
+        }}>
+            {children}
+        </ThemeContext.Provider>
+    )
 }
 
 export function useTheme() {

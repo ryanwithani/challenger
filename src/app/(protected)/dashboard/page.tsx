@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useChallengeStore } from '@/src/lib/store/challengeStore'
@@ -40,17 +40,23 @@ export default function DashboardPage() {
     })
   }, [fetchChallenges, fetchAllSims])
 
-  // Get recent activity
-  const recentChallenges = challenges
-    .sort((a, b) => new Date(b.updated_at ?? '').getTime() - new Date(a.updated_at ?? '').getTime())
-    .slice(0, 3)
+  // Memoized recent activity
+  const recentChallenges = useMemo(() =>
+    challenges
+      .sort((a, b) => new Date(b.updated_at ?? '').getTime() - new Date(a.updated_at ?? '').getTime())
+      .slice(0, 3), [challenges]
+  )
 
-  const recentSims = allSims
-    .sort((a, b) => new Date(b.created_at ?? '').getTime() - new Date(a.created_at ?? '').getTime())
-    .slice(0, 6)
+  const recentSims = useMemo(() =>
+    allSims
+      .sort((a, b) => new Date(b.created_at ?? '').getTime() - new Date(a.created_at ?? '').getTime())
+      .slice(0, 6), [allSims]
+  )
 
-  // Get active challenges
-  const activeChallenges = challenges.filter(c => c.status === 'active')
+  // Memoized active challenges
+  const activeChallenges = useMemo(() =>
+    challenges.filter(c => c.status === 'active'), [challenges]
+  )
 
   const tabs = [
     { id: 'overview', name: 'Overview' },
@@ -77,32 +83,17 @@ export default function DashboardPage() {
     router.push(`/sim/${id}`);
   };
 
-  useEffect(() => {
-    console.log('Dashboard component mounted');
-    
-    setError(null);
-    console.log('Fetching dashboard data...');
-    
-    Promise.all([
-      fetchChallenges().then(() => console.log('Challenges fetched successfully')),
-      fetchAllSims().then(() => console.log('Sims fetched successfully'))
-    ]).catch(error => {
-      console.error('Error in dashboard data fetching:', error);
-      setError('Failed to load dashboard data. Please try again.');
-    });
-  }, [fetchChallenges, fetchAllSims]);
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <div className="max-w-[1400px] mx-auto p-6 space-y-8">
         {/* Header */}
-        <div className="bg-white rounded-3xl p-8 shadow-xl border-2 border-gray-100">
+        <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-xl border-2 border-gray-100 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                 Dashboard
               </h1>
-              <p className="text-lg text-gray-600 mt-2">Manage your challenges and sims</p>
+              <p className="text-lg text-gray-600 dark:text-gray-400 mt-2">Manage your challenges and sims</p>
             </div>
             <div className="flex space-x-3">
               <Link href="/dashboard/new/challenge">
@@ -129,7 +120,7 @@ export default function DashboardPage() {
                 <p className="text-red-600 text-sm mt-1">Check your connection and try again</p>
               </div>
             </div>
-            <Button 
+            <Button
               onClick={handleRetry}
               variant="destructive"
             >
@@ -146,30 +137,34 @@ export default function DashboardPage() {
             { label: 'Total Sims', value: allSims.length, color: 'from-purple-500 to-pink-600', icon: '👥' },
             { label: 'Current Heirs', value: allSims.filter(sim => sim.is_heir).length, color: 'from-amber-500 to-orange-600', icon: '👑' }
           ].map((stat, index) => (
-            <div key={index} className="bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-100 hover:shadow-xl transition-shadow duration-200">
+            <div key={index} className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border-2 border-gray-100 dark:border-gray-700 hover:shadow-xl transition-shadow duration-200">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-3xl">{stat.icon}</span>
                 <div className={`text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
                   {stat.value}
                 </div>
               </div>
-              <div className="text-gray-600 font-medium">{stat.label}</div>
+              <div className="text-gray-600 dark:text-gray-400 font-medium">{stat.label}</div>
             </div>
           ))}
         </div>
 
         {/* Tabs */}
-        <div className="bg-white rounded-2xl p-2 shadow-lg border-2 border-gray-100">
-          <nav className="flex space-x-2">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-2 shadow-lg border-2 border-gray-100 dark:border-gray-700">
+          <nav className="flex space-x-2" role="tablist" aria-label="Dashboard navigation tabs">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`flex-1 py-4 px-6 rounded-xl font-semibold transition-all duration-300 ${
-                  activeTab === tab.id
-                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
-                    : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
-                }`}
+                className={`flex-1 py-4 px-6 rounded-xl font-semibold transition-all duration-300 ${activeTab === tab.id
+                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
+                  }`}
+                id={`${tab.id}-tab`}
+                role="tab"
+                aria-selected={activeTab === tab.id}
+                aria-controls={`${tab.id}-panel`}
+                aria-label={`Switch to ${tab.name} tab`}
               >
                 {tab.name}
               </button>
@@ -181,96 +176,98 @@ export default function DashboardPage() {
         <div className="space-y-8">
           {/* OVERVIEW TAB */}
           {activeTab === 'overview' && (
-            <div className="grid lg:grid-cols-2 gap-8">
-              {/* Recent Challenges */}
-              <div className="bg-white rounded-3xl p-8 shadow-lg border-2 border-gray-100">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-bold text-gray-900">Recent Challenges</h2>
-                  <button
-                    onClick={() => setActiveTab('challenges')}
-                    className="text-purple-600 hover:text-purple-700 font-semibold flex items-center gap-2"
-                  >
-                    View all →
-                  </button>
+            <div role="tabpanel" id="overview-panel" aria-labelledby="overview-tab">
+              <div className="grid lg:grid-cols-2 gap-8">
+                {/* Recent Challenges */}
+                <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-lg border-2 border-gray-100 dark:border-gray-700">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Recent Challenges</h2>
+                    <button
+                      onClick={() => setActiveTab('challenges')}
+                      className="text-purple-600 hover:text-purple-700 font-semibold flex items-center gap-2"
+                    >
+                      View all →
+                    </button>
+                  </div>
+
+                  {challengesLoading ? (
+                    <div className="text-center py-12">
+                      <div className="animate-spin rounded-full h-12 w-12 border-4 border-purple-500 border-t-transparent mx-auto"></div>
+                      <p className="text-gray-500 dark:text-gray-400 mt-4">Loading challenges...</p>
+                    </div>
+                  ) : recentChallenges.length > 0 ? (
+                    <div className="space-y-4">
+                      {recentChallenges.map((challenge) => (
+                        <div
+                          key={challenge.id}
+                          onClick={() => navigateToChallenge(challenge.id)}
+                          className="cursor-pointer"
+                        >
+                          <ChallengeTile challenge={challenge} />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-2xl">
+                      <div className="text-6xl mb-4">🎯</div>
+                      <p className="text-gray-500 dark:text-gray-400 mb-4">No challenges yet</p>
+                      <Link href="/challenge/new">
+                        <Button variant="gradient">
+                          Create Your First Challenge
+                        </Button>
+                      </Link>
+                    </div>
+                  )}
                 </div>
 
-                {challengesLoading ? (
-                  <div className="text-center py-12">
-                    <div className="animate-spin rounded-full h-12 w-12 border-4 border-purple-500 border-t-transparent mx-auto"></div>
-                    <p className="text-gray-500 mt-4">Loading challenges...</p>
+                {/* Recent Sims */}
+                <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-lg border-2 border-gray-100 dark:border-gray-700">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Recent Sims</h2>
+                    <button
+                      onClick={() => setActiveTab('sims')}
+                      className="text-purple-600 hover:text-purple-700 font-semibold flex items-center gap-2"
+                    >
+                      View all →
+                    </button>
                   </div>
-                ) : recentChallenges.length > 0 ? (
-                  <div className="space-y-4">
-                    {recentChallenges.map((challenge) => (
-                      <div 
-                        key={challenge.id} 
-                        onClick={() => navigateToChallenge(challenge.id)}
-                        className="cursor-pointer"
-                      >
-                        <ChallengeTile challenge={challenge} />
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-2xl">
-                    <div className="text-6xl mb-4">🎯</div>
-                    <p className="text-gray-500 mb-4">No challenges yet</p>
-                    <Link href="/challenge/new">
-                      <Button variant="gradient">
-                        Create Your First Challenge
-                      </Button>
-                    </Link>
-                  </div>
-                )}
-              </div>
 
-              {/* Recent Sims */}
-              <div className="bg-white rounded-3xl p-8 shadow-lg border-2 border-gray-100">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-bold text-gray-900">Recent Sims</h2>
-                  <button
-                    onClick={() => setActiveTab('sims')}
-                    className="text-purple-600 hover:text-purple-700 font-semibold flex items-center gap-2"
-                  >
-                    View all →
-                  </button>
+                  {simsLoading ? (
+                    <div className="text-center py-12">
+                      <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent mx-auto"></div>
+                      <p className="text-gray-500 dark:text-gray-400 mt-4">Loading sims...</p>
+                    </div>
+                  ) : recentSims.length > 0 ? (
+                    <div className="grid grid-cols-2 gap-4">
+                      {recentSims.map((sim) => (
+                        <SimCard
+                          key={sim.id}
+                          sim={sim}
+                          compact
+                          traitCatalog={Traits}
+                          onClick={() => navigateToSim(sim.id)}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-2xl">
+                      <div className="text-6xl mb-4">👤</div>
+                      <p className="text-gray-500 dark:text-gray-400 mb-4">No sims yet</p>
+                      <Link href="/dashboard/new/sim">
+                        <Button variant="secondary">
+                          Add Your First Sim
+                        </Button>
+                      </Link>
+                    </div>
+                  )}
                 </div>
-
-                {simsLoading ? (
-                  <div className="text-center py-12">
-                    <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent mx-auto"></div>
-                    <p className="text-gray-500 mt-4">Loading sims...</p>
-                  </div>
-                ) : recentSims.length > 0 ? (
-                  <div className="grid grid-cols-2 gap-4">
-                    {recentSims.map((sim) => (
-                      <div 
-                        key={sim.id} 
-                        onClick={() => navigateToSim(sim.id)}
-                        className="p-3 rounded-xl border-2 border-gray-200 hover:border-blue-400 hover:shadow-lg transition-all duration-200 bg-gradient-to-br from-white to-blue-50 cursor-pointer"
-                      >
-                        <SimCard sim={sim} compact traitCatalog={Traits} />
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-2xl">
-                    <div className="text-6xl mb-4">👤</div>
-                    <p className="text-gray-500 mb-4">No sims yet</p>
-                    <Link href="/dashboard/new/sim">
-                      <Button variant="secondary">
-                        Add Your First Sim
-                      </Button>
-                    </Link>
-                  </div>
-                )}
               </div>
             </div>
           )}
 
           {/* CHALLENGES TAB */}
           {activeTab === 'challenges' && (
-            <div className="bg-white rounded-3xl p-8 shadow-lg border-2 border-gray-100">
+            <div role="tabpanel" id="challenges-panel" aria-labelledby="challenges-tab" className="bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-lg border-2 border-gray-100 dark:border-gray-700">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-gray-900">All Challenges</h2>
                 <Link href="/challenge/new">
@@ -288,8 +285,8 @@ export default function DashboardPage() {
               ) : challenges.length > 0 ? (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {challenges.map((challenge) => (
-                    <div 
-                      key={challenge.id} 
+                    <div
+                      key={challenge.id}
                       onClick={() => navigateToChallenge(challenge.id)}
                       className="cursor-pointer"
                     >
@@ -314,7 +311,7 @@ export default function DashboardPage() {
 
           {/* SIMS TAB */}
           {activeTab === 'sims' && (
-            <div className="bg-white rounded-3xl p-8 shadow-lg border-2 border-gray-100">
+            <div role="tabpanel" id="sims-panel" aria-labelledby="sims-tab" className="bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-lg border-2 border-gray-100 dark:border-gray-700">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-gray-900">All Sims</h2>
                 <Link href="/dashboard/new/sim">
@@ -348,12 +345,12 @@ export default function DashboardPage() {
                   {/* Sims Grid */}
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {allSims.map((sim) => (
-                      <div 
+                      <div
                         key={sim.id}
                         onClick={() => navigateToSim(sim.id)}
                         className="p-4 rounded-xl border-2 border-gray-200 hover:border-blue-400 hover:shadow-xl transition-all duration-200 bg-gradient-to-br from-white to-blue-50 h-full cursor-pointer"
                       >
-                        <SimCard sim={sim} traitCatalog={Traits}/>
+                        <SimCard sim={sim} traitCatalog={Traits} />
                       </div>
                     ))}
                   </div>

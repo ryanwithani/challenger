@@ -3,7 +3,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState, memo } from 'react'
+import { useState, memo, useMemo } from 'react'
 import clsx from 'clsx'
 import { Database } from '@/src/types/database.types'
 import { PackIcon } from '@/src/components/sim/PackIcon'
@@ -26,13 +26,14 @@ type TraitCatalogItem = {
 
 export type SimCardProps = {
   sim: Sim
-  challenge?: Challenge | null            // pass if you’re on a challenge view
+  challenge?: Challenge | null            // pass if you're on a challenge view
   challengeSim?: ChallengeSim | null      // pass the joined row when available
   traitCatalog: TraitCatalogItem[]        // your TraitsCatalog flat array
   onToggleFavorite?: (id: string, next: boolean) => Promise<void> | void
   onEdit?: (sim: Sim) => void
   onLinkToChallenge?: (sim: Sim) => void
   onUnlinkFromChallenge?: (sim: Sim) => void
+  onClick?: () => void                    // click handler for the entire card
   compact?: boolean                       // tighter layout for dense grids
 }
 
@@ -62,9 +63,10 @@ export const SimCard = memo(function SimCard({
   onEdit,
   onLinkToChallenge,
   onUnlinkFromChallenge,
+  onClick,
   compact = false,
 }: SimCardProps) {
-  const { byId } = traitMaps(traitCatalog)
+  const { byId } = useMemo(() => traitMaps(traitCatalog), [traitCatalog])
   const [fav, setFav] = useState<boolean>(false)
 
   const traitsIds: string[] = Array.isArray(sim.traits) ? (sim.traits as unknown as string[]) : []
@@ -89,15 +91,18 @@ export const SimCard = memo(function SimCard({
   return (
     <article
       className={clsx(
-        'group relative overflow-hidden rounded-2xl border-2 bg-white transition-shadow',
-        'border-gray-100 shadow hover:shadow-lg focus-within:shadow-lg',
-        isHeir && 'border-amber-300'
+        'group relative overflow-hidden rounded-2xl border-2 transition-shadow cursor-pointer',
+        'bg-white dark:bg-gray-800',
+        'border-gray-100 dark:border-gray-700',
+        'shadow hover:shadow-lg focus-within:shadow-lg',
+        isHeir && 'border-amber-300 dark:border-amber-500'
       )}
       tabIndex={0}
       aria-label={`${sim.name} card`}
+      onClick={onClick}
     >
       {/* Top media */}
-      <div className={clsx('relative w-full', compact ? 'h-28' : 'h-36', 'bg-gradient-to-br from-indigo-50 to-white')}>
+      <div className={clsx('relative w-full', compact ? 'h-28' : 'h-36', 'bg-gradient-to-br from-indigo-50 to-white dark:from-indigo-900/20 dark:to-gray-800')}>
         <Image
           src={sim.avatar_url || '/images/avatars/default_sim.png'}
           alt={`${sim.name} avatar`}
@@ -160,10 +165,10 @@ export const SimCard = memo(function SimCard({
         {/* Name & nav */}
         <div className="flex items-start justify-between gap-2">
           <div>
-            <Link href={`/sims/${sim.id}`} className="block text-base font-semibold text-gray-900 hover:underline">
+            <Link href={`/sims/${sim.id}`} className="block text-base font-semibold text-gray-900 dark:text-gray-100 hover:underline">
               <SafeText>{sim.name}</SafeText>
             </Link>
-            <div className="mt-0.5 text-xs text-gray-600">
+            <div className="mt-0.5 text-xs text-gray-600 dark:text-gray-400">
               {titleCaseAge(sim.age_stage)}{sim.career ? ` • ${sim.career}` : ''}{sim.aspiration ? ` • ${sim.aspiration}` : ''}
             </div>
           </div>
@@ -174,7 +179,7 @@ export const SimCard = memo(function SimCard({
               <button
                 type="button"
                 onClick={() => onUnlinkFromChallenge?.(sim)}
-                className="rounded-md border border-gray-300 bg-white px-2 py-1 text-xs text-gray-700 hover:bg-gray-50"
+                className="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-2 py-1 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600"
                 title="Unlink from challenge"
               >
                 Unlink
@@ -195,11 +200,11 @@ export const SimCard = memo(function SimCard({
         {/* Traits */}
         <div className="mt-3">
           {shown.length === 0 ? (
-            <div className="text-xs text-gray-500">No traits</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400">No traits</div>
           ) : (
             <ul className={clsx('flex flex-wrap gap-2', compact && 'gap-1.5')}>
               {shown.map(t => (
-                <li key={t.id} className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-2 py-0.5 text-[11px] text-gray-800">
+                <li key={t.id} className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-2 py-0.5 text-[11px] text-gray-800 dark:text-gray-200">
                   <TraitIcon label={t.label} size={16} />
                   <span>{t.label}</span>
                   {shouldShowPackIcon(t.expansionPack) && (
@@ -213,7 +218,7 @@ export const SimCard = memo(function SimCard({
                 </li>
               ))}
               {hiddenCount > 0 && (
-                <li className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-[11px] text-gray-700">
+                <li className="inline-flex items-center rounded-full bg-gray-100 dark:bg-gray-600 px-2 py-0.5 text-[11px] text-gray-700 dark:text-gray-300">
                   +{hiddenCount} more
                 </li>
               )}
