@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { createSupabaseBrowserClient } from '@/src/lib/supabase/client'
 import { Database } from '@/src/types/database.types'
 import { seedLegacyChallengeGoals, LegacyChallengeConfig } from '@/src/components/challenge/GoalsSeeder'
+import { useAuthStore } from './authStore'
 
 type Challenge = Database['public']['Tables']['challenges']['Row']
 type Sim = Database['public']['Tables']['sims']['Row']
@@ -27,6 +28,7 @@ interface ChallengeState {
   createChallenge: (challenge: Partial<Challenge>) => Promise<void>
   updateChallenge: (id: string, updates: Partial<Challenge>) => Promise<void>
   deleteChallenge: (id: string) => Promise<void>
+  setChallenges: (challenges: Challenge[]) => void
 
   // Sim methods
   addSim: (sim: Partial<Sim>) => Promise<void>
@@ -77,6 +79,12 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
     const now = Date.now();
     const cacheValid = lastChallengesFetch && (now - lastChallengesFetch) < CACHE_TIMEOUT_MS;
     
+    const { data: { user } } = await createSupabaseBrowserClient().auth.getUser();
+    if (!user) {
+      set({ challenges: [], loading: false });
+      return;
+    }
+    
     // If we have data and the cache is valid, and we're not forcing a refresh, return immediately
     if (challenges.length > 0 && cacheValid && !forceRefresh) {
       console.log('Using cached challenges data');
@@ -114,6 +122,7 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
   },
 
   fetchChallenge: async (id: string) => {
+    
     set({ loading: true });
     try {
       const supabase = createSupabaseBrowserClient();
@@ -159,12 +168,22 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
   },
 
   createChallenge: async (challenge: Partial<Challenge>) => {
+    console.log('🚀 Starting challenge creation process...', challenge);
+    
     try {
       const supabase = createSupabaseBrowserClient();
+      console.log('📡 Getting user authentication...');
+      
       const { data: { user } } = await supabase.auth.getUser();
 
-      if (!user) throw new Error('User not authenticated');
+      if (!user) {
+        console.error('❌ User not authenticated');
+        throw new Error('User not authenticated');
+      }
+      
+      console.log('✅ User authenticated:', user.id);
 
+      console.log('💾 Inserting challenge into database...');
       const { data, error } = await supabase
         .from('challenges')
         .insert({
@@ -179,12 +198,15 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
         .single();
 
       if (error) {
-        console.error('Supabase error:', error);
+        console.error('❌ Supabase error:', error);
         throw new Error(error.message || 'Failed to create challenge');
       }
 
+      console.log('✅ Challenge created successfully:', data);
+
       if (data) {
         // Update the challenges array with the new challenge
+        console.log('🔄 Updating local state...');
         set({ 
           challenges: [...get().challenges, data],
           lastChallengesFetch: Date.now() // Update timestamp since we modified data
@@ -192,18 +214,39 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
 
         // If this is a Legacy Challenge, seed it with predefined goals
         if (data.challenge_type === 'legacy') {
+          console.log('🎯 Legacy challenge detected, seeding goals...');
           try {
             const config = data.configuration as LegacyChallengeConfig;
-            await seedLegacyChallengeGoals(data.id, config, supabase);
-            console.log('Legacy Challenge goals seeded successfully');
+            console.log('📋 Configuration:', config);
+            
+            // Add a timeout to prevent hanging
+            const timeoutPromise = new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('Goal seeding timeout')), 30000)
+            );
+            
+            console.log('⏱️ Starting goal seeding with 30s timeout...');
+            await Promise.race([
+              seedLegacyChallengeGoals(data.id, config, supabase),
+              timeoutPromise
+            ]);
+            
+            console.log('✅ Legacy Challenge goals seeded successfully');
           } catch (seedError) {
-            console.error('Failed to seed Legacy Challenge goals:', seedError);
+            console.error('⚠️ Failed to seed Legacy Challenge goals:', seedError);
             // Don't throw here - challenge was created successfully, just goals failed
+            // But we should still show the user that the challenge was created
           }
+        } else {
+          console.log('ℹ️ Non-legacy challenge, skipping goal seeding');
         }
+        
+        console.log('🎉 Challenge creation process completed successfully');
+        
+        // Return the created challenge data
+        return data;
       }
     } catch (error) {
-      console.error('Error creating challenge:', error);
+      console.error('❌ Error creating challenge:', error);
       throw error;
     }
   },
@@ -255,6 +298,8 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
       throw error;
     }
   },
+
+  setChallenges: (challenges: Challenge[]) => set({ challenges, loading: false }),
 
   addSim: async (sim: Partial<Sim>) => {
     try {

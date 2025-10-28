@@ -16,10 +16,10 @@ export default function LandingPage() {
 
       <main className="container mx-auto px-4 py-16">
         <section className="text-center max-w-4xl mx-auto">
-          <h1 className="text-5xl font-bold text-gray-900 mb-6">
+          <h1 className="text-4xl font-bold text-gray-900 mb-6">
             The Ultimate Sims 4 Legacy Challenge Tracker
           </h1>
-          <p className="text-xl text-gray-600 mb-8">
+          <p className="text-lg text-gray-600 mb-8">
             Track your Legacy Challenge across 10 generations
             with built-in scoring, family trees, and goal management.
           </p>

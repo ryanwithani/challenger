@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/src/components/ui/Button'
 import { Modal } from '@/src/components/sim/SimModal'
+import { Select } from '@/src/components/ui/Select'
 import { Database } from '@/src/types/database.types'
 
 type Goal = Database['public']['Tables']['goals']['Row']
@@ -189,20 +190,16 @@ export function GoalCompletionModal({
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             Which Sim accomplished this?
                         </label>
-                        <select
+                        <Select
                             value={selectedSim}
                             onChange={(e) => setSelectedSim(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sims-green"
+                            options={eligibleSims.map((sim) => ({
+                                value: sim.id,
+                                label: `${sim.name}${sim.is_heir ? ' (Heir)' : ''}${sim.relationship_to_heir === 'spouse' ? ' (Spouse)' : ''}${sim.generation ? ` - Gen ${sim.generation}` : ''}`
+                            }))}
+                            emptyOption="Select a Sim..."
                             required
-                        >
-                            <option value="">Select a Sim...</option>
-                            {eligibleSims.map((sim) => (
-                                <option key={sim.id} value={sim.id}>
-                                    {sim.name} {sim.is_heir && '(Heir)'} {sim.relationship_to_heir === 'spouse' && '(Spouse)'}
-                                    {sim.generation && ` - Gen ${sim.generation}`}
-                                </option>
-                            ))}
-                        </select>
+                        />
                     </div>
                 )}
 

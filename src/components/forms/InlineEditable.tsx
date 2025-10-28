@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { clsx } from 'clsx'
 import { Input } from '@/src/components/ui/Input'
+import { Select } from '@/src/components/ui/Select'
 
 // Tiny local button to avoid styling conflicts with your global <Button>
 function InlineButton({
@@ -256,21 +257,18 @@ export function InlineEditable(props: InlineEditableProps) {
           )}
 
           {props.type === 'select' && (
-            <select
+            <Select
               id={id}
               ref={selectRef}
-              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
+              className="w-full"
               value={local ?? ''}
               onChange={(e) => setLocal(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') { e.preventDefault(); commit((e.target as HTMLSelectElement).value) }
                 if (e.key === 'Escape') { e.preventDefault(); handleCancel() }
               }}
-            >
-              {(props as any).options?.map((opt: SelectOption) => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
+              options={(props as any).options || []}
+            />
           )}
 
           {props.type === 'checkbox' && (

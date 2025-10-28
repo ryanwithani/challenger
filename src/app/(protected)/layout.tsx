@@ -64,15 +64,15 @@ export default function ProtectedLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex">
-      <Sidebar />
-      <div className="flex-1 flex flex-col">
-        <Navbar />
-        <main className={isFullPageLayout ? 'flex-1' : 'flex-1'}>
-          {children}
-        </main>
-        {!isFullPageLayout && <Footer />}
-      </div>
-    </div>
+    <div className="flex min-h-screen bg-gray-100 dark:bg-gray-800"> {/* CHANGE: h-screen to min-h-screen */}
+  <Sidebar />
+  <div className="flex-1 flex flex-col"> {/* REMOVE: overflow-hidden */}
+    <Navbar />
+    {/* REMOVE: flex-1 and overflow classes. Let it be a simple container. */}
+    <main className="p-6"> 
+      {children}
+    </main>
+  </div>
+</div>
   )
 }

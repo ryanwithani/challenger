@@ -71,7 +71,7 @@ export function Sidebar() {
                   className={clsx(
                     'group flex items-center px-3 py-2 text-sm font-medium rounded-xl transition-all duration-300',
                     {
-                      'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg': isActive,
+                      'bg-gradient-to-r from-purple-500 to-pink-500 dark:from-blue-500 dark:to-purple-600 text-white shadow-lg': isActive,
                       'text-gray-600 hover:bg-gray-50 hover:text-gray-900': !isActive,
                     }
                   )}

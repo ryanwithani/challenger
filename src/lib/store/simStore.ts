@@ -24,6 +24,7 @@ interface SimState {
     fetchSim: (id: string) => Promise<void>
     updateSim: (id: string, updates: SimUpdate) => Promise<void>
     deleteSim: (id: string) => Promise<void>
+    setSims: (sims: Sim[]) => void; 
   
     // Achievement operations
     fetchSimAchievements: (simId: string) => Promise<void>
@@ -124,6 +125,8 @@ export const useSimStore = create<SimState>((set, get) => ({
             set({ error: error.message, loading: false })
         }
     },
+    
+    setSims: (sims: Sim[]) => set({ familyMembers: sims, loading: false }),
 
     fetchSimAchievements: async (simId: string) => {
         const supabase = createSupabaseBrowserClient()
@@ -182,27 +185,31 @@ export const useSimStore = create<SimState>((set, get) => ({
     },
 
     fetchAllSims: async () => {
-        const supabase = createSupabaseBrowserClient()
-        const { data: { user } } = await supabase.auth.getUser()
-
-        if (!user) return
-
+        set({ loading: true, error: null });
+        const supabase = createSupabaseBrowserClient();
+        const { data: { user } } = await supabase.auth.getUser();
+    
+        // 1. This guard clause is still essential.
+        if (!user) {
+            set({ familyMembers: [], loading: false });
+            return;
+        }
+    
         try {
-            // Fetch all sims for user's challenges
-            const { data, error } = await supabase
-                .from('sims')
-                .select(`
-          *,
-          challenges!inner(user_id)
-        `)
-                .eq('challenges.user_id', user.id)
-                .order('created_at', { ascending: false })
-
-            if (error) throw error
-
-            set({ familyMembers: data || [] })
+            // 2. This is the new, single RPC call.
+            // It replaces the two separate .from() calls.
+            const { data, error } = await supabase.rpc('get_all_sims_for_user', {
+                p_user_id: user.id
+            });
+    
+            // 3. Handle any errors from the RPC call.
+            if (error) throw error;
+    
+            // 4. Update the state with the data returned from the function.
+            set({ familyMembers: data || [], loading: false });
+    
         } catch (error: any) {
-            set({ error: error.message })
+            set({ error: error.message, loading: false });
         }
     },
 

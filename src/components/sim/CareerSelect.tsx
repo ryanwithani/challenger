@@ -6,6 +6,7 @@ import {
   BASE_CAREERS, getBranchesForBase, careerLabelFromIds, packForCareerIds,
 } from '@/src/lib/utils/careers'
 import { PackIcon } from '@/src/components/sim/PackIcon'
+import { Select } from '@/src/components/ui/Select'
 
 const hidePack = (p?: string | null) => !!(p && p !== 'Base Game')
 
@@ -65,32 +66,26 @@ useEffect(() => {
     <div className={clsx('grid grid-cols-1 gap-2 md:grid-cols-3', className)}>
       <div className="md:col-span-1">
         <label className="block text-sm font-medium text-gray-700">Base Career</label>
-        <select
+        <Select
           disabled={wholeControlDisabled}
           value={baseId ?? ''}
           onChange={(e) => setBase(e.target.value)}
-          className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        >
-          <option value="">— Select —</option>
-          {BASE_CAREERS.map(b => (
-            <option key={b.id} value={b.id}>{b.label}</option>
-          ))}
-        </select>
+          options={BASE_CAREERS.map(b => ({ value: b.id, label: b.label }))}
+          emptyOption="— Select —"
+          className="mt-1"
+        />
       </div>
 
       <div className="md:col-span-1">
         <label className="block text-sm font-medium text-gray-700">Branch (optional)</label>
-        <select
+        <Select
           disabled={wholeControlDisabled || !baseId || branches.length === 0}
           value={branchId ?? ''}
           onChange={(e) => setBranch(e.target.value)}
-          className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        >
-          <option value="">— None —</option>
-          {branches.map(br => (
-            <option key={br.id} value={br.id}>{br.label}</option>
-          ))}
-        </select>
+          options={branches.map(br => ({ value: br.id, label: br.label }))}
+          emptyOption="— None —"
+          className="mt-1"
+        />
       </div>
 
       <div className="md:col-span-1 flex items-end">

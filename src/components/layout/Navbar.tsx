@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useAuthStore } from '@/src/lib/store/authStore'
 import { Button } from '@/src/components/ui/Button'
 import { LoginModal } from '@/src/components/auth/LoginModal'
@@ -32,10 +33,19 @@ export function Navbar() {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <Link href="/" className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-gradient-to-r from-sims-purple to-sims-pink rounded-xl flex items-center justify-center shadow-md">
-                <span className="text-white font-bold text-sm">C</span>
+              <div className="w-12 h-12 relative">
+                <Image
+                  src="/ChallengerCrown.svg"
+                  alt="Challenger Crown Logo"
+                  width={48}
+                  height={48}
+                  className="w-full h-full object-contain"
+                  style={{ background: 'transparent' }}
+                />
               </div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-sims-purple to-sims-pink text-transparent bg-clip-text">Challenger</h1>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 dark:from-blue-500 dark:to-purple-600 text-transparent bg-clip-text font-exo2">
+                Challenger
+              </h1>
             </Link>
           </div>
 

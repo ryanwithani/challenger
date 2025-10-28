@@ -7,7 +7,7 @@ const buttonVariants = cva(
     {
         variants: {
             variant: {
-                primary: 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 shadow-lg border-none',
+                primary: 'bg-gradient-to-r from-purple-500 to-pink-500 dark:from-blue-500 dark:to-purple-600 text-white hover:from-purple-600 hover:to-pink-600 dark:hover:from-blue-600 dark:hover:to-purple-700 shadow-lg border-none',
                 secondary: 'bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 shadow-lg border-none',
                 accent: 'bg-accent-500 text-white shadow-md hover:bg-green-600 hover:shadow-lg active:bg-green-700',
                 outline: 'border-2 border-purple-500 text-purple-500 bg-transparent hover:bg-purple-50 dark:hover:bg-purple-900/20 active:bg-purple-100 dark:active:bg-purple-800/30',
@@ -16,10 +16,10 @@ const buttonVariants = cva(
                 gradient: 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg hover:from-purple-600 hover:to-purple-700 hover:shadow-xl',
             },
             size: {
-                sm: 'h-8 px-3 text-sm',
+                sm: 'h-8 px-3 text-xs',
                 md: 'h-10 px-4 text-sm',
-                lg: 'h-12 px-6 text-base',
-                xl: 'h-14 px-8 text-lg',
+                lg: 'h-12 px-6 text-sm',
+                xl: 'h-14 px-8 text-base',
             },
         },
         defaultVariants: {

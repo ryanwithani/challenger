@@ -695,7 +695,7 @@ const currentGeneration = useMemo(() => {
   {/* Row 1: Challenge Identity + Actions */}
   <div className="flex items-start justify-between gap-6 mb-6">
     <div className="flex-1 min-w-0">
-      <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-3">
+      <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 dark:from-blue-500 dark:to-purple-600 bg-clip-text text-transparent mb-3">
         <SafeText>{challenge.name}</SafeText>
       </h1>
       
@@ -770,7 +770,7 @@ const currentGeneration = useMemo(() => {
                 aria-controls={`${tab.id}-panel`}
                 id={`${tab.id}-tab`}
                 className={`flex-1 py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 flex items-center justify-center space-x-2 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 ${activeTab === tab.id
-                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 dark:from-blue-500 dark:to-purple-600 text-white shadow-lg'
                   : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
                   }`}
               >
@@ -789,7 +789,7 @@ const currentGeneration = useMemo(() => {
                 {[
                   { label: 'Current Generation', value: currentGeneration, color: 'from-emerald-500 to-teal-600', icon: '🏠' },
                   { label: 'Total Sims', value: sims.length, color: 'from-blue-500 to-indigo-600', icon: '👥' },
-                  { label: 'Total Goals', value: goals.length, color: 'from-purple-500 to-pink-600', icon: '🎯' },
+                  { label: 'Total Goals', value: goals.length, color: 'from-purple-500 to-pink-600 dark:from-blue-500 dark:to-purple-600', icon: '🎯' },
                   { label: 'Legacy Score', value: `${totalPoints}/100`, color: 'from-amber-500 to-orange-600', icon: '🏆' }
                 ].map((stat, index) => (
                   <div key={index} className="bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-100 text-center hover:shadow-xl transition-all duration-300">

@@ -9,6 +9,7 @@ import {
   type AspirationAgeGroup,
   type AspirationCategory,
 } from '@/src/components/sim/AspirationsCatalog'
+import { GroupedSelect } from '@/src/components/ui/Select'
 
 const AGE_TABS: AspirationAgeGroup[] = ['adult', 'teen', 'child']
 
@@ -44,8 +45,11 @@ export function AspirationSelect({
   className?: string
   placeholder?: string
 }) {
+  const wholeControlDisabled =
+    simAgeStage === 'infant' || simAgeStage === 'toddler'
+
   const grouped = useMemo(() => {
-    // Filter to age-appropriate first; we’ll still show disabled ones with reasons
+    // Filter to age-appropriate first; we'll still show disabled ones with reasons
     const byCat = new Map<AspirationCategory, Aspiration[]>()
     for (const a of Aspirations) {
       if (!byCat.has(a.category)) byCat.set(a.category, [])
@@ -55,49 +59,34 @@ export function AspirationSelect({
     byCat.forEach((arr) => {
       arr.sort((x: Aspiration, y: Aspiration) => x.label.localeCompare(y.label));
     });
-    return Array.from(byCat.entries()).sort(
-      (a, b) => a[0].localeCompare(b[0])
-    );
-  }, []);
-
-  const wholeControlDisabled =
-    simAgeStage === 'infant' || simAgeStage === 'toddler'
+    return Array.from(byCat.entries()).map(([category, list]) => ({
+      label: category,
+      options: list.map((a) => {
+        const ageOk = ageMatches(a, simAgeStage)
+        const packOk = hasPack(a, ownedPacks)
+        const enabled = ageOk && packOk && !wholeControlDisabled
+        const reason = !ageOk
+          ? (a.ageGroup === 'teen' ? 'Teen-only' : a.ageGroup === 'child' ? 'Child-only' : 'Adult-only')
+          : !packOk
+            ? `Requires ${a.pack}`
+            : undefined
+        return {
+          value: a.label,
+          label: `${a.label}${reason ? ` — ${reason}` : ''}`,
+          disabled: !enabled
+        }
+      })
+    })).sort((a, b) => a.label.localeCompare(b.label));
+  }, [simAgeStage, ownedPacks, wholeControlDisabled]);
 
   return (
-    <select
+    <GroupedSelect
       value={value ?? ''}
       onChange={(e) => onChange(e.target.value || null)}
       disabled={wholeControlDisabled}
-      className={clsx(
-        'mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500',
-        className
-      )}
-    >
-      <option value="">{placeholder}</option>
-      {grouped.map(([category, list]) => (
-        <optgroup key={category} label={category}>
-          {list.map((a) => {
-            const ageOk = ageMatches(a, simAgeStage)
-            const packOk = hasPack(a, ownedPacks)
-            const enabled = ageOk && packOk && !wholeControlDisabled
-            const reason = !ageOk
-              ? (a.ageGroup === 'teen' ? 'Teen-only' : a.ageGroup === 'child' ? 'Child-only' : 'Adult-only')
-              : !packOk
-                ? `Requires ${a.pack}`
-                : undefined
-            return (
-              <option
-                key={a.id}
-                value={a.label}
-                disabled={!enabled}
-                title={reason ?? ''}
-              >
-                {a.label}{reason ? ` — ${reason}` : ''}
-              </option>
-            )
-          })}
-        </optgroup>
-      ))}
-    </select>
+      groups={grouped}
+      placeholder={placeholder}
+      className={clsx('mt-1', className)}
+    />
   )
 }

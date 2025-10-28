@@ -74,7 +74,7 @@ function LegacyConfigurationStep({
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-6">Legacy Challenge Configuration</h2>
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">Legacy Challenge Configuration</h2>
 
                 {/* Starting Difficulty */}
                 <Card className="mb-6">
@@ -88,8 +88,8 @@ function LegacyConfigurationStep({
                                     key={option.value}
                                     className={`p-4 border-2 rounded-xl cursor-pointer transition-all ${
                                         watchedValues.start_type === option.value
-                                            ? 'border-brand-500 bg-brand-500/5'
-                                            : 'border-gray-200 hover:border-gray-300'
+                                            ? 'border-brand-500 bg-brand-500/5 dark:bg-brand-500/10'
+                                            : 'border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600'
                                     }`}
                                 >
                                     <input
@@ -99,18 +99,18 @@ function LegacyConfigurationStep({
                                         className="sr-only"
                                     />
                                     <div className="text-center">
-                                        <div className="font-semibold text-gray-900 mb-1">{option.label}</div>
+                                        <div className="font-semibold text-gray-900 dark:text-gray-100 mb-1">{option.label}</div>
                                         <div className={`inline-block px-2 py-1 rounded-full text-xs font-medium mb-2 ${
-                                            option.difficulty === 'Easy' ? 'bg-green-100 text-green-800' :
-                                            option.difficulty === 'Hard' ? 'bg-yellow-100 text-yellow-800' :
-                                            'bg-red-100 text-red-800'
+                                            option.difficulty === 'Easy' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' :
+                                            option.difficulty === 'Hard' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300' :
+                                            'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
                                         }`}>
                                             {option.difficulty}
                                         </div>
-                                        <div className="text-sm text-gray-600 mb-2">{option.description}</div>
-                                        <div className="text-xs text-gray-500">{option.detail}</div>
+                                        <div className="text-sm text-gray-600 dark:text-gray-300 mb-2">{option.description}</div>
+                                        <div className="text-xs text-gray-500 dark:text-gray-400">{option.detail}</div>
                                         {option.bonus > 0 && (
-                                            <div className="text-xs text-brand-600 font-medium mt-2">
+                                            <div className="text-xs text-brand-600 dark:text-brand-400 font-medium mt-2">
                                                 +{option.bonus} bonus point{option.bonus > 1 ? 's' : ''}
                                             </div>
                                         )}
@@ -137,7 +137,7 @@ function LegacyConfigurationStep({
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
                                     {LEGACY_RULES.genderLaw.map((law) => (
                                         <label key={law.value} className={`p-3 border rounded-xl cursor-pointer transition-all ${
-                                            watchedValues.gender_law === law.value ? 'border-brand-500 bg-brand-500/5' : 'border-gray-200 hover:border-gray-300'
+                                            watchedValues.gender_law === law.value ? 'border-brand-500 bg-brand-500/5 dark:bg-brand-500/10' : 'border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600'
                                         }`}>
                                             <input
                                                 type="radio"
@@ -145,8 +145,8 @@ function LegacyConfigurationStep({
                                                 value={law.value}
                                                 className="sr-only"
                                             />
-                                            <div className="font-medium text-gray-900 mb-1">{law.label}</div>
-                                            <div className="text-sm text-gray-600">{law.desc}</div>
+                                            <div className="font-medium text-gray-900 dark:text-gray-100 mb-1">{law.label}</div>
+                                            <div className="text-sm text-gray-600 dark:text-gray-300">{law.desc}</div>
                                         </label>
                                     ))}
                                 </div>
@@ -162,7 +162,7 @@ function LegacyConfigurationStep({
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
                                     {LEGACY_RULES.bloodlineLaw.map((law) => (
                                         <label key={law.value} className={`p-3 border rounded-xl cursor-pointer transition-all ${
-                                            watchedValues.bloodline_law === law.value ? 'border-brand-500 bg-brand-500/5' : 'border-gray-200 hover:border-gray-300'
+                                            watchedValues.bloodline_law === law.value ? 'border-brand-500 bg-brand-500/5 dark:bg-brand-500/10' : 'border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600'
                                         }`}>
                                             <input
                                                 type="radio"
@@ -170,8 +170,8 @@ function LegacyConfigurationStep({
                                                 value={law.value}
                                                 className="sr-only"
                                             />
-                                            <div className="font-medium text-gray-900 mb-1">{law.label}</div>
-                                            <div className="text-sm text-gray-600">{law.desc}</div>
+                                            <div className="font-medium text-gray-900 dark:text-gray-100 mb-1">{law.label}</div>
+                                            <div className="text-sm text-gray-600 dark:text-gray-300">{law.desc}</div>
                                         </label>
                                     ))}
                                 </div>
@@ -187,7 +187,7 @@ function LegacyConfigurationStep({
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
                                     {LEGACY_RULES.heirSelection.map((method) => (
                                         <label key={method.value} className={`p-3 border rounded-xl cursor-pointer transition-all ${
-                                            watchedValues.heir_selection === method.value ? 'border-brand-500 bg-brand-500/5' : 'border-gray-200 hover:border-gray-300'
+                                            watchedValues.heir_selection === method.value ? 'border-brand-500 bg-brand-500/5 dark:bg-brand-500/10' : 'border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600'
                                         }`}>
                                             <input
                                                 type="radio"
@@ -195,8 +195,8 @@ function LegacyConfigurationStep({
                                                 value={method.value}
                                                 className="sr-only"
                                             />
-                                            <div className="font-medium text-gray-900 mb-1">{method.label}</div>
-                                            <div className="text-sm text-gray-600">{method.desc}</div>
+                                            <div className="font-medium text-gray-900 dark:text-gray-100 mb-1">{method.label}</div>
+                                            <div className="text-sm text-gray-600 dark:text-gray-300">{method.desc}</div>
                                         </label>
                                     ))}
                                 </div>
@@ -212,7 +212,7 @@ function LegacyConfigurationStep({
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
                                     {LEGACY_RULES.speciesRule.map((rule) => (
                                         <label key={rule.value} className={`p-3 border rounded-xl cursor-pointer transition-all ${
-                                            watchedValues.species_rule === rule.value ? 'border-brand-500 bg-brand-500/5' : 'border-gray-200 hover:border-gray-300'
+                                            watchedValues.species_rule === rule.value ? 'border-brand-500 bg-brand-500/5 dark:bg-brand-500/10' : 'border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600'
                                         }`}>
                                             <input
                                                 type="radio"
@@ -220,8 +220,8 @@ function LegacyConfigurationStep({
                                                 value={rule.value}
                                                 className="sr-only"
                                             />
-                                            <div className="font-medium text-gray-900 mb-1">{rule.label}</div>
-                                            <div className="text-sm text-gray-600">{rule.desc}</div>
+                                            <div className="font-medium text-gray-900 dark:text-gray-100 mb-1">{rule.label}</div>
+                                            <div className="text-sm text-gray-600 dark:text-gray-300">{rule.desc}</div>
                                         </label>
                                     ))}
                                 </div>
@@ -237,7 +237,7 @@ function LegacyConfigurationStep({
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
                                     {LEGACY_RULES.lifespan.map((lifespan) => (
                                         <label key={lifespan.value} className={`p-3 border rounded-xl cursor-pointer transition-all ${
-                                            watchedValues.lifespan === lifespan.value ? 'border-brand-500 bg-brand-500/5' : 'border-gray-200 hover:border-gray-300'
+                                            watchedValues.lifespan === lifespan.value ? 'border-brand-500 bg-brand-500/5 dark:bg-brand-500/10' : 'border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600'
                                         }`}>
                                             <input
                                                 type="radio"
@@ -245,8 +245,8 @@ function LegacyConfigurationStep({
                                                 value={lifespan.value}
                                                 className="sr-only"
                                             />
-                                            <div className="font-medium text-gray-900 mb-1">{lifespan.label}</div>
-                                            <div className="text-sm text-gray-600">{lifespan.desc}</div>
+                                            <div className="font-medium text-gray-900 dark:text-gray-100 mb-1">{lifespan.label}</div>
+                                            <div className="text-sm text-gray-600 dark:text-gray-300">{lifespan.desc}</div>
                                         </label>
                                     ))}
                                 </div>

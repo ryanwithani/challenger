@@ -1,22 +1,38 @@
 'use client'
 import { useState } from 'react'
 import Image from 'next/image'
-import { uploadSimAvatar } from '@/src/lib/utils/avatarUpload'
 
-export function AvatarUploader({
-  value, onChange,
-}: { value: string | null; onChange: (url: string | null) => void }) {
+interface AvatarUploaderProps {
+  value: string | null;
+  onChange: (url: string | null) => void;
+  // This new prop lets us pass in ANY upload function
+  uploadFunction: (file: File) => Promise<string>;
+}
+
+export function AvatarUploader({ value, onChange, uploadFunction }: AvatarUploaderProps) {
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
 
   async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files?.[0]; if (!f) return
-    setBusy(true); setErr(null)
-    try { onChange(await uploadSimAvatar('simId', f)) } catch (e:any) { setErr(e?.message ?? 'Upload failed') }
-    finally { setBusy(false) }
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setBusy(true);
+    setErr(null);
+    try {
+      // Call the provided upload function instead of the hardcoded one
+      const newUrl = await uploadFunction(file);
+      onChange(newUrl);
+    } catch (e: any) {
+      setErr(e?.message ?? 'Upload failed');
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
+    // ... Your existing JSX for this component is good and does not need to change ...
+    // I've included it here for completeness.
     <div className="space-y-3">
       {value ? (
         <div className="flex items-center gap-4">

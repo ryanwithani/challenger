@@ -7,6 +7,7 @@ import type { Database } from '@/src/types/database.types'
 import { CareerSelect, type CareerSelection } from '@/src/components/sim/CareerSelect'
 import { AspirationPicker } from '../sim/AspirationsPicker'
 import { AspirationSelect } from '../sim/AspirationSelect'
+import { Select } from '@/src/components/ui/Select'
 
 type SimRow = Database['public']['Tables']['sims']['Row']
 type SimInsert = Database['public']['Tables']['sims']['Insert']
@@ -130,13 +131,12 @@ export function SimForm({
 
         <div>
           <label className="block text-sm font-medium text-gray-700">Age Stage</label>
-          <select
+          <Select
             value={ageStage}
             onChange={(e) => setAgeStage(e.target.value as AgeStage)}
-            className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-            {AGE_OPTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-          </select>
+            options={AGE_OPTS}
+            className="mt-1"
+          />
         </div>
 
         <div className="md:col-span-2">
@@ -173,14 +173,16 @@ export function SimForm({
         {showChallengePicker && (
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700">Link to Challenge (optional)</label>
-            <select
+            <Select
               value={challengeId}
               onChange={(e) => setChallengeId(e.target.value)}
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            >
-              <option value="">— None —</option>
-              {challenges.map(c => <option key={c.id} value={c.id}>{c.challenge_type}</option>)}
-            </select>
+              options={challenges.map(c => ({
+                value: c.id,
+                label: c.challenge_type || 'Unknown Challenge'
+              }))}
+              emptyOption="— None —"
+              className="mt-1"
+            />
           </div>
         )}
       </div>

@@ -22,7 +22,6 @@ interface AuthState {
   signIn: (email: string, password: string) => Promise<void>
   signUp: (email: string, password: string) => Promise<void>
   signOut: () => Promise<void>
-  fetchUser: () => Promise<void>
   fetchUserProfile: () => Promise<void>
   initialize: () => Promise<void>
   getAuthErrorMessage: (error: any) => string
@@ -41,39 +40,47 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   showPasswordUpdateModal: false, // ADD THIS
 
   initialize: async () => {
-    console.log('🔵 Initialize called')
-    const supabase = createSupabaseBrowserClient()
-
-    // Handle password reset code exchange
-    if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search)
-      const code = urlParams.get('code')
-
-      if (code) {
-        console.log('🟢 Attempting code exchange...')
-        const { data, error } = await supabase.auth.exchangeCodeForSession(code)
-        if (!error && data.session) {
-          console.log('🟢 Session established! Setting modal to true')
-          set({
-            user: data.session.user,
-            showPasswordUpdateModal: true,
-            loading: false,
-            initialized: true
-          })
-          // ✅ Profile will be fetched by listener below
-          window.history.replaceState({}, document.title, '/')
-          // Don't return early - let listener be registered
-        }
-      }
+    
+    if (get().initialized) {
+      return;
     }
 
-    const { data: { session } } = await supabase.auth.getSession()
+    const supabase = createSupabaseBrowserClient()
 
-    set({
-      user: session?.user ?? null,
+    supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state changed:', event);
+      const user = session?.user ?? null;
+      set({ user }); // Update the user in the store
+
+      if (user) {
+        // If a user session exists, fetch their associated profile data.
+        get().fetchUserProfile();
+      } else {
+        // If the session is null (user signed out), clear the profile data.
+        set({
+          userProfile: null,
+          profileFetched: false,
+          isFetchingProfile: false
+        });
+      }
+
+      // This event is fired by Supabase after a password reset link is clicked.
+      if (event === 'PASSWORD_RECOVERY') {
+        set({ showPasswordUpdateModal: true });
+      }
+    });
+
+
+     // The listener above only fires on *changes*, not on the initial state.
+     const { data: { session } } = await supabase.auth.getSession();
+     const user = session?.user ?? null;
+     
+     set({
+      user,
       loading: false,
       initialized: true
-    })
+    });
+
 
     // ✅ REMOVED: Manual profile fetch
     // The listener below will handle it
@@ -99,8 +106,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     // ✅ NEW: If we have a session on init, manually trigger profile fetch once
     // (because listener only fires on *changes*, not initial state)
-    if (session?.user) {
-      await get().fetchUserProfile()
+    if (user) {
+      await get().fetchUserProfile();
     }
   },
 
@@ -276,21 +283,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } catch (error) {
       console.error('Caught error during sign out:', error);
       throw error;
-    }
-  },
-
-  fetchUser: async () => {
-    const supabase = createSupabaseBrowserClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    set({
-      user: null,
-      userProfile: null,
-      profileFetched: false,
-      isFetchingProfile: false
-    })
-
-    if (user) {
-      await get().fetchUserProfile()
     }
   },
 

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback, useMemo } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useSearchParams } from 'next/navigation'
 import { useChallengeStore } from '@/src/lib/store/challengeStore'
 import { SimCard } from '@/src/components/sim/SimCard'
 import { GoalCard } from '@/src/components/challenge/GoalCard'
@@ -15,6 +15,7 @@ import { Traits } from '@/src/components/sim/TraitsCatalog'
 
 export default function ChallengePage() {
   const params = useParams()
+  const searchParams = useSearchParams()
   const challengeId = params.id as string
 
   // Subscribe to store values separately to minimize re-renders
@@ -35,10 +36,19 @@ export default function ChallengePage() {
   const calculatePoints = useCallback(useChallengeStore.getState().calculatePoints, [])
   const calculateCategoryPoints = useCallback(useChallengeStore.getState().calculateCategoryPoints, [])
   const handleAddSim = useCallback(() => setShowSimForm(true), [])
+  const handleAddGoal = useCallback(() => setShowGoalForm(true), [])
   const handleToggleGoal = useCallback((goalId: string) => toggleGoalProgress(goalId), [toggleGoalProgress])
 
   const [showSimForm, setShowSimForm] = useState(false)
   const [showGoalForm, setShowGoalForm] = useState(false)
+
+  // Handle URL parameters for actions
+  useEffect(() => {
+    const action = searchParams.get('action')
+    if (action === 'add-sim') {
+      setShowSimForm(true)
+    }
+  }, [searchParams])
 
 
 
@@ -188,7 +198,7 @@ export default function ChallengePage() {
                     key={goal.id}
                     goal={goal}
                     isCompleted={progress.some(p => p.goal_id === goal.id)}
-                    onToggle={handleToggleGoal}
+                    onToggle={() => handleToggleGoal(goal.id)}
                   />
                 ))}
               </div>

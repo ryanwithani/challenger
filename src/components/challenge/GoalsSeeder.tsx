@@ -503,20 +503,54 @@ export async function seedLegacyChallengeGoals(
     config: LegacyChallengeConfig,
     supabaseClient: any
 ) {
-    const goalTemplates = generateLegacyGoals(config)
-    const dbGoals = goalTemplates.map((template, index) =>
-        convertGoalTemplateToDbGoal(template, challengeId, index * 10)
-    )
+    try {
+        console.log('🎯 GoalsSeeder: Starting goal generation...', { challengeId, config });
+        
+        const goalTemplates = generateLegacyGoals(config)
+        console.log(`🎯 GoalsSeeder: Generated ${goalTemplates.length} goal templates for Legacy Challenge`)
+        
+        if (goalTemplates.length === 0) {
+            console.warn('⚠️ GoalsSeeder: No goals generated, skipping database insertion');
+            return [];
+        }
+        
+        const dbGoals = goalTemplates.map((template, index) =>
+            convertGoalTemplateToDbGoal(template, challengeId, index * 10)
+        )
 
-    const { data, error } = await supabaseClient
-        .from('goals')
-        .insert(dbGoals)
-        .select()
+        console.log('🎯 GoalsSeeder: Inserting goals into database...', { goalCount: dbGoals.length });
+        
+        // Insert goals in batches to avoid database limits
+        const batchSize = 50;
+        const batches = [];
+        for (let i = 0; i < dbGoals.length; i += batchSize) {
+            batches.push(dbGoals.slice(i, i + batchSize));
+        }
+        
+        console.log(`🎯 GoalsSeeder: Inserting ${batches.length} batches of goals...`);
+        
+        const allResults = [];
+        for (let i = 0; i < batches.length; i++) {
+            console.log(`🎯 GoalsSeeder: Inserting batch ${i + 1}/${batches.length}...`);
+            
+            const { data, error } = await supabaseClient
+                .from('goals')
+                .insert(batches[i])
+                .select()
 
-    if (error) {
-        console.error('Error seeding Legacy goals:', error)
-        throw new Error('Failed to create Legacy Challenge goals')
+            if (error) {
+                console.error(`❌ GoalsSeeder: Error inserting batch ${i + 1}:`, error)
+                throw new Error(`Failed to create Legacy Challenge goals (batch ${i + 1}): ${error.message}`)
+            }
+
+            allResults.push(...(data || []));
+            console.log(`✅ GoalsSeeder: Batch ${i + 1} inserted successfully`);
+        }
+
+        console.log(`🎉 GoalsSeeder: Successfully inserted ${allResults.length} goals total`)
+        return allResults
+    } catch (error) {
+        console.error('❌ GoalsSeeder: Error in seedLegacyChallengeGoals:', error)
+        throw error
     }
-
-    return data
 }

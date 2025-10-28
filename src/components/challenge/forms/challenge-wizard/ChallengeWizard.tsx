@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useUserPreferencesStore } from '@/src/lib/store/userPreferencesStore'
 import { BasicInfoStep } from './BasicInfoStep'
 import { ConfigurationStep } from './ConfigurationStep'
@@ -22,17 +22,47 @@ interface ChallengeWizardProps {
   loading?: boolean
 }
 
+const PROGRESS_STORAGE_KEY = 'challenge_wizard_progress'
+const BASIC_INFO_STORAGE_KEY = 'challenge_wizard_basic_info'
+const CONFIG_STORAGE_KEY = 'challenge_wizard_config'
+
 export function ChallengeWizard({ onSubmit, onCancel, loading }: ChallengeWizardProps) {
   const [currentStep, setCurrentStep] = useState(1)
   const [wizardData, setWizardData] = useState<WizardData>({})
+  const [isClient, setIsClient] = useState(false)
   const { preferences, fetchPreferences } = useUserPreferencesStore()
 
+  // Load saved progress from localStorage
   useEffect(() => {
+    setIsClient(true)
     fetchPreferences()
+
+    try {
+      const savedProgress = localStorage.getItem(PROGRESS_STORAGE_KEY)
+      const savedBasicInfo = localStorage.getItem(BASIC_INFO_STORAGE_KEY)
+      const savedConfig = localStorage.getItem(CONFIG_STORAGE_KEY)
+
+      if (savedProgress) {
+        const parsed = JSON.parse(savedProgress)
+        setCurrentStep(parsed.currentStep || 1)
+      }
+
+      if (savedBasicInfo) {
+        const parsed = JSON.parse(savedBasicInfo)
+        setWizardData(prev => ({ ...prev, basicInfo: parsed }))
+      }
+
+      if (savedConfig) {
+        const parsed = JSON.parse(savedConfig)
+        setWizardData(prev => ({ ...prev, configuration: parsed }))
+      }
+    } catch (error) {
+      console.warn('Failed to load saved challenge wizard data:', error)
+    }
   }, [fetchPreferences])
 
-  // Simplified steps - no expansion packs step
-  const getSteps = () => {
+  // Memoized steps array to prevent recreation
+  const steps = useMemo(() => {
     const template = CHALLENGE_TEMPLATES.find(t => t.value === wizardData.basicInfo?.challenge_type)
     const needsConfig = template?.needsConfiguration || false
 
@@ -48,12 +78,42 @@ export function ChallengeWizard({ onSubmit, onCancel, loading }: ChallengeWizard
         { number: 2, name: 'Review', step: 2 },
       ]
     }
-  }
+  }, [wizardData.basicInfo?.challenge_type])
 
-  const steps = getSteps()
-  const getCurrentStepIndex = () => steps.findIndex(step => step.step === currentStep)
+  // Memoized current step index
+  const getCurrentStepIndex = useMemo(() => 
+    () => steps.findIndex(step => step.step === currentStep), 
+    [steps, currentStep]
+  )
 
-  const handleBasicInfoNext = (data: BasicInfoData) => {
+  // Auto-save functionality with debouncing
+  useEffect(() => {
+    if (!isClient) return
+
+    const timeoutId = setTimeout(() => {
+      try {
+        // Save current step
+        localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify({ currentStep }))
+        
+        // Save basic info if available
+        if (wizardData.basicInfo) {
+          localStorage.setItem(BASIC_INFO_STORAGE_KEY, JSON.stringify(wizardData.basicInfo))
+        }
+        
+        // Save configuration if available
+        if (wizardData.configuration) {
+          localStorage.setItem(CONFIG_STORAGE_KEY, JSON.stringify(wizardData.configuration))
+        }
+      } catch (error) {
+        console.warn('Failed to save challenge wizard data:', error)
+      }
+    }, 500) // Debounce auto-save
+
+    return () => clearTimeout(timeoutId)
+  }, [isClient, currentStep, wizardData])
+
+  // Memoized handlers with useCallback
+  const handleBasicInfoNext = useCallback((data: BasicInfoData) => {
     setWizardData(prev => ({ ...prev, basicInfo: data }))
     
     // Skip to review if no configuration needed
@@ -63,27 +123,39 @@ export function ChallengeWizard({ onSubmit, onCancel, loading }: ChallengeWizard
     } else {
       setCurrentStep(2) // Go to configuration
     }
-  }
+  }, [])
 
-  const handleConfigurationNext = (data: LegacyConfigData) => {
+  const handleConfigurationNext = useCallback((data: LegacyConfigData) => {
     setWizardData(prev => ({ ...prev, configuration: data }))
     setCurrentStep(3) // Go to review
-  }
+  }, [])
 
-  const handleFinalSubmit = async (data: WizardData) => {
+  const handleFinalSubmit = useCallback(async (data: WizardData) => {
     const challengeData: Partial<Challenge> = {
         name: data.basicInfo!.name,
         description: data.basicInfo?.description,
         challenge_type: data.basicInfo!.challenge_type,
         configuration: data.configuration || null,
-        status: 'active', // Add this
+        status: 'active',
     }
     
-    console.log('Transformed challenge data:', challengeData) // Debug
+    console.log('Transformed challenge data:', challengeData)
+    
+    // Clear localStorage data on successful submission
+    if (isClient) {
+      try {
+        localStorage.removeItem(PROGRESS_STORAGE_KEY)
+        localStorage.removeItem(BASIC_INFO_STORAGE_KEY)
+        localStorage.removeItem(CONFIG_STORAGE_KEY)
+      } catch (error) {
+        console.warn('Failed to clear challenge wizard data:', error)
+      }
+    }
+    
     await onSubmit(challengeData)
-}
+  }, [isClient, onSubmit])
 
-  const goBack = () => {
+  const goBack = useCallback(() => {
     const needsConfig = CHALLENGE_TEMPLATES.find(t => t.value === wizardData.basicInfo?.challenge_type)?.needsConfiguration
     if (currentStep === 2 && !needsConfig) {
       setCurrentStep(1) // From review to basic info
@@ -92,7 +164,21 @@ export function ChallengeWizard({ onSubmit, onCancel, loading }: ChallengeWizard
     } else {
       setCurrentStep(currentStep - 1)
     }
-  }
+  }, [currentStep, wizardData.basicInfo?.challenge_type])
+
+  // Cleanup on unmount or cancel
+  const handleCancel = useCallback(() => {
+    if (isClient) {
+      try {
+        localStorage.removeItem(PROGRESS_STORAGE_KEY)
+        localStorage.removeItem(BASIC_INFO_STORAGE_KEY)
+        localStorage.removeItem(CONFIG_STORAGE_KEY)
+      } catch (error) {
+        console.warn('Failed to clear challenge wizard data:', error)
+      }
+    }
+    onCancel()
+  }, [isClient, onCancel])
 
   return (
     <div className="space-y-8">
@@ -118,12 +204,12 @@ export function ChallengeWizard({ onSubmit, onCancel, loading }: ChallengeWizard
 
                 <div className="relative flex flex-col items-center">
                   <div className={`
-                    w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-300 bg-white z-10
+                    w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-300 z-10
                     ${isComplete
                       ? 'border-brand-500 bg-brand-500'
                       : isCurrent
-                        ? 'border-brand-500 bg-white'
-                        : 'border-gray-300 bg-white'
+                        ? 'border-brand-500 bg-white dark:bg-gray-800'
+                        : 'border-gray-300 bg-white dark:bg-gray-800'
                     }
                   `}>
                     {isComplete ? (
@@ -156,7 +242,7 @@ export function ChallengeWizard({ onSubmit, onCancel, loading }: ChallengeWizard
           <BasicInfoStep
             data={wizardData.basicInfo}
             onNext={handleBasicInfoNext}
-            onCancel={onCancel}
+            onCancel={handleCancel}
           />
         )}
 
