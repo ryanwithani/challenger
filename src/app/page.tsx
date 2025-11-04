@@ -10,7 +10,7 @@ export default function LandingPage() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sims-purple/10 to-sims-pink/10">
+    <div className="min-h-screen bg-gradient-to-br from-brand-100 to-accent-400/20">
       <AuthInitializer />
       <Navbar />
 

@@ -136,15 +136,15 @@ export function Packs({
                       'group relative aspect-square rounded-xl border bg-white dark:bg-zinc-900',
                       'p-2 transition-all',
                       checked
-                        ? 'border-sims-purple ring-0'
-                        : 'border-gray-200 hover:border-sims-blue/60',
+                        ? 'border-brand-600 ring-0'
+                        : 'border-gray-200 hover:border-brand-400/60',
                       disabled && !checked ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer',
-                      'focus:outline-none focus:ring-2 focus:ring-sims-blue',
+                      'focus:outline-none focus:ring-2 focus:ring-brand-500',
                     ].join(' ')}
                   >
                     {checked && (
                       <span
-                        className="absolute right-1.5 top-1.5 grid h-5 w-5 place-items-center rounded-full bg-sims-purple text-white text-[11px]"
+                        className="absolute right-1.5 top-1.5 grid h-5 w-5 place-items-center rounded-full bg-brand-600 text-white text-[11px]"
                         aria-hidden
                       >
                         ✓

@@ -68,7 +68,7 @@ export function SimAchievements({ sim, achievements }: SimAchievementsProps) {
     return (
         <div className="space-y-6">
             {/* Achievement Summary */}
-            <div className="bg-gradient-to-r from-sims-green to-sims-blue rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 text-white">
+            <div className="bg-gradient-to-r from-brand-500 to-accent-500 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 text-white">
                 <div className="flex items-center justify-between">
                     <div>
                         <h2><SafeText className="text-2xl font-bold">{sim.name}</SafeText>'s Achievements</h2>

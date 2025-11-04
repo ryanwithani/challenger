@@ -46,7 +46,7 @@ export function ThemeToggle() {
                         className={`
               flex items-center justify-between p-4 rounded-lg border-2 transition-all
               ${theme === themeOption.value
-                                ? 'border-sims-green bg-sims-green/10 dark:bg-sims-green/20'
+                                ? 'border-brand-500 bg-brand-100 dark:bg-brand-900/40'
                                 : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                             }
             `}
@@ -55,7 +55,7 @@ export function ThemeToggle() {
                             <span className="text-2xl">{themeOption.icon}</span>
                             <div className="text-left">
                                 <div className={`font-medium ${theme === themeOption.value
-                                    ? 'text-sims-green'
+                                    ? 'text-brand-600'
                                     : 'text-gray-900 dark:text-gray-100'
                                     }`}>
                                     {themeOption.label}
@@ -67,7 +67,7 @@ export function ThemeToggle() {
                         </div>
 
                         {theme === themeOption.value && (
-                            <div className="w-5 h-5 rounded-full bg-sims-green flex items-center justify-center">
+                            <div className="w-5 h-5 rounded-full bg-brand-500 flex items-center justify-center">
                                 <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                 </svg>

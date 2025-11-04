@@ -85,7 +85,7 @@ export default function SimProfilePage() {
                         <p className="text-gray-600">
                             Generation {currentSim.generation} • {currentSim.age_stage?.replace('_', ' ')}
                             {currentSim.is_heir && (
-                                <span className="ml-2 px-2 py-1 bg-sims-yellow/20 text-sims-yellow rounded text-sm font-medium">
+                                <span className="ml-2 px-2 py-1 bg-accent-400/20 text-accent-600 rounded text-sm font-medium">
                                     Heir
                                 </span>
                             )}
