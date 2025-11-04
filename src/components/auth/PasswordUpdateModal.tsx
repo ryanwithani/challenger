@@ -108,7 +108,7 @@ export function PasswordUpdateModal({ open, onClose }: PasswordUpdateModalProps)
 
                         <Button
                             type="submit"
-                            className="w-full bg-sims-green hover:bg-sims-green/90 text-white"
+                            className="w-full bg-brand-500 hover:bg-brand-600 text-white"
                             disabled={loading}
                         >
                             {loading ? 'Updating...' : 'Reset Password'}

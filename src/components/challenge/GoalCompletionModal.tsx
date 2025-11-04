@@ -179,7 +179,7 @@ export function GoalCompletionModal({
                     {goal.description && (
                         <p className="text-sm text-gray-600 mt-1">{goal.description}</p>
                     )}
-                    <div className="text-sm text-sims-green font-medium mt-2">
+                    <div className="text-sm text-brand-600 font-medium mt-2">
                         +{goal.point_value} points
                     </div>
                 </div>
@@ -214,7 +214,7 @@ export function GoalCompletionModal({
                                 key={method.value}
                                 onClick={() => setSelectedMethod(method.value)}
                                 className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all ${selectedMethod === method.value
-                                    ? 'border-sims-green bg-sims-green/10 text-sims-green'
+                                    ? 'border-brand-500 bg-brand-100 text-brand-700'
                                     : 'border-gray-200 hover:border-gray-300 text-gray-700'
                                     }`}
                             >
@@ -236,7 +236,7 @@ export function GoalCompletionModal({
                             value={notes}
                             onChange={(e) => setNotes(e.target.value)}
                             placeholder="How did you complete this goal?"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sims-green"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-500"
                         />
                     </div>
                 )}
@@ -252,7 +252,7 @@ export function GoalCompletionModal({
                             onChange={(e) => setNotes(e.target.value)}
                             placeholder="Any additional details about this achievement..."
                             rows={3}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sims-green"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-500"
                         />
                     </div>
                 )}

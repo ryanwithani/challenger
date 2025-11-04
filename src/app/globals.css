@@ -4,27 +4,27 @@
 
 @layer base {
   :root {
-    /* Light mode colors */
+    /* Light mode colors - Warm Sunset Theme */
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --background-dark: 222.2 84% 4.9%;
-    --foreground-dark: 210 40% 98%;
+    --foreground: 18 60% 15%;  /* warm dark brown for text */
+    --background-dark: 20 25% 8%;  /* warm dark brown instead of cool black */
+    --foreground-dark: 30 15% 95%;  /* warm cream white for dark mode text */
 
-    /* Semantic colors */
-    --border: 214.3 31.8% 91.4%;
-    --border-dark: 217.2 32.6% 17.5%;
+    /* Semantic colors - Warm tones */
+    --border: 30 40% 90%;  /* warm cream border */
+    --border-dark: 20 20% 20%;  /* warm dark border */
 
     --card: 0 0% 100%;
-    --card-dark: 222.2 84% 4.9%;
+    --card-dark: 20 20% 12%;  /* warm dark card background */
 
-    --muted: 210 40% 96%;
-    --muted-dark: 217.2 32.6% 17.5%;
+    --muted: 30 50% 96%;  /* warm cream muted */
+    --muted-dark: 20 15% 18%;  /* warm dark muted */
 
-    --primary: 142.1 76.2% 36.3%;
-    --primary-dark: 142.1 70.6% 45.3%;
+    --primary: 16 100% 60%;  /* warm coral - #ff6b35 */
+    --primary-dark: 16 95% 65%;  /* lighter coral for dark mode */
 
-    --secondary: 210 40% 96%;
-    --secondary-dark: 217.2 32.6% 17.5%;
+    --secondary: 30 50% 96%;  /* warm cream */
+    --secondary-dark: 20 15% 18%;  /* warm dark secondary */
   }
 
   .dark {
@@ -87,11 +87,11 @@
 
 @layer components {
   .btn-primary {
-    @apply bg-green-600 hover:bg-green-600/90 text-white font-bold py-2 px-4 rounded transition-colors;
+    @apply bg-brand-500 hover:bg-brand-600 text-white font-bold py-2 px-4 rounded transition-colors;
   }
 
   .btn-secondary {
-    @apply bg-blue-600 hover:bg-blue-600/90 text-white font-bold py-2 px-4 rounded transition-colors;
+    @apply bg-brand-300 hover:bg-brand-400 text-white font-bold py-2 px-4 rounded transition-colors;
   }
 
   .card {
@@ -102,11 +102,11 @@
 
   /* Dark mode variants for components */
   .dark .btn-primary {
-    @apply bg-green-600/90 hover:bg-green-600;
+    @apply bg-brand-600 hover:bg-brand-500;
   }
 
   .dark .btn-secondary {
-    @apply bg-blue-600/90 hover:bg-blue-600;
+    @apply bg-brand-400 hover:bg-brand-300;
   }
 }
 

@@ -148,7 +148,7 @@ export function GoalForm({
               }}
               className={`flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-colors ${
                 selectedCategory === cat.value
-                  ? 'border-sims-purple bg-sims-purple/10'
+                  ? 'border-brand-600 bg-brand-100'
                   : 'border-gray-200 hover:border-gray-300'
               }`}
             >
@@ -205,7 +205,7 @@ export function GoalForm({
           {...register('description')}
           rows={2}
           placeholder="Add any additional details or requirements..."
-          className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-sims-blue resize-none"
+          className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none"
         />
         {errors.description && (
           <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>
@@ -226,7 +226,7 @@ export function GoalForm({
             max="10"
             className="flex-1"
           />
-          <span className="text-2xl font-bold text-sims-purple w-12 text-center">
+          <span className="text-2xl font-bold text-brand-600 w-12 text-center">
             {pointValue}
           </span>
         </div>
@@ -244,7 +244,7 @@ export function GoalForm({
             type="checkbox"
             id="is_required"
             {...register('is_required')}
-            className="mt-0.5 h-4 w-4 text-sims-yellow border-gray-300 rounded focus:ring-sims-yellow"
+            className="mt-0.5 h-4 w-4 text-accent-500 border-gray-300 rounded focus:ring-accent-500"
           />
           <div className="ml-3">
             <label htmlFor="is_required" className="text-sm font-medium text-gray-900">

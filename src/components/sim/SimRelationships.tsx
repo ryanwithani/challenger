@@ -81,8 +81,8 @@ export function SimRelationships({ sim, challenge }: SimRelationshipsProps) {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {/* Current Sim */}
                             <div className="relative">
-                                <SimCard sim={sim} showProfileLink={false} className="bg-sims-green/10 border-sims-green" />
-                                <span className="absolute -top-2 -right-2 px-2 py-1 bg-sims-green text-white text-xs rounded-full">
+                                <SimCard sim={sim} showProfileLink={false} className="bg-brand-100 border-brand-500" />
+                                <span className="absolute -top-2 -right-2 px-2 py-1 bg-brand-500 text-white text-xs rounded-full">
                                     You
                                 </span>
                             </div>

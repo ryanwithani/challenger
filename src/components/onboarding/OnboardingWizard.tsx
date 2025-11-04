@@ -150,7 +150,7 @@ export function OnboardingWizard() {
   }, [loading, isClient])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sims-green/10 via-white to-sims-blue/10 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-brand-100 via-white to-accent-400/20 flex items-center justify-center p-4">
       <div className="w-full max-w-4xl">
         {/* Progress Indicator */}
         <OnboardingProgress

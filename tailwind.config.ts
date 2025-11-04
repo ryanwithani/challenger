@@ -13,24 +13,33 @@ module.exports = {
     extend: {
     colors: {
     brand: {
-    50: '#f5f2ff',
-    100: '#ece6ff',
-    200: '#d9ccff',
-    300: '#bea6ff',
-    400: '#a47eff',
-    500: '#8a57ff', // primary plumbob purple
-    600: '#6c39e6',
-    700: '#552ec2',
-    800: '#40249b',
-    900: '#2c1872',
+    50: '#fff5f0',   // lightest peach - warm and inviting
+    100: '#ffe8db',
+    200: '#ffd0b8',
+    300: '#ffb088',
+    400: '#ff8f5c',
+    500: '#ff6b35',  // primary warm coral/orange - cozy and fun
+    600: '#e84a1f',
+    700: '#c73615',
+    800: '#a22b11',
+    900: '#7a2110',  // deepest
     },
     accent: {
-    500: '#00d974', // success/gamified glow
+    400: '#fbbf24',  // golden hour - warm yellow
+    500: '#f59e0b',  // amber - energetic
+    600: '#d97706',  // honey - rich
+    success: '#22c55e', // keep green for success states
+    },
+    cozy: {
+    cream: '#fef6ee',
+    sand: '#f5e6d3',
+    terracotta: '#d4856a',
+    clay: '#8b5a3c',
     },
     surface: {
     DEFAULT: '#ffffff',
-    muted: '#f6f7fb',
-    dark: '#0e0f12',
+    muted: '#fef6ee',     // warm cream instead of cool gray
+    dark: '#1a1410',      // warm dark brown instead of cold black
     },
     },
     borderRadius: {
