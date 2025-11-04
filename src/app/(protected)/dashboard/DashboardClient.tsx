@@ -70,7 +70,7 @@ export function DashboardClient({ initialChallenges, initialSims }: DashboardCli
     // You can return a spinner here, or null for a flicker-free experience.
     return (
       <div className="text-center p-12">
-        <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+        <div className="w-8 h-8 border-4 border-brand-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
       </div>
     );
   }
@@ -95,7 +95,7 @@ export function DashboardClient({ initialChallenges, initialSims }: DashboardCli
             </div>
             <div className="w-px h-12 bg-gray-300 dark:bg-gray-600 mx-3"></div>
             <div className="text-center flex-1">
-              <div className="text-3xl font-bold bg-gradient-to-r from-blue-500 to-indigo-600 bg-clip-text text-transparent mb-1">
+              <div className="text-3xl font-bold bg-gradient-to-r from-brand-400 to-brand-600 bg-clip-text text-transparent mb-1">
                 {completedChallenges.length}
               </div>
               <div className="text-gray-600 dark:text-gray-400 text-xs font-medium">Completed</div>
@@ -111,7 +111,7 @@ export function DashboardClient({ initialChallenges, initialSims }: DashboardCli
           </div>
           <div className="flex items-center justify-center">
             <div className="text-center flex-1">
-              <div className="text-3xl font-bold bg-gradient-to-r from-purple-500 to-pink-600 dark:from-blue-500 dark:to-purple-600 bg-clip-text text-transparent mb-1">
+              <div className="text-3xl font-bold bg-gradient-to-r from-brand-500 to-accent-500 dark:from-brand-600 dark:to-accent-600 bg-clip-text text-transparent mb-1">
                 {allSims.length}
               </div>
               <div className="text-gray-600 dark:text-gray-400 text-xs font-medium">Total Sims</div>
@@ -135,7 +135,7 @@ export function DashboardClient({ initialChallenges, initialSims }: DashboardCli
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`flex-1 py-4 px-6 rounded-xl font-semibold transition-all duration-300 ${activeTab === tab.id
-                ? 'bg-gradient-to-r from-purple-500 to-pink-500 dark:from-blue-500 dark:to-purple-600 text-white shadow-lg'
+                ? 'bg-gradient-to-r from-brand-500 to-accent-500 dark:from-brand-600 dark:to-accent-600 text-white shadow-lg'
                 : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
                 }`}
               role="tab"

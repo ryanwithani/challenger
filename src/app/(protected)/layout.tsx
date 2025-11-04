@@ -48,13 +48,13 @@ export default function ProtectedLayout({
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <div className="w-12 h-12 border-4 border-brand-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
           <div className="text-2xl text-gray-500">Loading your dashboard...</div>
           <div className="text-sm text-gray-400">
             If loading takes more than 10 seconds, please
             <button
               onClick={() => window.location.reload()}
-              className="text-purple-500 hover:underline ml-1">
+              className="text-brand-500 hover:underline ml-1">
               refresh the page
             </button>
           </div>

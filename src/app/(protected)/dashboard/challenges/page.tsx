@@ -91,13 +91,13 @@ export default function ChallengesPage() {
   }, [fetchChallenges])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-cozy-cream via-brand-50 to-accent-400/20 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <div className="max-w-[1400px] mx-auto p-6 space-y-8">
         {/* Header */}
         <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-xl border-2 border-gray-100 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 dark:from-blue-500 dark:to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-brand-500 to-accent-500 dark:from-brand-600 dark:to-accent-600 bg-clip-text text-transparent">
                 All Challenges
               </h1>
               <p className="text-lg text-gray-600 dark:text-gray-400 mt-2">
@@ -163,7 +163,7 @@ export default function ChallengesPage() {
               <select
                 value={filters.statusFilter}
                 onChange={(e) => updateFilter('statusFilter', e.target.value)}
-                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:border-purple-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:border-brand-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               >
                 <option value="all">All Statuses</option>
                 <option value="active">Active</option>
@@ -180,7 +180,7 @@ export default function ChallengesPage() {
               <select
                 value={filters.typeFilter}
                 onChange={(e) => updateFilter('typeFilter', e.target.value)}
-                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:border-purple-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:border-brand-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               >
                 <option value="all">All Types</option>
                 {challengeTypes.map((type) => (
@@ -206,7 +206,7 @@ export default function ChallengesPage() {
         {/* Content */}
         {challengesLoading ? (
           <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-purple-500 border-t-transparent mx-auto"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-brand-500 border-t-transparent mx-auto"></div>
             <p className="text-gray-500 dark:text-gray-400 mt-4">Loading challenges...</p>
           </div>
         ) : challenges.length === 0 ? (
@@ -245,7 +245,7 @@ export default function ChallengesPage() {
                      status === 'archived' ? '📦' : '❓'}
                   </span>
                   {status.charAt(0).toUpperCase() + status.slice(1)} Challenges
-                  <span className="ml-3 px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-400 text-sm rounded-full">
+                  <span className="ml-3 px-3 py-1 bg-purple-100 dark:bg-purple-900 text-brand-600 dark:text-purple-400 text-sm rounded-full">
                     {statusChallenges.length}
                   </span>
                 </h3>

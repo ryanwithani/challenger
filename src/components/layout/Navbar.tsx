@@ -43,7 +43,7 @@ export function Navbar() {
                   style={{ background: 'transparent' }}
                 />
               </div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 dark:from-blue-500 dark:to-purple-600 text-transparent bg-clip-text font-exo2">
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-brand-500 to-accent-500 dark:from-brand-600 dark:to-accent-600 text-transparent bg-clip-text font-exo2">
                 Challenger
               </h1>
             </Link>

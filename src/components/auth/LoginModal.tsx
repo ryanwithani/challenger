@@ -97,7 +97,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
               <button
                 type="button"
                 onClick={handleForgotPassword}
-                className="text-sm text-brand-500 hover:text-purple-600"
+                className="text-sm text-brand-500 hover:text-brand-600"
               >
                 Forgot password?
               </button>

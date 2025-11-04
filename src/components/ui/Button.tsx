@@ -7,13 +7,13 @@ const buttonVariants = cva(
     {
         variants: {
             variant: {
-                primary: 'bg-gradient-to-r from-purple-500 to-pink-500 dark:from-blue-500 dark:to-purple-600 text-white hover:from-purple-600 hover:to-pink-600 dark:hover:from-blue-600 dark:hover:to-purple-700 shadow-lg border-none',
-                secondary: 'bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 shadow-lg border-none',
-                accent: 'bg-accent-500 text-white shadow-md hover:bg-green-600 hover:shadow-lg active:bg-green-700',
-                outline: 'border-2 border-purple-500 text-purple-500 bg-transparent hover:bg-purple-50 dark:hover:bg-purple-900/20 active:bg-purple-100 dark:active:bg-purple-800/30',
-                ghost: 'text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-700 dark:hover:text-purple-300 active:bg-purple-100 dark:active:bg-purple-800/30',
+                primary: 'bg-gradient-to-r from-brand-500 to-accent-500 dark:from-brand-600 dark:to-accent-600 text-white hover:from-brand-600 hover:to-accent-600 dark:hover:from-brand-700 dark:hover:to-accent-700 shadow-lg border-none',
+                secondary: 'bg-gradient-to-r from-brand-400 to-brand-600 text-white hover:from-brand-500 hover:to-brand-700 shadow-lg border-none',
+                accent: 'bg-accent-500 text-white shadow-md hover:bg-accent-600 hover:shadow-lg active:bg-accent-700',
+                outline: 'border-2 border-brand-500 text-brand-600 bg-transparent hover:bg-brand-50 dark:hover:bg-brand-900/20 active:bg-brand-100 dark:active:bg-brand-800/30',
+                ghost: 'text-brand-600 dark:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-900/20 hover:text-brand-700 dark:hover:text-brand-300 active:bg-brand-100 dark:active:bg-brand-800/30',
                 destructive: 'bg-red-600 text-white shadow-md hover:bg-red-700 hover:shadow-lg active:bg-red-800',
-                gradient: 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg hover:from-purple-600 hover:to-purple-700 hover:shadow-xl',
+                gradient: 'bg-gradient-to-r from-brand-500 to-brand-600 text-white shadow-lg hover:from-brand-600 hover:to-brand-700 hover:shadow-xl',
             },
             size: {
                 sm: 'h-8 px-3 text-xs',

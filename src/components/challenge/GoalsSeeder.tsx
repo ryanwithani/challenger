@@ -367,7 +367,7 @@ export const LEGACY_CATEGORIES = {
     },
     creative: {
         name: 'Creative',
-        color: 'bg-purple-500',
+        color: 'bg-brand-500',
         maxPoints: 10,
         description: 'Memorialize family, complete creative aspirations',
         icon: '/traits/Creative.png'

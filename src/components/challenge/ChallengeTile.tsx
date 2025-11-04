@@ -13,7 +13,7 @@ export function ChallengeTile({ challenge }: ChallengeTileProps) {
   return (
     <div
       className={`card mb-4 hover:shadow-lg transition-shadow cursor-pointer ${isActive
-        ? 'border-2 border-purple-500 bg-purple-500/10 dark:bg-purple-500/20 shadow-md'
+        ? 'border-2 border-brand-500 bg-brand-500/10 dark:bg-brand-500/20 shadow-md'
         : ''
         }`}
       role="button"
@@ -36,19 +36,19 @@ export function ChallengeTile({ challenge }: ChallengeTileProps) {
         </div>
       )}
 
-      <h3 className={`text-xl font-semibold mb-2 ${isActive ? 'text-purple-500' : 'text-gray-900 dark:text-gray-100'
+      <h3 className={`text-xl font-semibold mb-2 ${isActive ? 'text-brand-500' : 'text-gray-900 dark:text-gray-100'
         }`}>
         <SafeText>{challenge.name}</SafeText>
       </h3>
 
       {challenge.description && (
-        <p className={`text-sm mb-4 ${isActive ? 'text-purple-500' : 'text-gray-600 dark:text-gray-400'
+        <p className={`text-sm mb-4 ${isActive ? 'text-brand-500' : 'text-gray-600 dark:text-gray-400'
           }`}>
           <SafeText>{challenge.description}</SafeText>
         </p>
       )}
 
-      <div className={`flex justify-between items-center text-sm ${isActive ? 'text-purple-500' : 'text-gray-500 dark:text-gray-400'
+      <div className={`flex justify-between items-center text-sm ${isActive ? 'text-brand-500' : 'text-gray-500 dark:text-gray-400'
         }`}>
         <span className="capitalize">{challenge.challenge_type || 'Custom'}</span>
         <span>

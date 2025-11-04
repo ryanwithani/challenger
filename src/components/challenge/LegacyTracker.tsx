@@ -688,14 +688,14 @@ const currentGeneration = useMemo(() => {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-cozy-cream to-brand-100 p-6">
       <div className="max-w-[1400px] mx-auto space-y-8">
         {/* Header */}
 <div className="bg-white rounded-3xl p-8 shadow-xl border-2 border-gray-100">
   {/* Row 1: Challenge Identity + Actions */}
   <div className="flex items-start justify-between gap-6 mb-6">
     <div className="flex-1 min-w-0">
-      <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 dark:from-blue-500 dark:to-purple-600 bg-clip-text text-transparent mb-3">
+      <h1 className="text-4xl font-bold bg-gradient-to-r from-brand-500 to-accent-500 dark:from-brand-600 dark:to-accent-600 bg-clip-text text-transparent mb-3">
         <SafeText>{challenge.name}</SafeText>
       </h1>
       
@@ -723,7 +723,7 @@ const currentGeneration = useMemo(() => {
     <Button
       onClick={onAddSim}
       size="sm"
-      className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-purple-700 transition-all duration-200 border-none shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+      className="px-6 py-3 bg-gradient-to-r from-brand-400 to-brand-600 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-purple-700 transition-all duration-200 border-none shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
       aria-label="Add a new Sim to this challenge"
     >
       Add Sim
@@ -769,8 +769,8 @@ const currentGeneration = useMemo(() => {
                 aria-selected={activeTab === tab.id}
                 aria-controls={`${tab.id}-panel`}
                 id={`${tab.id}-tab`}
-                className={`flex-1 py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 flex items-center justify-center space-x-2 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 ${activeTab === tab.id
-                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 dark:from-blue-500 dark:to-purple-600 text-white shadow-lg'
+                className={`flex-1 py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 flex items-center justify-center space-x-2 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 ${activeTab === tab.id
+                  ? 'bg-gradient-to-r from-brand-500 to-accent-500 dark:from-brand-600 dark:to-accent-600 text-white shadow-lg'
                   : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
                   }`}
               >

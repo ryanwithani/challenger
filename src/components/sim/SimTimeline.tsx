@@ -39,7 +39,7 @@ export function SimTimeline({ sim, achievements }: SimTimelineProps) {
             case 'milestone': return 'bg-blue-500'
             case 'achievement': return 'bg-green-500'
             case 'relationship': return 'bg-pink-500'
-            case 'career': return 'bg-purple-500'
+            case 'career': return 'bg-brand-500'
             default: return 'bg-gray-500'
         }
     }
