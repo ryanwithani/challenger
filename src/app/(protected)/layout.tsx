@@ -48,13 +48,13 @@ export default function ProtectedLayout({
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <div className="text-2xl text-gray-500">Loading your dashboard...</div>
+          <div className="w-12 h-12 border-4 border-brand-500 dark:border-brand-400 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <div className="text-gray-600 dark:text-gray-300 mt-4">Loading...</div>
           <div className="text-sm text-gray-400">
             If loading takes more than 10 seconds, please
             <button
               onClick={() => window.location.reload()}
-              className="text-purple-500 hover:underline ml-1">
+              className="text-brand-500 dark:text-brand-400 hover:underline ml-1">
               refresh the page
             </button>
           </div>
@@ -65,14 +65,14 @@ export default function ProtectedLayout({
 
   return (
     <div className="flex min-h-screen bg-gray-100 dark:bg-gray-800"> {/* CHANGE: h-screen to min-h-screen */}
-  <Sidebar />
-  <div className="flex-1 flex flex-col"> {/* REMOVE: overflow-hidden */}
-    <Navbar />
-    {/* REMOVE: flex-1 and overflow classes. Let it be a simple container. */}
-    <main className="p-6"> 
-      {children}
-    </main>
-  </div>
-</div>
+      <Sidebar />
+      <div className="flex-1 flex flex-col"> {/* REMOVE: overflow-hidden */}
+        <Navbar />
+        {/* REMOVE: flex-1 and overflow classes. Let it be a simple container. */}
+        <main className="p-6">
+          {children}
+        </main>
+      </div>
+    </div>
   )
 }

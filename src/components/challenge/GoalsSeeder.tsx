@@ -367,7 +367,7 @@ export const LEGACY_CATEGORIES = {
     },
     creative: {
         name: 'Creative',
-        color: 'bg-purple-500',
+        color: 'bg-brand-500',
         maxPoints: 10,
         description: 'Memorialize family, complete creative aspirations',
         icon: '/traits/Creative.png'
@@ -505,34 +505,34 @@ export async function seedLegacyChallengeGoals(
 ) {
     try {
         console.log('🎯 GoalsSeeder: Starting goal generation...', { challengeId, config });
-        
+
         const goalTemplates = generateLegacyGoals(config)
         console.log(`🎯 GoalsSeeder: Generated ${goalTemplates.length} goal templates for Legacy Challenge`)
-        
+
         if (goalTemplates.length === 0) {
             console.warn('⚠️ GoalsSeeder: No goals generated, skipping database insertion');
             return [];
         }
-        
+
         const dbGoals = goalTemplates.map((template, index) =>
             convertGoalTemplateToDbGoal(template, challengeId, index * 10)
         )
 
         console.log('🎯 GoalsSeeder: Inserting goals into database...', { goalCount: dbGoals.length });
-        
+
         // Insert goals in batches to avoid database limits
         const batchSize = 50;
         const batches = [];
         for (let i = 0; i < dbGoals.length; i += batchSize) {
             batches.push(dbGoals.slice(i, i + batchSize));
         }
-        
+
         console.log(`🎯 GoalsSeeder: Inserting ${batches.length} batches of goals...`);
-        
+
         const allResults = [];
         for (let i = 0; i < batches.length; i++) {
             console.log(`🎯 GoalsSeeder: Inserting batch ${i + 1}/${batches.length}...`);
-            
+
             const { data, error } = await supabaseClient
                 .from('goals')
                 .insert(batches[i])

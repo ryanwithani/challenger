@@ -6,25 +6,37 @@
   :root {
     /* Light mode colors - Warm Sunset Theme */
     --background: 0 0% 100%;
-    --foreground: 18 60% 15%;  /* warm dark brown for text */
-    --background-dark: 20 25% 8%;  /* warm dark brown instead of cool black */
-    --foreground-dark: 30 15% 95%;  /* warm cream white for dark mode text */
+    --foreground: 18 60% 15%;
+    /* warm dark brown for text */
+    --background-dark: 20 25% 8%;
+    /* warm dark brown instead of cool black */
+    --foreground-dark: 30 15% 95%;
+    /* warm cream white for dark mode text */
 
     /* Semantic colors - Warm tones */
-    --border: 30 40% 90%;  /* warm cream border */
-    --border-dark: 20 20% 20%;  /* warm dark border */
+    --border: 30 40% 90%;
+    /* warm cream border */
+    --border-dark: 20 20% 20%;
+    /* warm dark border */
 
     --card: 0 0% 100%;
-    --card-dark: 20 20% 12%;  /* warm dark card background */
+    --card-dark: 20 20% 12%;
+    /* warm dark card background */
 
-    --muted: 30 50% 96%;  /* warm cream muted */
-    --muted-dark: 20 15% 18%;  /* warm dark muted */
+    --muted: 30 50% 96%;
+    /* warm cream muted */
+    --muted-dark: 20 15% 18%;
+    /* warm dark muted */
 
-    --primary: 16 100% 60%;  /* warm coral - #ff6b35 */
-    --primary-dark: 16 95% 65%;  /* lighter coral for dark mode */
+    --primary: 16 100% 60%;
+    /* warm coral - #ff6b35 */
+    --primary-dark: 16 95% 65%;
+    /* lighter coral for dark mode */
 
-    --secondary: 30 50% 96%;  /* warm cream */
-    --secondary-dark: 20 15% 18%;  /* warm dark secondary */
+    --secondary: 30 50% 96%;
+    /* warm cream */
+    --secondary-dark: 20 15% 18%;
+    /* warm dark secondary */
   }
 
   .dark {
@@ -51,28 +63,47 @@
   /* Responsive font scaling for high-DPI displays */
   @media (min-resolution: 2dppx) {
     html {
-      font-size: 14px; /* Reduce base font size for high-DPI displays */
+      font-size: 14px;
+      /* Reduce base font size for high-DPI displays */
     }
   }
 
   @media (min-width: 1920px) {
     html {
-      font-size: 15px; /* Slightly larger for very wide screens */
+      font-size: 15px;
+      /* Slightly larger for very wide screens */
     }
   }
 
   @media (min-width: 2560px) {
     html {
-      font-size: 16px; /* Standard size for ultra-wide displays */
+      font-size: 16px;
+      /* Standard size for ultra-wide displays */
     }
   }
 
   /* High-DPI specific font size adjustments */
   @media (min-resolution: 2dppx) {
-    .text-5xl { font-size: 2.5rem; } /* 40px instead of 48px */
-    .text-4xl { font-size: 2rem; }   /* 32px instead of 36px */
-    .text-3xl { font-size: 1.75rem; } /* 28px instead of 30px */
-    .text-2xl { font-size: 1.5rem; }  /* 24px instead of 28px */
+    .text-5xl {
+      font-size: 2.5rem;
+    }
+
+    /* 40px instead of 48px */
+    .text-4xl {
+      font-size: 2rem;
+    }
+
+    /* 32px instead of 36px */
+    .text-3xl {
+      font-size: 1.75rem;
+    }
+
+    /* 28px instead of 30px */
+    .text-2xl {
+      font-size: 1.5rem;
+    }
+
+    /* 24px instead of 28px */
   }
 
   .font-exo2 {
@@ -197,18 +228,130 @@
 
   /* Brand color utilities for dark mode */
   .bg-brand-50 {
-    background-color: rgb(245 242 255);
+    background-color: rgb(255 245 240);
   }
 
   .dark .bg-brand-50 {
-    background-color: rgb(44 24 114);
+    background-color: rgb(122 33 16);
   }
 
   .bg-brand-100 {
-    background-color: rgb(236 230 255);
+    background-color: rgb(255 232 219);
   }
 
   .dark .bg-brand-100 {
-    background-color: rgb(64 36 155);
+    background-color: rgb(162 43 17);
+  }
+
+  /* SVG Icon Color Filters for Brand Colors */
+  /* Lighter filter that preserves some gradient effect */
+  .icon-brand-gradient {
+    filter: brightness(0.9) saturate(120%) invert(47%) sepia(93%) saturate(1352%) hue-rotate(346deg) brightness(101%) contrast(101%);
+  }
+
+  .dark .icon-brand-gradient {
+    filter: brightness(0.85) saturate(130%) invert(35%) sepia(100%) saturate(2000%) hue-rotate(346deg) brightness(95%) contrast(95%);
+  }
+
+  /* For icons that need single color (no gradient) */
+  .icon-brand {
+    filter: brightness(0) saturate(100%) invert(47%) sepia(93%) saturate(1352%) hue-rotate(346deg) brightness(101%) contrast(101%);
+  }
+
+  .dark .icon-brand {
+    filter: brightness(0) saturate(100%) invert(35%) sepia(100%) saturate(2000%) hue-rotate(346deg) brightness(95%) contrast(95%);
+  }
+
+  /* Gradient mask for icons - uses SVG as mask with brand gradient */
+  .icon-gradient-mask {
+    position: relative;
+  }
+
+  .icon-gradient-mask::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #ff6b35 0%, #e84a1f 50%, #c73615 100%);
+    -webkit-mask-image: url('/ChallengerCrown.svg');
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-image: url('/ChallengerCrown.svg');
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    z-index: 1;
+  }
+
+  .dark .icon-gradient-mask::before {
+    background: linear-gradient(135deg, #ff6b35 0%, #e84a1f 50%, #a22b11 100%);
+  }
+
+  /* Hide the Image component when using mask */
+  .icon-gradient-mask img {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Gradient mask for Challenge icon */
+  .challenge-icon-gradient-mask {
+    position: relative;
+  }
+
+  .challenge-icon-gradient-mask::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #ff6b35 0%, #e84a1f 50%, #c73615 100%);
+    -webkit-mask-image: url('/ChallengeIcon.svg');
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-image: url('/ChallengeIcon.svg');
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    z-index: 1;
+  }
+
+  .dark .challenge-icon-gradient-mask::before {
+    background: linear-gradient(135deg, #ff6b35 0%, #e84a1f 50%, #a22b11 100%);
+  }
+
+  /* Hide the Image component when using mask */
+  .challenge-icon-gradient-mask img {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Gradient mask for Sim icon */
+  .sim-icon-gradient-mask {
+    position: relative;
+  }
+
+  .sim-icon-gradient-mask::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #ff6b35 0%, #e84a1f 50%, #c73615 100%);
+    -webkit-mask-image: url('/SimIcon.svg');
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-image: url('/SimIcon.svg');
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    z-index: 1;
+  }
+
+  .dark .sim-icon-gradient-mask::before {
+    background: linear-gradient(135deg, #ff6b35 0%, #e84a1f 50%, #a22b11 100%);
+  }
+
+  /* Hide the Image component when using mask */
+  .sim-icon-gradient-mask img {
+    opacity: 0;
+    pointer-events: none;
   }
 }

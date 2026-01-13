@@ -42,7 +42,7 @@ export const PASSWORD_REGEX = {
   upper: /[A-Z]/,
   lower: /[a-z]/,
   number: /\d/,
-  symbol: /[^A-Za-z0-9]/,
+  symbol: /[$-/:-?{-~!"^_`\[\]]/
 };
 
 export const passwordSchema = z.string()
@@ -72,26 +72,14 @@ export const changePasswordSchema = z.object({
   { path: ["confirmNewPassword"], message: "Passwords do not match." }
 )
 
+
 export const emailSchema = z
   .string()
   .min(1, 'Email is required')
-  .email('Please enter a valid email address')
-  .max(254, 'Email address is too long')
-  .toLowerCase()
   .trim()
-  .refine((email) => {
-    // No consecutive dots
-    return !email.includes('..')
-  }, 'Email cannot contain consecutive dots')
-  .refine((email) => {
-    // Cannot start or end with a dot
-    return !email.startsWith('.') && !email.endsWith('.')
-  }, 'Email cannot start or end with a dot')
-  .refine((email) => {
-    // Local part (before @) cannot start or end with a dot
-    const [localPart] = email.split('@')
-    return !localPart.startsWith('.') && !localPart.endsWith('.')
-  }, 'Email username cannot start or end with a dot')
+  .toLowerCase()
+  .email() // This is the correct modern approach
+  .max(254, 'Email address is too long')
   .refine((email) => {
     // Check for common typos in popular domains
     const commonTypos = [
@@ -129,7 +117,7 @@ export function validateEmail(email: string) {
   return {
     valid: false,
     email: null,
-    errors: result.error.errors.map(err => err.message)
+    errors: result.error.issues.map(err => err.message)
   }
 }
 
@@ -141,12 +129,15 @@ export const signInSchema = z.object({
 export const usernameSchema = z.string()
   .min(3, 'Username must be at least 3 characters')
   .max(20, 'Username must be less than 20 characters')
-  .regex(/^[a-z0-9_-]+$/, 'Username can only contain lowercase letters, numbers, - and _')
-  .refine((username) => {
-    const reserved = ['admin', 'root', 'system', 'mod', 'moderator', 'support', 'help']
-    return !reserved.includes(username.toLowerCase())
-  }, 'This username is reserved.')
   .transform((username) => username.toLowerCase().trim())
+  .pipe(
+    z.string()
+      .regex(/^[a-z0-9_-]+$/, 'Username can only contain lowercase letters, numbers, - and _')
+      .refine((username) => {
+        const reserved = ['admin', 'root', 'system', 'mod', 'moderator', 'support', 'help']
+        return !reserved.includes(username)
+      }, 'This username is reserved.')
+  )
 
 export const signUpSchema = z.object({
   username: usernameSchema,

@@ -11,6 +11,8 @@ import { Button } from '@/src/components/ui/Button'
 import { Traits } from '@/src/components/sim/TraitsCatalog'
 import { DASHBOARD_TABS } from '@/src/lib/constants'
 import { Database } from '@/src/types/database.types'
+import { ChallengeIcon } from '@/src/components/icons/ChallengeIcon'
+import { SimIcon } from '@/src/components/icons/SimIcon'
 
 interface DashboardClientProps {
   initialChallenges: Database['public']['Tables']['challenges']['Row'][];
@@ -70,7 +72,7 @@ export function DashboardClient({ initialChallenges, initialSims }: DashboardCli
     // You can return a spinner here, or null for a flicker-free experience.
     return (
       <div className="text-center p-12">
-        <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+        <div className="w-8 h-8 border-4 border-brand-500 dark:border-brand-400 border-t-transparent rounded-full animate-spin mx-auto"></div>
       </div>
     );
   }
@@ -83,7 +85,7 @@ export function DashboardClient({ initialChallenges, initialSims }: DashboardCli
         {/* Challenges Card */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border-2 border-gray-100 dark:border-gray-700 hover:shadow-xl transition-shadow duration-200">
           <div className="text-center mb-6">
-            <img src="/ChallengeIcon.svg" alt="Challenges" className="w-16 h-16 mx-auto mb-3" />
+            <ChallengeIcon size={64} className="mx-auto mb-3" />
             <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Challenges</h3>
           </div>
           <div className="flex items-center justify-center">
@@ -106,12 +108,12 @@ export function DashboardClient({ initialChallenges, initialSims }: DashboardCli
         {/* Sims Card */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border-2 border-gray-100 dark:border-gray-700 hover:shadow-xl transition-shadow duration-200">
           <div className="text-center mb-6">
-            <img src="/SimIcon.svg" alt="Sims" className="w-16 h-16 mx-auto mb-3" />
+            <SimIcon size={64} className="mx-auto mb-3" />
             <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Sims</h3>
           </div>
           <div className="flex items-center justify-center">
             <div className="text-center flex-1">
-              <div className="text-3xl font-bold bg-gradient-to-r from-purple-500 to-pink-600 dark:from-blue-500 dark:to-purple-600 bg-clip-text text-transparent mb-1">
+              <div className="text-3xl font-bold bg-gradient-to-r from-brand-500 to-brand-600 dark:from-brand-600 dark:to-brand-700 bg-clip-text text-transparent mb-1">
                 {allSims.length}
               </div>
               <div className="text-gray-600 dark:text-gray-400 text-xs font-medium">Total Sims</div>
@@ -135,7 +137,7 @@ export function DashboardClient({ initialChallenges, initialSims }: DashboardCli
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`flex-1 py-4 px-6 rounded-xl font-semibold transition-all duration-300 ${activeTab === tab.id
-                ? 'bg-gradient-to-r from-purple-500 to-pink-500 dark:from-blue-500 dark:to-purple-600 text-white shadow-lg'
+                ? 'bg-gradient-to-r from-brand-500 to-brand-600 dark:from-brand-600 dark:to-brand-700 text-white shadow-lg'
                 : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
                 }`}
               role="tab"
@@ -211,23 +213,23 @@ export function DashboardClient({ initialChallenges, initialSims }: DashboardCli
         )}
 
         {activeTab === 'sims' && (
-           <div role="tabpanel" className="bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-lg">
-             <h2 className="text-2xl font-bold mb-6">All Sims</h2>
-             {allSims.length > 0 ? (
-               <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                 {allSims.map((sim) => (
-                   <div key={sim.id} onClick={() => navigateToSim(sim.id)} className="cursor-pointer">
-                     <SimCard sim={sim} traitCatalog={Traits} />
-                   </div>
-                 ))}
-               </div>
-             ) : (
-               <div className="text-center py-16">
-                 <p className="text-gray-600 dark:text-gray-400 mb-4">You have no sims!</p>
-                 <Link href="/dashboard/new/sim"><Button>Create A Sim</Button></Link>
-               </div>
-             )}
-           </div>
+          <div role="tabpanel" className="bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-lg">
+            <h2 className="text-2xl font-bold mb-6">All Sims</h2>
+            {allSims.length > 0 ? (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {allSims.map((sim) => (
+                  <div key={sim.id} onClick={() => navigateToSim(sim.id)} className="cursor-pointer">
+                    <SimCard sim={sim} traitCatalog={Traits} />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16">
+                <p className="text-gray-600 dark:text-gray-400 mb-4">You have no sims!</p>
+                <Link href="/dashboard/new/sim"><Button>Create A Sim</Button></Link>
+              </div>
+            )}
+          </div>
         )}
       </div>
     </>

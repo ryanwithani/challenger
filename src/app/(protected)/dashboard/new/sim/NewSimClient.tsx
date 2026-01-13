@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { createSupabaseBrowserClient } from '@/src/lib/supabase/client'
 import { SimWizard } from '@/src/components/sim/form/SimWizard' // Corrected import path
 import { useSimStore } from '@/src/lib/store/simStore'
@@ -69,7 +70,21 @@ export default function NewSimClient() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 flex items-center justify-center p-4">
       <div className="w-full max-w-4xl">
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 p-8">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-8">
+          {/* Header with mascot */}
+          <div className="flex items-center gap-2 mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
+            <Image
+              src="/mascot/pointing.png"
+              alt="Mascot pointing"
+              width={80}
+              height={80}
+              className="w-20 h-20 object-contain -mr-2"
+            />
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-brand-500 to-brand-600 dark:from-brand-600 dark:to-brand-700 text-transparent bg-clip-text font-exo2">
+              Create a Sim
+            </h1>
+          </div>
+          
           <SimWizard 
             onSubmit={handleFinalSubmit} 
             onCancel={handleCancel}

@@ -37,7 +37,7 @@ export default async function DashboardPage() {
         <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-xl border-2 border-gray-100 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 dark:from-blue-500 dark:to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-brand-600 to-brand-700 dark:from-brand-500 dark:to-brand-600 bg-clip-text text-transparent">
                 Dashboard
               </h1>
               <p className="text-base text-gray-600 dark:text-gray-400 mt-2">Manage your challenges and sims</p>

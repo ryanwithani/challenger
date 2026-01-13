@@ -34,7 +34,7 @@ export function SimAchievements({ sim, achievements }: SimAchievementsProps) {
     const getCategoryColor = (goalTitle: string) => {
         const title = goalTitle.toLowerCase()
 
-        if (title.includes('memorialize') || title.includes('creative')) return 'bg-purple-100 text-purple-800 border-purple-200'
+        if (title.includes('memorialize') || title.includes('creative')) return 'bg-brand-100 dark:bg-brand-900/30 text-brand-800 dark:text-brand-300 border-brand-200 dark:border-brand-800'
         if (title.includes('skill') || title.includes('knowledge')) return 'bg-blue-100 text-blue-800 border-blue-200'
         if (title.includes('aspiration') || title.includes('athletic')) return 'bg-green-100 text-green-800 border-green-200'
         if (title.includes('fortune') || title.includes('wealth')) return 'bg-yellow-100 text-yellow-800 border-yellow-200'
@@ -98,7 +98,7 @@ export function SimAchievements({ sim, achievements }: SimAchievementsProps) {
             {achievements.length > 0 ? (
                 <div className="space-y-6">
                     {Object.entries(achievementsByCategory).map(([category, categoryAchievements]) => (
-                        <div key={category} className="bg-white rounded-2xl border-2 border-gray-100 p-6 shadow-lg hover:shadow-xl transition-all duration-300">
+                        <div key={category} className="bg-white dark:bg-surface-dark rounded-2xl border-2 border-gray-100 dark:border-brand-800 p-6 shadow-lg hover:shadow-xl transition-all duration-300">
                             <div className="flex items-center justify-between mb-4">
                                 <h3 className="text-lg font-semibold">{category} Achievements</h3>
                                 <span className="text-sm text-gray-500">
@@ -151,12 +151,12 @@ export function SimAchievements({ sim, achievements }: SimAchievementsProps) {
                 /* No Achievements State */
                 <div className="text-center py-12">
                     <div className="text-6xl mb-4">🏆</div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">No Achievements Yet</h3>
-                    <p className="text-gray-600 mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">No Achievements Yet</h3>
+                    <p className="text-gray-600 dark:text-gray-300 mb-4">
                         <SafeText>{sim.name}</SafeText> hasn't completed any goals yet. Start playing and achieving goals to see them here!
                     </p>
-                    <div className="bg-gray-50 rounded-xl p-4 max-w-md mx-auto">
-                        <p className="text-sm text-gray-600">
+                    <div className="bg-gray-50 dark:bg-brand-900/20 rounded-xl p-4 max-w-md mx-auto">
+                        <p className="text-sm text-gray-600 dark:text-gray-300">
                             💡 <strong>Tip:</strong> Achievements are earned when you complete goals in the challenge.
                             Visit the Scoring tab to mark goals as complete and they'll appear here.
                         </p>

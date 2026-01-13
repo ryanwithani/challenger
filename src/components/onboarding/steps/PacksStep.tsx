@@ -94,7 +94,7 @@ export default function PacksStep({ onBack, onNext }: PacksStepProps) {
   return (
     <div className="p-8 md:p-12 space-y-6">
       {/* Stats */}
-      <div className="text-center p-4 bg-gradient-to-r from-brand-50 to-purple-50 dark:from-gray-800 dark:to-gray-700 rounded-2xl border border-brand-200 dark:border-gray-600">
+      <div className="text-center p-4 bg-gradient-to-r from-brand-50 to-brand-100 dark:from-brand-900/30 dark:to-brand-800/30 rounded-2xl border border-brand-200 dark:border-brand-800">
         <div className="text-2xl font-bold text-brand-600 dark:text-brand-400">{totalSelected}</div>
         <div className="text-sm text-gray-600 dark:text-gray-400">Packs Selected</div>
       </div>

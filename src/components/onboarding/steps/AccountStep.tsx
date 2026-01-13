@@ -67,7 +67,7 @@ export default function AccountStep({ onSuccess, initialData }: AccountStepProps
 
       const result = schema.safeParse(value)
       if (!result.success) {
-        return result.error.errors[0].message
+        return result.error.issues[0].message
       }
       return null
     } catch (error) {

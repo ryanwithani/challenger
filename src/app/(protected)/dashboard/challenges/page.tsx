@@ -49,7 +49,7 @@ export default function ChallengesPage() {
   }), [challenges])
 
   // Memoized challenge types
-  const challengeTypes = useMemo(() => 
+  const challengeTypes = useMemo(() =>
     Array.from(new Set(challenges.map(c => c.challenge_type).filter(Boolean))),
     [challenges]
   )
@@ -91,7 +91,7 @@ export default function ChallengesPage() {
   }, [fetchChallenges])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-brand-50 to-accent-400/20 dark:from-surface-dark dark:via-brand-900/30 dark:to-brand-800/20">
       <div className="max-w-[1400px] mx-auto p-6 space-y-8">
         {/* Header */}
         <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-xl border-2 border-gray-100 dark:border-gray-700">
@@ -115,7 +115,7 @@ export default function ChallengesPage() {
 
         {/* Error State */}
         {error && (
-          <ErrorMessage 
+          <ErrorMessage
             error={error}
           />
         )}
@@ -125,7 +125,7 @@ export default function ChallengesPage() {
           {[
             { label: 'Active', value: stats.active, color: 'from-emerald-500 to-teal-600', icon: '⚡' },
             { label: 'Completed', value: stats.completed, color: 'from-blue-500 to-indigo-600', icon: '✅' },
-            { label: 'Legacy', value: stats.legacy, color: 'from-purple-500 to-pink-600 dark:from-blue-500 dark:to-purple-600', icon: '🎯' },
+            { label: 'Legacy', value: stats.legacy, color: 'from-brand-500 to-brand-600 dark:from-brand-600 dark:to-brand-700', icon: '🎯' },
             { label: 'This Month', value: stats.thisMonth, color: 'from-amber-500 to-orange-600', icon: '📅' }
           ].map((stat, index) => (
             <div key={index} className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border-2 border-gray-100 dark:border-gray-700 hover:shadow-xl transition-shadow duration-200">
@@ -163,7 +163,7 @@ export default function ChallengesPage() {
               <select
                 value={filters.statusFilter}
                 onChange={(e) => updateFilter('statusFilter', e.target.value)}
-                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:border-purple-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-brand-800 rounded-xl focus:border-brand-400 dark:focus:border-brand-500 focus:outline-none bg-white dark:bg-surface-dark text-gray-900 dark:text-gray-100"
               >
                 <option value="all">All Statuses</option>
                 <option value="active">Active</option>
@@ -180,7 +180,7 @@ export default function ChallengesPage() {
               <select
                 value={filters.typeFilter}
                 onChange={(e) => updateFilter('typeFilter', e.target.value)}
-                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:border-purple-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-brand-800 rounded-xl focus:border-brand-400 dark:focus:border-brand-500 focus:outline-none bg-white dark:bg-surface-dark text-gray-900 dark:text-gray-100"
               >
                 <option value="all">All Types</option>
                 {challengeTypes.map((type) => (
@@ -206,7 +206,7 @@ export default function ChallengesPage() {
         {/* Content */}
         {challengesLoading ? (
           <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-purple-500 border-t-transparent mx-auto"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-brand-500 dark:border-brand-400 border-t-transparent mx-auto"></div>
             <p className="text-gray-500 dark:text-gray-400 mt-4">Loading challenges...</p>
           </div>
         ) : challenges.length === 0 ? (
@@ -239,13 +239,13 @@ export default function ChallengesPage() {
               <div key={status} className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border-2 border-gray-100 dark:border-gray-700">
                 <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6 flex items-center">
                   <span className="mr-3 text-2xl">
-                    {status === 'active' ? '⚡' : 
-                     status === 'completed' ? '✅' : 
-                     status === 'paused' ? '⏸️' : 
-                     status === 'archived' ? '📦' : '❓'}
+                    {status === 'active' ? '⚡' :
+                      status === 'completed' ? '✅' :
+                        status === 'paused' ? '⏸️' :
+                          status === 'archived' ? '📦' : '❓'}
                   </span>
                   {status.charAt(0).toUpperCase() + status.slice(1)} Challenges
-                  <span className="ml-3 px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-400 text-sm rounded-full">
+                  <span className="ml-3 px-3 py-1 bg-brand-100 dark:bg-brand-900 text-brand-600 dark:text-brand-400 text-sm rounded-full">
                     {statusChallenges.length}
                   </span>
                 </h3>

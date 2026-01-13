@@ -37,12 +37,12 @@ export function AvatarUploader({ value, onChange, uploadFunction }: AvatarUpload
       {value ? (
         <div className="flex items-center gap-4">
           <div className="relative">
-            <Image 
-              src={value} 
-              alt="Avatar" 
-              width={64} 
-              height={64} 
-              className="h-16 w-16 rounded-xl object-cover border-2 border-gray-200" 
+            <Image
+              src={value}
+              alt="Avatar"
+              width={64}
+              height={64}
+              className="h-16 w-16 rounded-xl object-cover border-2 border-gray-200"
             />
             {busy && (
               <div className="absolute inset-0 bg-black/50 rounded-xl flex items-center justify-center">
@@ -50,8 +50,8 @@ export function AvatarUploader({ value, onChange, uploadFunction }: AvatarUpload
               </div>
             )}
           </div>
-          <button 
-            type="button" 
+          <button
+            type="button"
             onClick={() => onChange(null)}
             className="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-xl hover:bg-red-100 transition-colors"
           >
@@ -60,12 +60,12 @@ export function AvatarUploader({ value, onChange, uploadFunction }: AvatarUpload
         </div>
       ) : (
         <div className="space-y-2">
-          <input 
-            type="file" 
-            accept="image/jpeg,image/jpg,image/png,image/webp" 
+          <input
+            type="file"
+            accept="image/jpeg,image/jpg,image/png,image/webp"
             onChange={onFile}
             disabled={busy}
-            className="block w-full text-sm text-gray-700 file:mr-4 file:rounded-xl file:border-2 file:border-gray-300 file:bg-white file:px-4 file:py-2 file:text-sm file:font-medium hover:file:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-200 rounded-xl border-2 border-dashed border-gray-300 p-4 text-center" 
+            className="block w-full text-sm text-gray-700 file:mr-4 file:rounded-xl file:border-2 file:border-gray-300 file:bg-white file:px-4 file:py-2 file:text-sm file:font-medium hover:file:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-200 rounded-xl border-2 border-dashed border-gray-300 p-4 text-center"
           />
           <p className="text-xs text-gray-500">JPEG, PNG, or WebP • Max 5MB</p>
         </div>

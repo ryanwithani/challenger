@@ -6,9 +6,9 @@ import { Database } from '@/src/types/database.types'
 import { LEGACY_CATEGORIES } from '@/src/components/challenge/GoalsSeeder'
 import { SafeText } from '../ui/SafeText'
 import { GoalCompletionModal } from './GoalCompletionModal'
-import { 
-  safeParseCompletionDetails, 
-  safeParseThresholds, 
+import {
+  safeParseCompletionDetails,
+  safeParseThresholds,
   safeParseChallengeConfig,
   getParsedData,
   isParseSuccess,
@@ -26,7 +26,7 @@ const formatRuleName = (rule: string | undefined): string => {
 }
 
 const getRuleDescription = (
-  ruleType: keyof LegacyRules, 
+  ruleType: keyof LegacyRules,
   value: string
 ): string => {
   const rule = LEGACY_RULES[ruleType].find((r: LegacyRule) => r.value === value)
@@ -62,12 +62,12 @@ function DifficultyBadge({ startType }: DifficultyBadgeProps) {
     extreme: 'bg-gradient-to-r from-yellow-500 to-orange-600',
     regular: 'bg-gradient-to-r from-green-400 to-green-600'
   }
-  
+
   const style = badgeStyles[startType as keyof typeof badgeStyles] || badgeStyles.regular
   const label = formatRuleName(startType)
-  
+
   return (
-    <span 
+    <span
       className={`px-3 py-1.5 rounded-full text-sm font-semibold text-white ${style}`}
       aria-label={`Challenge difficulty: ${label} start`}
     >
@@ -140,7 +140,7 @@ function GenerationCard({ generation, heir, spouse, children, isActive, onSelect
         </div>
         {spouse ? (
           <div className="flex items-center space-x-3 p-3 bg-white rounded-xl border border-pink-200">
-            <div className="w-12 h-12 bg-gradient-to-br from-pink-400 to-pink-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+            <div className="w-12 h-12 bg-gradient-to-br from-brand-500 to-brand-600 dark:from-brand-600 dark:to-brand-700 rounded-full flex items-center justify-center text-white font-bold text-lg">
               {spouse?.name?.charAt(0) ?? ''}
             </div>
             <div>
@@ -228,7 +228,7 @@ function GoalComponent({
   const [tempValue, setTempValue] = useState(goal.current_value || 0)
 
   const isCompleted = progress.some(p => p.goal_id === goal.id)
-  
+
   const handleSaveValue = async () => {
     try {
       await onUpdateGoalValue(goal.id, tempValue)
@@ -272,17 +272,17 @@ function GoalComponent({
       } else {
         // Already completed - show green checkmark but allow unchecking
         return (
-        <button
-          onClick={async () => {
-            try {
-              await onToggleGoal(goal.id)
-            } catch (error) {
-              console.error('Goal toggle failed:', error)
-            }
-          }}
-          className="w-8 h-8 rounded-xl border-2 flex items-center justify-center bg-gradient-to-br from-emerald-500 to-green-600 border-emerald-500 text-white hover:from-emerald-600 hover:to-green-700 transition-all duration-300"
-          title="Click to mark as incomplete"
-        >
+          <button
+            onClick={async () => {
+              try {
+                await onToggleGoal(goal.id)
+              } catch (error) {
+                console.error('Goal toggle failed:', error)
+              }
+            }}
+            className="w-8 h-8 rounded-xl border-2 flex items-center justify-center bg-gradient-to-br from-emerald-500 to-green-600 border-emerald-500 text-white hover:from-emerald-600 hover:to-green-700 transition-all duration-300"
+            title="Click to mark as incomplete"
+          >
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
             </svg>
@@ -428,7 +428,7 @@ function GoalComponent({
       if (!isParseSuccess(thresholdsResult)) {
         return `${goal.point_value || 0} points`
       }
-      
+
       const thresholds = thresholdsResult.data
       const currentValue = goal.current_value || 0
       let currentPoints = 0
@@ -489,7 +489,7 @@ function GoalComponent({
       {isCompleted && completionProgress?.completion_details && (() => {
         const detailsResult = safeParseCompletionDetails(completionProgress.completion_details as string)
         if (!isParseSuccess(detailsResult)) return null
-        
+
         const details = detailsResult.data
         return (
           <div className="p-4 bg-emerald-100 rounded-xl border border-emerald-200 mb-4" role="status" aria-label="Goal completion details">
@@ -515,11 +515,11 @@ function GoalComponent({
         {goal.goal_type === 'threshold' && goal.thresholds && (() => {
           const thresholdsResult = safeParseThresholds(goal.thresholds)
           if (!isParseSuccess(thresholdsResult)) return null
-          
+
           const thresholds = thresholdsResult.data
           const currentValue = goal.current_value || 0
           const nextThreshold = thresholds.find(t => currentValue < t.value)
-          
+
           return (
             <div className="text-xs text-gray-500">
               Next: {nextThreshold?.value || 'Max reached'}
@@ -640,7 +640,7 @@ export function LegacyTracker({
   const handleOpenCompletionModal = useCallback((goal: Goal) => {
     setGoalCompletionModal({ isOpen: true, goal });
   }, []);
-  
+
   const handleCloseCompletionModal = useCallback(() => {
     setGoalCompletionModal({ isOpen: false, goal: null });
   }, []);
@@ -674,11 +674,11 @@ export function LegacyTracker({
     }, {});
   }, [sims]);
 
-  
-const currentGeneration = useMemo(() => {
-  const keys = Object.keys(simsByGeneration).map(Number);
-  return Math.max(1, ...(keys.length ? keys : [1]));
-}, [simsByGeneration]);
+
+  const currentGeneration = useMemo(() => {
+    const keys = Object.keys(simsByGeneration).map(Number);
+    return Math.max(1, ...(keys.length ? keys : [1]));
+  }, [simsByGeneration]);
 
 
   const tabs = [
@@ -688,78 +688,77 @@ const currentGeneration = useMemo(() => {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-surface-dark dark:to-brand-900/30 p-6">
       <div className="max-w-[1400px] mx-auto space-y-8">
         {/* Header */}
-<div className="bg-white rounded-3xl p-8 shadow-xl border-2 border-gray-100">
-  {/* Row 1: Challenge Identity + Actions */}
-  <div className="flex items-start justify-between gap-6 mb-6">
-    <div className="flex-1 min-w-0">
-      <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 dark:from-blue-500 dark:to-purple-600 bg-clip-text text-transparent mb-3">
-        <SafeText>{challenge.name}</SafeText>
-      </h1>
-      
-      {/* Metadata Bar */}
-      <div className="flex flex-wrap items-center gap-4 text-base text-gray-600">
-        <div className="flex items-center gap-2">
-          <span className="font-semibold text-gray-900">Generation {currentGeneration}</span>
+        <div className="bg-white dark:bg-surface-dark rounded-3xl p-8 shadow-xl border-2 border-gray-100 dark:border-brand-800">          {/* Row 1: Challenge Identity + Actions */}
+          <div className="flex items-start justify-between gap-6 mb-6">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-brand-600 to-brand-700 dark:from-brand-500 dark:to-brand-600 bg-clip-text text-transparent mb-3">
+                <SafeText>{challenge.name}</SafeText>
+              </h1>
+
+              {/* Metadata Bar */}
+              <div className="flex flex-wrap items-center gap-4 text-base text-gray-600 dark:text-gray-300">
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-gray-900 dark:text-gray-100">Generation {currentGeneration}</span>
+                </div>
+
+                <div className="w-px h-5 bg-gray-300" aria-hidden="true" />
+
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-gray-900 dark:text-gray-100">{totalPoints}</span>
+                  <span className="text-gray-400">/</span>
+                  <span>100 pts</span>
+                </div>
+
+                <div className="w-px h-5 bg-gray-300" aria-hidden="true" />
+
+                <DifficultyBadge startType={config.start_type || 'regular'} />
+              </div>
+            </div>
+
+            {/* Actions */}
+            <Button
+              onClick={onAddSim}
+              size="sm"
+              className="px-6 py-3 bg-gradient-to-r from-brand-500 to-brand-600 dark:from-brand-600 dark:to-brand-700 text-white rounded-xl font-semibold hover:from-brand-600 hover:to-brand-700 dark:hover:from-brand-700 dark:hover:to-brand-800 transition-all duration-200 border-none shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-brand-500 dark:focus:ring-brand-400 focus:ring-offset-2"
+              aria-label="Add a new Sim to this challenge"
+            >
+              Add Sim
+            </Button>
+          </div>
+
+          {/* Row 2: Challenge Rules (Compact Reference) */}
+          <div className="pt-6 border-t border-gray-200 dark:border-brand-800">
+            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+              Challenge Rules
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                { label: 'Gender Law', value: config.gender_law, type: 'genderLaw' as const },
+                { label: 'Bloodline', value: config.bloodline_law, type: 'bloodlineLaw' as const },
+                { label: 'Heir Selection', value: config.heir_selection, type: 'heirSelection' as const },
+                { label: 'Species', value: config.species_rule, type: 'speciesRule' as const }
+              ].map((rule, index) => (
+                <div key={index} className="flex flex-col space-y-1">
+                  <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                    {rule.label}
+                  </span>
+                  <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                    {formatRuleName(rule.value)}
+                  </span>
+                  <span className="text-xs text-gray-600 dark:text-gray-300 leading-tight">
+                    {getRuleDescription(rule.type, rule.value ?? '')}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-        
-        <div className="w-px h-5 bg-gray-300" aria-hidden="true" />
-        
-        <div className="flex items-center gap-2">
-          <span className="font-semibold text-gray-900">{totalPoints}</span>
-          <span className="text-gray-400">/</span>
-          <span>100 pts</span>
-        </div>
-        
-        <div className="w-px h-5 bg-gray-300" aria-hidden="true" />
-        
-        <DifficultyBadge startType={config.start_type || 'regular'} />
-      </div>
-    </div>
-    
-    {/* Actions */}
-    <Button
-      onClick={onAddSim}
-      size="sm"
-      className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-purple-700 transition-all duration-200 border-none shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
-      aria-label="Add a new Sim to this challenge"
-    >
-      Add Sim
-    </Button>
-  </div>
-  
-  {/* Row 2: Challenge Rules (Compact Reference) */}
-  <div className="pt-6 border-t border-gray-200">
-    <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
-      Challenge Rules
-    </h3>
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-  {[
-    { label: 'Gender Law', value: config.gender_law, type: 'genderLaw' as const },
-    { label: 'Bloodline', value: config.bloodline_law, type: 'bloodlineLaw' as const },
-    { label: 'Heir Selection', value: config.heir_selection, type: 'heirSelection' as const },
-    { label: 'Species', value: config.species_rule, type: 'speciesRule' as const }
-  ].map((rule, index) => (
-    <div key={index} className="flex flex-col space-y-1">
-      <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-        {rule.label}
-      </span>
-      <span className="text-sm font-semibold text-gray-900">
-        {formatRuleName(rule.value)}
-      </span>
-      <span className="text-xs text-gray-600 leading-tight">
-        {getRuleDescription(rule.type, rule.value ?? '')}
-      </span>
-    </div>
-  ))}
-</div>
-  </div>
-</div>
 
         {/* Tabs */}
-        <div className="bg-white rounded-2xl p-2 shadow-lg border-2 border-gray-100">
+        <div className="bg-white dark:bg-surface-dark rounded-2xl p-2 shadow-lg border-2 border-gray-100 dark:border-brand-800">
           <nav className="flex space-x-2" role="tablist" aria-label="Challenge sections">
             {tabs.map((tab) => (
               <button
@@ -769,9 +768,9 @@ const currentGeneration = useMemo(() => {
                 aria-selected={activeTab === tab.id}
                 aria-controls={`${tab.id}-panel`}
                 id={`${tab.id}-tab`}
-                className={`flex-1 py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 flex items-center justify-center space-x-2 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 ${activeTab === tab.id
-                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 dark:from-blue-500 dark:to-purple-600 text-white shadow-lg'
-                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+                className={`flex-1 py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 flex items-center justify-center space-x-2 focus:outline-none focus:ring-2 focus:ring-brand-500 dark:focus:ring-brand-400 focus:ring-offset-2 ${activeTab === tab.id
+                  ? 'bg-gradient-to-r from-brand-500 to-brand-600 dark:from-brand-600 dark:to-brand-700 text-white shadow-lg'
+                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-brand-900/20'
                   }`}
               >
                 <span>{tab.name}</span>
@@ -789,10 +788,10 @@ const currentGeneration = useMemo(() => {
                 {[
                   { label: 'Current Generation', value: currentGeneration, color: 'from-emerald-500 to-teal-600', icon: '🏠' },
                   { label: 'Total Sims', value: sims.length, color: 'from-blue-500 to-indigo-600', icon: '👥' },
-                  { label: 'Total Goals', value: goals.length, color: 'from-purple-500 to-pink-600 dark:from-blue-500 dark:to-purple-600', icon: '🎯' },
+                  { label: 'Total Goals', value: goals.length, color: 'from-brand-500 to-brand-600 dark:from-brand-600 dark:to-brand-700', icon: '🎯' },
                   { label: 'Legacy Score', value: `${totalPoints}/100`, color: 'from-amber-500 to-orange-600', icon: '🏆' }
                 ].map((stat, index) => (
-                  <div key={index} className="bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-100 text-center hover:shadow-xl transition-all duration-300">
+                  <div className={`text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
                     <div className={`text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
                       {stat.value}
                     </div>
@@ -886,8 +885,8 @@ const currentGeneration = useMemo(() => {
           )}
         </div>
 
-                {/* Footer */}
-                <div className="mt-12 py-6 border-t border-gray-200">
+        {/* Footer */}
+        <div className="mt-12 py-6 border-t border-gray-200">
           <div className="flex items-center justify-between text-sm text-gray-600">
             <div>© 2025 Sims Challenge Tracker. All rights reserved.</div>
             <div className="flex gap-6">

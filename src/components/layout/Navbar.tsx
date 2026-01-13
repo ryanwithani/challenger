@@ -9,6 +9,7 @@ import { LoginModal } from '@/src/components/auth/LoginModal'
 import { PasswordUpdateModal } from '../auth/PasswordUpdateModal'
 import { ThemeToggleCompact } from './ThemeToggleCompact'
 import { useRouter } from 'next/navigation'
+import { CrownIcon } from '../icons/CrownIcon'
 
 export function Navbar() {
   const { user, userProfile, signOut, showPasswordUpdateModal, setShowPasswordUpdateModal } = useAuthStore()
@@ -33,17 +34,8 @@ export function Navbar() {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <Link href="/" className="flex items-center space-x-2">
-              <div className="w-12 h-12 relative">
-                <Image
-                  src="/ChallengerCrown.svg"
-                  alt="Challenger Crown Logo"
-                  width={48}
-                  height={48}
-                  className="w-full h-full object-contain"
-                  style={{ background: 'transparent' }}
-                />
-              </div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 dark:from-blue-500 dark:to-purple-600 text-transparent bg-clip-text font-exo2">
+              <CrownIcon size={48} className="w-12 h-12" />
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-brand-500 to-brand-600 dark:from-brand-600 dark:to-brand-700 text-transparent bg-clip-text font-exo2">
                 Challenger
               </h1>
             </Link>

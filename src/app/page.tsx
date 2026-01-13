@@ -1,151 +1,154 @@
 'use client'
+
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Navbar } from '@/src/components/layout/Navbar'
+import Image from 'next/image'
 import { AuthInitializer } from '../components/auth/AuthInitializer'
-import { LoginModal } from '@/src/components/auth/LoginModal'
+import { CrownIcon } from '@/src/components/icons/CrownIcon'
+import { useAuthStore } from '@/src/lib/store/authStore'
+import { Input } from '@/src/components/ui/Input'
 import { Button } from '@/src/components/ui/Button'
+import { PasswordInput } from '@/src/components/auth/PasswordInput'
+import { PasswordResetModal } from '@/src/components/auth/PasswordResetModal'
 
 export default function LandingPage() {
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  
+  const router = useRouter()
+  const { signIn } = useAuthStore()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [showResetModal, setShowResetModal] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    console.log('Login form submitted with email:', email)
+    setError('')
+    setLoading(true)
+
+    try {
+      console.log('Attempting to sign in...')
+      await signIn(email, password)
+      console.log('Sign in successful!')
+      router.push('/dashboard')
+    } catch (err: any) {
+      console.error('Sign in error details:', err)
+      setError(err.message || 'Failed to sign in')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleForgotPassword = () => {
+    setShowResetModal(true)
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-brand-100 to-accent-400/20">
+    <div className="min-h-screen bg-gradient-to-br from-brand-100 to-accent-400/20 dark:from-surface-dark dark:to-brand-900/30 flex flex-col">
       <AuthInitializer />
-      <Navbar />
-
-      <main className="container mx-auto px-4 py-16">
-        <section className="text-center max-w-4xl mx-auto">
-          <h1 className="text-4xl font-bold text-gray-900 mb-6">
-            The Ultimate Sims 4 Legacy Challenge Tracker
-          </h1>
-          <p className="text-lg text-gray-600 mb-8">
-            Track your Legacy Challenge across 10 generations
-            with built-in scoring, family trees, and goal management.
-          </p>
-
-          <div className="flex gap-4 justify-center">
-            <Link href="/signup">
-              <Button size="lg" className="bg-gradient-to-r from-brand-500 to-brand-600 hover:opacity-90 text-white px-8 py-6 text-lg rounded-3xl shadow-lg">
-                Start Your Legacy
-              </Button>
-            </Link>
-            <Button 
-              onClick={() => setIsLoginModalOpen(true)}
-              size="lg" 
-              variant="outline"
-              className="border-2 border-brand-500 text-brand-500 hover:bg-brand-50/10 px-8 py-6 text-lg rounded-3xl shadow-lg"
-            >
-              Sign In
-            </Button>
+      <main className="container mx-auto px-4 flex-1 flex flex-col items-center justify-center">
+        {/* Header Section */}
+        <div className="flex flex-col items-center justify-center mb-12">
+          <div className="flex items-center space-x-3 mb-4">
+            <CrownIcon size={64} className="w-16 h-16" />
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-brand-500 to-brand-600 dark:from-brand-600 dark:to-brand-700 text-transparent bg-clip-text font-exo2 leading-normal">
+              Challenger
+            </h1>
           </div>
-        </section>
+        </div>
 
-        {/* Legacy Challenge Features */}
-        <section className="mt-20">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
-            Everything You Need for the Perfect Legacy
-          </h2>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-white rounded-3xl shadow-lg p-6 text-center hover:shadow-xl transition-all duration-300 border border-brand-500/10">
-              <div className="text-4xl mb-4">👨‍👩‍👧‍👦</div>
-              <h3 className="text-xl font-semibold mb-2 text-brand-500">Family Management</h3>
-              <p className="text-gray-600">
-                Track heirs, spouses, and children across all 10 generations with clear family trees
-              </p>
-            </div>
-
-            <div className="bg-white rounded-3xl shadow-lg p-6 text-center hover:shadow-xl transition-all duration-300 border border-brand-500/10">
-              <div className="text-4xl mb-4">🏆</div>
-              <h3 className="text-xl font-semibold mb-2 text-brand-500">Automatic Scoring</h3>
-              <p className="text-gray-600">
-                Built-in point calculation across all 11 categories for accurate legacy scoring
-              </p>
-            </div>
-
-            <div className="bg-white rounded-3xl shadow-lg p-6 text-center hover:shadow-xl transition-all duration-300 border border-brand-500/10">
-              <div className="text-4xl mb-4">🎯</div>
-              <h3 className="text-xl font-semibold mb-2 text-brand-500">Goal Tracking</h3>
-              <p className="text-gray-600">
-                Complete and track memorializations, aspirations, skills, and more with detailed logs
-              </p>
-            </div>
+        {/* Main Content Section - Three Column Layout */}
+        <div className="flex flex-col lg:flex-row items-center justify-center gap-8 max-w-6xl mx-auto w-full">
+          {/* Left: Mascot Image */}
+          <div className="flex-shrink-0">
+            <Image
+              src="/mascot/pointing.png"
+              alt="Challenger Mascot"
+              width={300}
+              height={300}
+              className="object-contain"
+            />
           </div>
-        </section>
 
-        {/* How It Works */}
-        <section className="mt-20">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
-            How It Works
-          </h2>
+          {/* Center: Blurb Text */}
+          <div className="flex-1 max-w-md text-center lg:text-left">
+            <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
+              Track your legacy challenge across 10 generations with built-in scoring, family trees, and goal management.
+            </p>
+          </div>
 
-          <div className="grid md:grid-cols-4 gap-6">
-            <div className="text-center">
-              <div className="w-12 h-12 bg-gradient-to-r from-brand-500 to-brand-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold shadow-md">
-                1
+          {/* Right: Sign-In Form */}
+          <div className="flex-shrink-0 w-full max-w-md">
+            <div className="bg-white dark:bg-surface-dark rounded-3xl shadow-xl p-8">
+              <h2 className="text-2xl font-bold text-brand-500 dark:text-brand-400 mb-6">
+                Sign In
+              </h2>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <Input
+                  type="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full"
+                  required
+                />
+
+                <PasswordInput
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full"
+                  placeholder="Password"
+                  required
+                />
+
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={handleForgotPassword}
+                    className="text-sm text-brand-500 hover:text-brand-600 dark:hover:text-brand-400"
+                  >
+                    Forgot password?
+                  </button>
+                </div>
+
+                {error && (
+                  <p className="text-red-500 text-sm">{error}</p>
+                )}
+
+                <Button
+                  type="submit"
+                  variant="gradient"
+                  className="w-full"
+                  disabled={loading}
+                  loading={loading}
+                  loadingText="Signing in..."
+                >
+                  Sign In
+                </Button>
+              </form>
+
+              <div className="mt-6 text-center">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Don't have an account?{' '}
+                  <Link
+                    href="/signup"
+                    className="text-brand-500 hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300 font-semibold underline"
+                  >
+                    Sign up
+                  </Link>
+                </p>
               </div>
-              <h4 className="font-semibold mb-2 text-brand-500">Create Challenge</h4>
-              <p className="text-sm text-gray-600">Set up your legacy with custom rules and expansion packs</p>
-            </div>
-
-            <div className="text-center">
-              <div className="w-12 h-12 bg-gradient-to-r from-brand-500 to-brand-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold shadow-md">
-                2
-              </div>
-              <h4 className="font-semibold mb-2 text-brand-500">Add Your Sims</h4>
-              <p className="text-sm text-gray-600">Create founder and track family members through generations</p>
-            </div>
-
-            <div className="text-center">
-              <div className="w-12 h-12 bg-gradient-to-r from-brand-500 to-brand-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold shadow-md">
-                3
-              </div>
-              <h4 className="font-semibold mb-2 text-brand-500">Complete Goals</h4>
-              <p className="text-sm text-gray-600">Mark achievements and track detailed completion methods</p>
-            </div>
-
-            <div className="text-center">
-              <div className="w-12 h-12 bg-gradient-to-r from-brand-500 to-brand-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold shadow-md">
-                4
-              </div>
-                <h4 className="font-semibold mb-2 text-brand-500">Watch Score Grow</h4>
-              <p className="text-sm text-gray-600">See your legacy score increase as you hit milestones</p>
             </div>
           </div>
-        </section>
-
-        {/* Call to Action */}
-        <section className="mt-20 text-center bg-white rounded-3xl shadow-lg p-8 border border-brand-500/10">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6">
-            Ready to Start Your Legacy?
-          </h2>
-          <p className="text-xl text-gray-600 mb-8">
-            Join Simmers who have already discovered the joy of organized legacy tracking.
-          </p>
-
-          <div className="flex gap-4 justify-center">
-            <Link href="/signup">
-                <Button size="lg" className="bg-gradient-to-r from-brand-500 to-brand-600 hover:opacity-90 text-white px-8 py-6 text-lg rounded-3xl shadow-lg">
-                Create Your Legacy
-              </Button>
-            </Link>
-            <Button 
-              onClick={() => setIsLoginModalOpen(true)}
-              size="lg" 
-              variant="outline"
-              className="border-2 border-brand-500 text-brand-500 hover:bg-brand-50/10 px-8 py-6 text-lg rounded-3xl shadow-lg"
-            >
-              Sign In
-            </Button>
-          </div>
-        </section>
+        </div>
       </main>
-      
-      {/* Modal for sign in */}
-      <LoginModal 
-        isOpen={isLoginModalOpen} 
-        onClose={() => setIsLoginModalOpen(false)} 
+
+      <PasswordResetModal
+        isOpen={showResetModal}
+        onClose={() => setShowResetModal(false)}
+        initialEmail={email}
       />
     </div>
   )

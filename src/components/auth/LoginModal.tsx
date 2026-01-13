@@ -61,9 +61,9 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
   return (
     <>
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-        <div className="bg-white rounded-3xl shadow-xl w-full max-w-md p-8 relative">
+        <div className="bg-white dark:bg-surface-dark rounded-3xl shadow-xl w-full max-w-md p-8 relative">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-brand-500">Sign In</h2>
+            <h2 className="text-2xl font-bold text-brand-500 dark:text-brand-400">Sign In</h2>
             <button
               onClick={handleClose}
               className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -97,7 +97,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
               <button
                 type="button"
                 onClick={handleForgotPassword}
-                className="text-sm text-brand-500 hover:text-purple-600"
+                className="text-sm text-brand-500 hover:text-brand-600 dark:hover:text-brand-400"
               >
                 Forgot password?
               </button>
