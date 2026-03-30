@@ -2,21 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/src/lib/supabase/server'
 import { withCSRFProtection } from '@/src/lib/middleware/csrf'
 import { passwordSchema, emailSchema, usernameSchema, PASSWORD_MIN } from '@/src/lib/utils/validators'
-import rateLimit from '@/src/lib/utils/rateLimit'
-import { getClientIP } from '@/src/lib/utils/ip-utils'
-
-const signupLimiter = rateLimit({
-  interval: 60 * 60 * 1000, // 1 hour
-  uniqueTokenPerInterval: 500,
-})
-
 async function signupHandler(request: NextRequest) {
   try {
-    const clientIP = getClientIP(request)
-
-    // Rate limiting: 3 signups per hour per IP
-    await signupLimiter.check(3, clientIP)
-
     const { username, email, password, website } = await request.json()
 
     // Honeypot check
@@ -107,7 +94,7 @@ async function signupHandler(request: NextRequest) {
       throw signUpError
     }
 
-    // Create user profile in users table if user was created successfully
+    // Create user profile — required, not optional
     if (data.user) {
       const { error: profileError } = await supabase
         .from('users')
@@ -115,14 +102,16 @@ async function signupHandler(request: NextRequest) {
           id: data.user.id,
           email: data.user.email!,
           username: usernameTrimmed,
-          display_name: usernameTrimmed, // Use username as initial display name
+          display_name: usernameTrimmed,
           created_at: new Date().toISOString(),
         })
 
       if (profileError) {
         console.error('Failed to create user profile:', profileError)
-        // Don't fail the signup if profile creation fails - user can still sign in
-        // The profile will be created on first login via the auth store
+        return NextResponse.json(
+          { error: 'Failed to create account. Please try again.' },
+          { status: 500 }
+        )
       }
     }
 
@@ -132,18 +121,8 @@ async function signupHandler(request: NextRequest) {
       message: 'Account created successfully'
     })
 
-  } catch (rateLimitError: any) {
-    if (rateLimitError.message?.includes('Rate limit')) {
-      return NextResponse.json(
-        { error: 'Too many signup attempts. Please try again in an hour.' },
-        {
-          status: 429,
-          headers: { 'Retry-After': '3600' }
-        }
-      )
-    }
-
-    console.error('Signup error:', rateLimitError)
+  } catch (error) {
+    console.error('Signup error:', error)
     return NextResponse.json(
       { error: 'Failed to create account. Please try again.' },
       { status: 500 }

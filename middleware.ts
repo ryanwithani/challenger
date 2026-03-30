@@ -9,56 +9,24 @@ import { generateCSRFToken, setCSRFTokenCookie } from '@/src/lib/utils/csrf'
 const redis = Redis.fromEnv()
 const limiter = new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(10, '10s') })
 
+const PROTECTED_PATHS = ['/dashboard', '/profile', '/settings']
+const AUTH_PAGES = ['/login', '/register']
+
 export async function middleware(request: NextRequest) {
   const ip = getClientIP(request)
   const pathname = request.nextUrl.pathname
-  // Tighter limits on auth + write endpoints
+
+  // Rate limit auth + write endpoints
   if (pathname.startsWith('/api/auth') || (pathname.startsWith('/api') && request.method !== 'GET')) {
     const { success } = await limiter.limit(`${ip}:${pathname}`)
     if (!success) return new NextResponse('Too Many Requests', { status: 429 })
   }
 
   let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
+    request: { headers: request.headers },
   })
 
-  // Generate CSRF token for authenticated users on first visit
-  if (request.nextUrl.pathname.startsWith('/dashboard') ||
-    request.nextUrl.pathname.startsWith('/profile') ||
-    request.nextUrl.pathname.startsWith('/settings')) {
-
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return request.cookies.getAll()
-          },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
-            response = NextResponse.next({
-              request: {
-                headers: request.headers,
-              },
-            })
-            cookiesToSet.forEach(({ name, value, options }) =>
-              response.cookies.set(name, value, options)
-            )
-          },
-        },
-      }
-    )
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (user && !request.cookies.get('csrf-token')) {
-      const token = generateCSRFToken()
-      setCSRFTokenCookie(response, token)
-    }
-  }
-
+  // Create Supabase client once for all auth checks
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -68,11 +36,9 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
           response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
+            request: { headers: request.headers },
           })
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options)
@@ -82,40 +48,33 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // Check auth for protected routes
-  const protectedPaths = ['/dashboard', '/profile', '/settings']
-  const isProtectedPath = protectedPaths.some(path =>
-    request.nextUrl.pathname.startsWith(path)
-  )
+  const isProtectedPath = PROTECTED_PATHS.some(path => pathname.startsWith(path))
+  const isAuthPage = AUTH_PAGES.some(path => pathname.startsWith(path))
 
-  if (isProtectedPath) {
+  // Only call getUser() when we actually need auth info
+  if (isProtectedPath || isAuthPage) {
     const { data: { user } } = await supabase.auth.getUser()
 
-    // Not authenticated
-    if (!user) {
-      return NextResponse.redirect(new URL('/login', request.url))
-    }
+    if (isProtectedPath) {
+      if (!user) {
+        return NextResponse.redirect(new URL('/login', request.url))
+      }
 
-    // Check email verification
-    if (user && !user.email_confirmed_at) {
-      // Allow access to verify-email page
-      if (!request.nextUrl.pathname.startsWith('/auth/verify-email')) {
+      if (!user.email_confirmed_at && !pathname.startsWith('/auth/verify-email')) {
         return NextResponse.redirect(new URL('/auth/verify-email', request.url))
       }
-    }
-  }
 
-  // If user is logged in but email not verified, redirect from auth pages to verify-email
-  if (request.nextUrl.pathname.startsWith('/login') ||
-    request.nextUrl.pathname.startsWith('/register')) {
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (user && !user.email_confirmed_at) {
-      return NextResponse.redirect(new URL('/auth/verify-email', request.url))
+      // Generate CSRF token for authenticated users if not already set
+      if (!request.cookies.get('csrf-token')) {
+        const token = generateCSRFToken()
+        setCSRFTokenCookie(response, token)
+      }
     }
 
-    // If already logged in and verified, redirect to dashboard
-    if (user && user.email_confirmed_at) {
+    if (isAuthPage && user) {
+      if (!user.email_confirmed_at) {
+        return NextResponse.redirect(new URL('/auth/verify-email', request.url))
+      }
       return NextResponse.redirect(new URL('/dashboard', request.url))
     }
   }
@@ -125,14 +84,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder
-     */
     '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/api/auth/(.*)',
   ],
 }

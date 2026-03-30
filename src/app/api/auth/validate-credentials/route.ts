@@ -2,21 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/src/lib/supabase/server'
 import { createSupabaseAdminClient } from '@/src/lib/supabase/admin'
 import { emailSchema } from '@/src/lib/utils/validators'
-import rateLimit from '@/src/lib/utils/rateLimit'
-import { getClientIP } from '@/src/lib/utils/ip-utils'
-
-const validationLimiter = rateLimit({
-    interval: 60 * 1000, // 1 minute
-    uniqueTokenPerInterval: 100,
-})
 
 export async function POST(request: NextRequest) {
     try {
-        const clientIP = getClientIP(request)
-
-        // Rate limiting: 10 validations per minute per IP
-        await validationLimiter.check(10, clientIP)
-
         const { username, email } = await request.json()
 
         if (!username && !email) {
@@ -92,14 +80,7 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json(results)
 
-    } catch (error: any) {
-        if (error.message?.includes('Rate limit')) {
-            return NextResponse.json(
-                { error: 'Too many validation attempts. Please try again in a minute.' },
-                { status: 429 }
-            )
-        }
-
+    } catch (error) {
         console.error('Validation error:', error)
         return NextResponse.json(
             { error: 'Validation failed. Please try again.' },

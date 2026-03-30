@@ -1,25 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import rateLimit from '@/src/lib/utils/rateLimit'
 import { createSupabaseServerClient } from '@/src/lib/supabase/server'
 import { withCSRFProtection } from '@/src/lib/middleware/csrf'
 import { z } from 'zod'
 import { emailSchema } from '@/src/lib/utils/validators'
 import { PASSWORD_REGEX } from '@/src/lib/utils/validators'
 import { PASSWORD_MIN } from '@/src/lib/utils/validators'
-import { getClientIP } from '@/src/lib/utils/ip-utils'
-
-const limiter = rateLimit({
-    interval: 15 * 60 * 1000, // 15 minutes
-    uniqueTokenPerInterval: 500,
-})
 
 async function signinHandler(request: NextRequest) {
     try {
-        const clientIP = getClientIP(request)
-
-        // Rate limiting: 5 attempts per 15 minutes per IP
-        await limiter.check(5, clientIP)
-
         const { email, password } = await request.json()
 
         if (!email || !password) {
@@ -63,14 +51,8 @@ async function signinHandler(request: NextRequest) {
             user: data.user
         })
 
-    } catch (rateLimitError) {
-        return NextResponse.json(
-            { error: 'Too many login attempts. Please try again in 15 minutes.' },
-            {
-                status: 429,
-                headers: { 'Retry-After': '900' }
-            }
-        )
+    } catch (error) {
+        return NextResponse.json({ error: 'Sign in failed. Please try again.' }, { status: 500 })
     }
 }
 

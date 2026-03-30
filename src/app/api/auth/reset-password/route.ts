@@ -1,20 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import rateLimit from '@/src/lib/utils/rateLimit'
 import { createSupabaseServerClient } from '@/src/lib/supabase/server'
-import { getClientIP } from '@/src/lib/utils/ip-utils'
-
-const resetLimiter = rateLimit({
-    interval: 60 * 60 * 1000, // 1 hour
-    uniqueTokenPerInterval: 500,
-})
 
 async function resetPasswordHandler(request: NextRequest) {
     try {
-        const clientIP = getClientIP(request)
-
-        // Rate limiting: 3 attempts per hour per IP
-        await resetLimiter.check(3, clientIP)
-
         const { email } = await request.json()
 
         if (!email) {
@@ -57,19 +45,8 @@ async function resetPasswordHandler(request: NextRequest) {
             message: 'If an account exists, a reset email has been sent.'
         })
 
-    } catch (rateLimitError) {
-        return NextResponse.json(
-            { error: 'Too many reset attempts. Please try again in an hour.' },
-            {
-                status: 429,
-                headers: {
-                    'Retry-After': '3600',
-                    'X-RateLimit-Limit': '3',
-                    'X-RateLimit-Remaining': '0',
-                    'X-RateLimit-Reset': String(Math.ceil(Date.now() / 1000) + 3600)
-                }
-            }
-        )
+    } catch (error) {
+        return NextResponse.json({ error: 'Request failed. Please try again.' }, { status: 500 })
     }
 }
 
