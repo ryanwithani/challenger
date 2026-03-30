@@ -23,6 +23,11 @@ const customJestConfig = {
     '**/__tests__/**/*.[jt]s?(x)',
     '**/?(*.)+(spec|test).[jt]s?(x)',
   ],
+  testPathIgnorePatterns: [
+    '<rootDir>/node_modules/',
+    '<rootDir>/.next/',
+    '<rootDir>/src/__tests__/utils/',
+  ],
   coverageThreshold: {
     global: {
       branches: 70,
