@@ -127,7 +127,6 @@ export type Database = {
       challenges: {
         Row: {
           challenge_type: string | null
-          completed_points: number | null
           configuration: Json | null
           created_at: string | null
           description: string | null
@@ -142,7 +141,6 @@ export type Database = {
         }
         Insert: {
           challenge_type?: string | null
-          completed_points?: number | null
           configuration?: Json | null
           created_at?: string | null
           description?: string | null
@@ -157,7 +155,6 @@ export type Database = {
         }
         Update: {
           challenge_type?: string | null
-          completed_points?: number | null
           configuration?: Json | null
           created_at?: string | null
           description?: string | null

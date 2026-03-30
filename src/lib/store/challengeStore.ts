@@ -61,6 +61,7 @@ interface ChallengeState {
   calculateCategoryPoints: (category: string) => number
   hasStartedProgress: () => boolean
   isPenaltyGoal: (goal: Goal) => boolean
+  persistPoints: () => Promise<void>
 }
 
 export const useChallengeStore = create<ChallengeState>((set, get) => ({
@@ -299,7 +300,7 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
     }
   },
 
-  setChallenges: (challenges: Challenge[]) => set({ challenges, loading: false }),
+  setChallenges: (challenges: Challenge[]) => set({ challenges, loading: false, lastChallengesFetch: Date.now() }),
 
   addSim: async (sim: Partial<Sim>) => {
     try {
@@ -484,6 +485,8 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
           set({ progress: [...get().progress, data] });
         }
       }
+
+      await get().persistPoints();
     } catch (error) {
       console.error('Error toggling goal progress:', error);
       throw error;
@@ -538,6 +541,8 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
         if (data) {
           set({ progress: [...get().progress, data] });
         }
+
+        await get().persistPoints();
       }
     } catch (error) {
       console.error('Error incrementing penalty:', error);
@@ -610,6 +615,8 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
           set({
             progress: get().progress.filter(p => p.id !== mostRecent.id)
           });
+
+          await get().persistPoints();
         }
       }
     } catch (error) {
@@ -633,6 +640,8 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
           g.id === goalId ? { ...g, current_value: newValue } : g
         )
       });
+
+      await get().persistPoints();
     } catch (error) {
       console.error('Error updating goal value:', error);
       throw error;
@@ -909,9 +918,36 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
           notes
         });
       }
+
+      await get().persistPoints();
     } catch (error) {
       console.error('Error completing goal with details:', error);
       throw error;
     }
+  },
+
+  persistPoints: async () => {
+    const { currentChallenge } = get();
+    if (!currentChallenge) return;
+
+    const points = get().calculatePoints();
+
+    const supabase = createSupabaseBrowserClient();
+    const { error } = await supabase
+      .from('challenges')
+      .update({ total_points: points })
+      .eq('id', currentChallenge.id);
+
+    if (error) {
+      console.error('Error persisting points:', error);
+      return;
+    }
+
+    set({
+      currentChallenge: { ...currentChallenge, total_points: points },
+      challenges: get().challenges.map(c =>
+        c.id === currentChallenge.id ? { ...c, total_points: points } : c
+      )
+    });
   },
 }))

@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { createSupabaseBrowserClient } from '@/src/lib/supabase/client'
+import { signIn as signInAPI } from '@/src/lib/api/auth'
 import { User } from '@supabase/supabase-js'
 
 
@@ -23,7 +24,7 @@ interface AuthState {
   signUp: (email: string, password: string) => Promise<void>
   signOut: () => Promise<void>
   fetchUserProfile: () => Promise<void>
-  initialize: () => Promise<void>
+  initialize: () => void
   getAuthErrorMessage: (error: any) => string
   requestPasswordReset: (email: string) => Promise<void> // ADD THIS
   updatePassword: (password: string) => Promise<void> // ADD THIS
@@ -39,76 +40,39 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   profileFetched: false,
   showPasswordUpdateModal: false, // ADD THIS
 
-  initialize: async () => {
-    
-    if (get().initialized) {
-      return;
-    }
+  initialize: () => {
+    if (get().initialized) return;
 
-    const supabase = createSupabaseBrowserClient()
+    set({ initialized: true });
+
+    const supabase = createSupabaseBrowserClient();
 
     supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state changed:', event);
-      const user = session?.user ?? null;
-      set({ user }); // Update the user in the store
+      set({ user: session?.user ?? null, loading: false });
 
-      if (user) {
-        // If a user session exists, fetch their associated profile data.
-        get().fetchUserProfile();
+      if (session?.user) {
+        await get().fetchUserProfile();
       } else {
-        // If the session is null (user signed out), clear the profile data.
-        set({
-          userProfile: null,
-          profileFetched: false,
-          isFetchingProfile: false
-        });
+        set({ userProfile: null, profileFetched: false, isFetchingProfile: false });
       }
 
-      // This event is fired by Supabase after a password reset link is clicked.
       if (event === 'PASSWORD_RECOVERY') {
         set({ showPasswordUpdateModal: true });
       }
-    });
 
-
-     // The listener above only fires on *changes*, not on the initial state.
-     const { data: { session } } = await supabase.auth.getSession();
-     const user = session?.user ?? null;
-     
-     set({
-      user,
-      loading: false,
-      initialized: true
-    });
-
-
-    // ✅ REMOVED: Manual profile fetch
-    // The listener below will handle it
-
-    // ✅ Single source of truth for profile fetching
-    supabase.auth.onAuthStateChange(async (event, session) => {
-      set({ user: session?.user ?? null })
-
-      if (session?.user) {
-        await get().fetchUserProfile() // ✅ Only place that triggers fetch
-      } else {
-        set({
-          userProfile: null,
-          profileFetched: false,  // ✅ Reset cache on logout
-          isFetchingProfile: false
-        })
+      if (event === 'SIGNED_OUT') {
+        const wizardKeys = [
+          'challenge_wizard_progress',
+          'challenge_wizard_basic_info',
+          'challenge_wizard_config',
+          'sim_wizard_progress',
+          'sim_wizard_basic_info',
+          'sim_wizard_traits',
+          'sim_wizard_personality',
+        ]
+        wizardKeys.forEach(key => localStorage.removeItem(key))
       }
-
-      if (event === 'PASSWORD_RECOVERY') {
-        set({ showPasswordUpdateModal: true })
-      }
-    })
-
-    // ✅ NEW: If we have a session on init, manually trigger profile fetch once
-    // (because listener only fires on *changes*, not initial state)
-    if (user) {
-      await get().fetchUserProfile();
-    }
+    });
   },
 
   fetchUserProfile: async () => {
@@ -150,39 +114,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         .single()
 
       if (error) {
-        // If profile doesn't exist (PGRST116 error), create it
-        if (error.code === 'PGRST116' || error.message?.includes('0 rows')) {
-          console.log('Profile not found, creating new profile for user:', user.id)
-
-          // Extract username from user metadata or use email prefix
-          const username = user.user_metadata?.username || user.email?.split('@')[0] || 'user'
-
-          const { data: newProfile, error: createError } = await supabase
-            .from('users')
-            .insert({
-              id: user.id,
-              email: user.email!,
-              username: username,
-              display_name: username,
-              created_at: new Date().toISOString(),
-            })
-            .select('id, username, display_name, avatar_url, email')
-            .single()
-
-          if (createError) {
-            console.error('Failed to create profile:', createError)
-            throw createError
-          }
-
-          set({
-            userProfile: newProfile,
-            profileFetched: true,
-            isFetchingProfile: false
-          })
-          return
-        }
-
-        // For other errors, throw them
         throw error
       }
 
@@ -204,42 +135,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
 
   signIn: async (email: string, password: string) => {
-    console.log('SignIn function called in authStore');
-    try {
-      const supabase = createSupabaseBrowserClient();
-      console.log('Created supabase client');
+    // Goes through the API route, which applies rate limiting and CSRF protection
+    await signInAPI(email, password)
 
-      console.log('Directly attempting sign in with password...');
-      try {
-        const authResponse = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
+    // The API route signs in server-side and sets session cookies.
+    // Call getSession() so the browser client picks up those cookies.
+    const supabase = createSupabaseBrowserClient()
+    const { data: { session }, error } = await supabase.auth.getSession()
 
-        console.log('Raw auth response:', authResponse);
-        const { data, error } = authResponse;
-
-        if (error) {
-          console.error('Supabase auth returned error:', error);
-          throw error;
-        }
-
-        if (!data || !data.user) {
-          console.error('No user data returned from authentication');
-          throw new Error('Authentication failed: No user data returned');
-        }
-
-        console.log('Authentication successful for:', data.user.email);
-        set({ user: data.user });
-        // Don't return anything to match void return type
-      } catch (innerError) {
-        console.error('Exception during Supabase auth call:', innerError);
-        throw innerError;
-      }
-    } catch (outerError: any) {
-      console.error('Outer catch - sign in error in authStore:', outerError);
-      throw outerError;
+    if (error || !session?.user) {
+      throw new Error('Authentication failed: No session returned')
     }
+
+    set({ user: session.user })
   },
 
   signUp: async (email: string, password: string) => {
