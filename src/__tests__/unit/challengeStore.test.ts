@@ -1,0 +1,267 @@
+import { useChallengeStore } from '@/src/lib/store/challengeStore'
+import { createSupabaseBrowserClient } from '@/src/lib/supabase/client'
+
+jest.mock('@/src/lib/supabase/client')
+jest.mock('@/src/components/challenge/GoalsSeeder', () => ({
+    seedLegacyChallengeGoals: jest.fn(),
+}))
+jest.mock('@/src/lib/store/authStore', () => ({
+    useAuthStore: {
+        getState: () => ({ user: { id: 'user-123' } }),
+    },
+}))
+
+// ---------- Fixtures ----------
+
+function makeGoal(overrides: Record<string, any> = {}) {
+    return {
+        id: 'goal-1',
+        challenge_id: 'challenge-1',
+        title: 'Test Goal',
+        goal_type: 'milestone',
+        point_value: 10,
+        max_points: null,
+        current_value: 0,
+        target_value: 1,
+        thresholds: null,
+        category: 'general',
+        is_required: false,
+        created_at: '2024-01-01',
+        updated_at: '2024-01-01',
+        ...overrides,
+    }
+}
+
+function makeProgress(overrides: Record<string, any> = {}) {
+    return {
+        id: 'progress-1',
+        goal_id: 'goal-1',
+        user_id: 'user-123',
+        challenge_id: 'challenge-1',
+        sim_id: null,
+        completed_at: '2024-01-01',
+        completion_details: null,
+        ...overrides,
+    }
+}
+
+// ---------- Supabase mock ----------
+
+const mockSingle = jest.fn()
+const mockInsertSelect = jest.fn().mockReturnValue({ single: mockSingle })
+const mockInsert = jest.fn().mockReturnValue({ select: mockInsertSelect })
+const mockEq = jest.fn().mockResolvedValue({ error: null })
+const mockUpdate = jest.fn().mockReturnValue({ eq: mockEq })
+const mockDelete = jest.fn().mockReturnValue({ eq: mockEq })
+const mockSelectFrom = jest.fn().mockReturnValue({
+    eq: jest.fn().mockReturnValue({
+        order: jest.fn().mockResolvedValue({ data: [], error: null }),
+    }),
+    ilike: jest.fn().mockReturnValue({ maybySingle: jest.fn().mockResolvedValue({ data: null }) }),
+})
+
+const mockSupabase = {
+    auth: {
+        getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'user-123' } } }),
+    },
+    from: jest.fn().mockReturnValue({
+        select: mockSelectFrom,
+        insert: mockInsert,
+        update: mockUpdate,
+        delete: mockDelete,
+    }),
+    rpc: jest.fn().mockResolvedValue({ data: [], error: null }),
+}
+
+const initialState = {
+    challenges: [],
+    currentChallenge: null,
+    sims: [],
+    goals: [],
+    progress: [],
+    loading: false,
+    challengesLoading: false,
+    lastChallengesFetch: null,
+}
+
+describe('challengeStore', () => {
+    beforeEach(() => {
+        jest.clearAllMocks()
+        ;(createSupabaseBrowserClient as jest.Mock).mockReturnValue(mockSupabase)
+        useChallengeStore.setState(initialState)
+    })
+
+    // ---- calculatePoints ----
+
+    describe('calculatePoints', () => {
+        test('returns 0 when there are no goals', () => {
+            useChallengeStore.setState({ goals: [], progress: [] })
+            expect(useChallengeStore.getState().calculatePoints()).toBe(0)
+        })
+
+        test('milestone goal: returns full points when completed', () => {
+            const goal = makeGoal({ id: 'g1', goal_type: 'milestone', point_value: 10 })
+            const progress = makeProgress({ goal_id: 'g1' })
+            useChallengeStore.setState({ goals: [goal as any], progress: [progress as any] })
+
+            expect(useChallengeStore.getState().calculatePoints()).toBe(10)
+        })
+
+        test('milestone goal: returns 0 when not completed', () => {
+            const goal = makeGoal({ id: 'g1', goal_type: 'milestone', point_value: 10 })
+            useChallengeStore.setState({ goals: [goal as any], progress: [] })
+
+            expect(useChallengeStore.getState().calculatePoints()).toBe(0)
+        })
+
+        test('counter goal: multiplies current_value by point_value', () => {
+            const goal = makeGoal({ id: 'g1', goal_type: 'counter', point_value: 5, current_value: 4, max_points: null })
+            useChallengeStore.setState({ goals: [goal as any], progress: [] })
+
+            expect(useChallengeStore.getState().calculatePoints()).toBe(20)
+        })
+
+        test('counter goal: caps at max_points', () => {
+            const goal = makeGoal({ id: 'g1', goal_type: 'counter', point_value: 5, current_value: 10, max_points: 25 })
+            useChallengeStore.setState({ goals: [goal as any], progress: [] })
+
+            expect(useChallengeStore.getState().calculatePoints()).toBe(25)
+        })
+
+        test('threshold goal: awards points for highest met threshold', () => {
+            const thresholds = JSON.stringify([
+                { value: 10, points: 5 },
+                { value: 20, points: 10 },
+                { value: 30, points: 15 },
+            ])
+            const goal = makeGoal({ id: 'g1', goal_type: 'threshold', thresholds, current_value: 25 })
+            useChallengeStore.setState({ goals: [goal as any], progress: [] })
+
+            expect(useChallengeStore.getState().calculatePoints()).toBe(10)
+        })
+
+        test('threshold goal: returns 0 when no threshold is met', () => {
+            const thresholds = JSON.stringify([{ value: 10, points: 5 }])
+            const goal = makeGoal({ id: 'g1', goal_type: 'threshold', thresholds, current_value: 5 })
+            useChallengeStore.setState({ goals: [goal as any], progress: [] })
+
+            expect(useChallengeStore.getState().calculatePoints()).toBe(0)
+        })
+
+        test('penalty goal (occurrence): subtracts for each progress entry', () => {
+            const goal = makeGoal({ id: 'g1', goal_type: 'penalty', point_value: -5 })
+            const progress = [
+                makeProgress({ id: 'p1', goal_id: 'g1' }),
+                makeProgress({ id: 'p2', goal_id: 'g1' }),
+            ]
+            useChallengeStore.setState({ goals: [goal as any], progress: progress as any[] })
+
+            expect(useChallengeStore.getState().calculatePoints()).toBe(-10)
+        })
+
+        test('penalty goal (counter type): multiplies current_value by point_value', () => {
+            const goal = makeGoal({ id: 'g1', goal_type: 'counter', point_value: -3, current_value: 4, category: 'penalties' })
+            useChallengeStore.setState({ goals: [goal as any], progress: [] })
+
+            expect(useChallengeStore.getState().calculatePoints()).toBe(-12)
+        })
+
+        test('sums across multiple goals of different types', () => {
+            const goals = [
+                makeGoal({ id: 'g1', goal_type: 'milestone', point_value: 10 }),
+                makeGoal({ id: 'g2', goal_type: 'counter', point_value: 5, current_value: 3, max_points: null }),
+                makeGoal({ id: 'g3', goal_type: 'penalty', point_value: -2 }),
+            ]
+            const progress = [
+                makeProgress({ id: 'p1', goal_id: 'g1' }), // milestone completed
+                makeProgress({ id: 'p2', goal_id: 'g3' }), // 1 penalty occurrence
+            ]
+            useChallengeStore.setState({ goals: goals as any[], progress: progress as any[] })
+
+            // 10 (milestone) + 15 (counter) + (-2) (penalty) = 23
+            expect(useChallengeStore.getState().calculatePoints()).toBe(23)
+        })
+    })
+
+    // ---- isPenaltyGoal ----
+
+    describe('isPenaltyGoal', () => {
+        test('returns true for goal_type === "penalty"', () => {
+            const goal = makeGoal({ goal_type: 'penalty' })
+            expect(useChallengeStore.getState().isPenaltyGoal(goal as any)).toBe(true)
+        })
+
+        test('returns true for negative point_value', () => {
+            const goal = makeGoal({ goal_type: 'milestone', point_value: -5 })
+            expect(useChallengeStore.getState().isPenaltyGoal(goal as any)).toBe(true)
+        })
+
+        test('returns true for category "penalties"', () => {
+            const goal = makeGoal({ goal_type: 'milestone', point_value: 10, category: 'penalties' })
+            expect(useChallengeStore.getState().isPenaltyGoal(goal as any)).toBe(true)
+        })
+
+        test('returns false for a regular milestone goal', () => {
+            const goal = makeGoal({ goal_type: 'milestone', point_value: 10, category: 'general' })
+            expect(useChallengeStore.getState().isPenaltyGoal(goal as any)).toBe(false)
+        })
+    })
+
+    // ---- hasStartedProgress ----
+
+    describe('hasStartedProgress', () => {
+        test('returns false when there is no progress', () => {
+            useChallengeStore.setState({ progress: [] })
+            expect(useChallengeStore.getState().hasStartedProgress()).toBe(false)
+        })
+
+        test('returns true when there is at least one progress entry', () => {
+            useChallengeStore.setState({ progress: [makeProgress() as any] })
+            expect(useChallengeStore.getState().hasStartedProgress()).toBe(true)
+        })
+    })
+
+    // ---- setChallenges ----
+
+    describe('setChallenges', () => {
+        test('updates challenges and sets lastChallengesFetch timestamp', () => {
+            const challenges = [{ id: 'c1', title: 'Challenge 1' }] as any[]
+            const before = Date.now()
+
+            useChallengeStore.getState().setChallenges(challenges)
+
+            const state = useChallengeStore.getState()
+            expect(state.challenges).toEqual(challenges)
+            expect(state.lastChallengesFetch).toBeGreaterThanOrEqual(before)
+        })
+    })
+
+    // ---- deleteChallenge ----
+
+    describe('deleteChallenge', () => {
+        test('removes the challenge from state after deletion', async () => {
+            useChallengeStore.setState({
+                challenges: [
+                    { id: 'c1', title: 'Keep' } as any,
+                    { id: 'c2', title: 'Delete' } as any,
+                ],
+            })
+            mockEq.mockResolvedValue({ error: null })
+
+            await useChallengeStore.getState().deleteChallenge('c2')
+
+            const state = useChallengeStore.getState()
+            expect(state.challenges).toHaveLength(1)
+            expect(state.challenges[0].id).toBe('c1')
+        })
+
+        test('throws when Supabase returns an error', async () => {
+            useChallengeStore.setState({ challenges: [{ id: 'c1' } as any] })
+            mockEq.mockResolvedValue({ error: { message: 'Delete failed' } })
+
+            await expect(useChallengeStore.getState().deleteChallenge('c1')).rejects.toMatchObject({
+                message: 'Delete failed',
+            })
+        })
+    })
+})

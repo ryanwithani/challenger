@@ -1,42 +1,28 @@
+/**
+ * @jest-environment node
+ */
 import { POST } from '@/src/app/api/auth/signup/route'
 import { NextRequest } from 'next/server'
 import { createSupabaseServerClient } from '@/src/lib/supabase/server'
-import { getClientIP } from '@/src/lib/utils/ip-utils'
-import rateLimit from '@/src/lib/utils/rateLimit'
+import { createServerSupabaseMock } from '@/src/__tests__/utils/test-helpers'
 
-// Mock dependencies
 jest.mock('@/src/lib/supabase/server')
-jest.mock('@/src/lib/utils/ip-utils')
-jest.mock('@/src/lib/utils/rateLimit')
 jest.mock('@/src/lib/middleware/csrf', () => ({
     withCSRFProtection: (handler: any) => handler,
 }))
 
-const mockSupabase = {
-    auth: {
-        signUp: jest.fn(),
-    },
-    from: jest.fn(() => ({
-        select: jest.fn(() => ({
-            ilike: jest.fn(() => ({
-                maybeSingle: jest.fn(),
-            })),
-        })),
-        insert: jest.fn(),
-    })),
-}
-
-const mockRateLimitCheck = jest.fn()
+let mockMaybeSingle: jest.Mock
+let mockInsert: jest.Mock
+let mockSupabase: any
 
 describe('POST /api/auth/signup', () => {
     beforeEach(() => {
         jest.clearAllMocks()
-            ; (createSupabaseServerClient as jest.Mock).mockResolvedValue(mockSupabase)
-            ; (getClientIP as jest.Mock).mockReturnValue('127.0.0.1')
-            ; (rateLimit as jest.Mock).mockReturnValue({
-                check: mockRateLimitCheck,
-            })
-        mockRateLimitCheck.mockResolvedValue(undefined)
+        const mock = createServerSupabaseMock()
+        mockMaybeSingle = mock.mockMaybeSingle
+        mockInsert = mock.mockInsert
+        mockSupabase = mock.supabase
+        ;(createSupabaseServerClient as jest.Mock).mockResolvedValue(mockSupabase)
     })
 
     function createMockRequest(body: any) {
@@ -57,12 +43,12 @@ describe('POST /api/auth/signup', () => {
                 user_metadata: { username: 'testuser' },
             }
 
-            mockSupabase.from().select().ilike().maybeSingle.mockResolvedValue({ data: null })
+            mockMaybeSingle.mockResolvedValue({ data: null })
             mockSupabase.auth.signUp.mockResolvedValue({
                 data: { user: mockUser },
                 error: null,
             })
-            mockSupabase.from().insert.mockResolvedValue({ error: null })
+            mockInsert.mockResolvedValue({ error: null })
 
             const request = createMockRequest({
                 username: 'testuser',
@@ -89,12 +75,12 @@ describe('POST /api/auth/signup', () => {
         })
 
         test('username is stored in lowercase', async () => {
-            mockSupabase.from().select().ilike().maybeSingle.mockResolvedValue({ data: null })
+            mockMaybeSingle.mockResolvedValue({ data: null })
             mockSupabase.auth.signUp.mockResolvedValue({
                 data: { user: { id: '123', email: 'test@example.com' } },
                 error: null,
             })
-            mockSupabase.from().insert.mockResolvedValue({ error: null })
+            mockInsert.mockResolvedValue({ error: null })
 
             const request = createMockRequest({
                 username: 'TestUser',
@@ -184,7 +170,7 @@ describe('POST /api/auth/signup', () => {
 
     describe('Duplicate Checks', () => {
         test('returns error for existing username', async () => {
-            mockSupabase.from().select().ilike().maybeSingle.mockResolvedValue({
+            mockMaybeSingle.mockResolvedValue({
                 data: { username: 'testuser' },
             })
 
@@ -204,7 +190,7 @@ describe('POST /api/auth/signup', () => {
         })
 
         test('returns error for existing email', async () => {
-            mockSupabase.from().select().ilike().maybeSingle.mockResolvedValue({ data: null })
+            mockMaybeSingle.mockResolvedValue({ data: null })
             mockSupabase.auth.signUp.mockResolvedValue({
                 data: null,
                 error: { message: 'User already registered' },
@@ -226,7 +212,7 @@ describe('POST /api/auth/signup', () => {
         })
 
         test('username check is case-insensitive', async () => {
-            mockSupabase.from().select().ilike().maybeSingle.mockResolvedValue({
+            mockMaybeSingle.mockResolvedValue({
                 data: { username: 'testuser' },
             })
 
@@ -263,31 +249,9 @@ describe('POST /api/auth/signup', () => {
         })
     })
 
-    describe('Rate Limiting', () => {
-        test('enforces rate limit', async () => {
-            mockRateLimitCheck.mockRejectedValueOnce({
-                message: 'Rate limit exceeded',
-            })
-
-            const request = createMockRequest({
-                username: 'testuser',
-                email: 'test@example.com',
-                password: 'ValidPass123!@#',
-                website: '',
-            })
-
-            const response = await POST(request)
-            const data = await response.json()
-
-            expect(response.status).toBe(429)
-            expect(data.error).toContain('Too many signup attempts')
-            expect(response.headers.get('Retry-After')).toBe('3600')
-        })
-    })
-
     describe('Server Errors', () => {
-        test('handles Supabase errors gracefully', async () => {
-            mockSupabase.from().select().ilike().maybeSingle.mockResolvedValue({ data: null })
+        test('handles Supabase auth errors gracefully', async () => {
+            mockMaybeSingle.mockResolvedValue({ data: null })
             mockSupabase.auth.signUp.mockResolvedValue({
                 data: null,
                 error: { message: 'Invalid email format' },
@@ -308,13 +272,13 @@ describe('POST /api/auth/signup', () => {
             expect(data.error).toContain('valid email address')
         })
 
-        test('handles database errors', async () => {
-            mockSupabase.from().select().ilike().maybeSingle.mockResolvedValue({ data: null })
+        test('handles database insert errors', async () => {
+            mockMaybeSingle.mockResolvedValue({ data: null })
             mockSupabase.auth.signUp.mockResolvedValue({
                 data: { user: { id: '123', email: 'test@example.com' } },
                 error: null,
             })
-            mockSupabase.from().insert.mockResolvedValue({
+            mockInsert.mockResolvedValue({
                 error: { message: 'Database error' },
             })
 
@@ -328,13 +292,12 @@ describe('POST /api/auth/signup', () => {
             const response = await POST(request)
             const data = await response.json()
 
-            // Profile creation failure shouldn't fail signup
-            expect(response.status).toBe(200)
-            expect(data.success).toBe(true)
+            expect(response.status).toBe(500)
+            expect(data.error).toBe('Failed to create account. Please try again.')
         })
 
         test('handles unexpected errors', async () => {
-            mockRateLimitCheck.mockRejectedValueOnce(new Error('Unexpected error'))
+            mockMaybeSingle.mockRejectedValue(new Error('Unexpected error'))
 
             const request = createMockRequest({
                 username: 'testuser',
@@ -358,12 +321,12 @@ describe('POST /api/auth/signup', () => {
                 email: 'test@example.com',
             }
 
-            mockSupabase.from().select().ilike().maybeSingle.mockResolvedValue({ data: null })
+            mockMaybeSingle.mockResolvedValue({ data: null })
             mockSupabase.auth.signUp.mockResolvedValue({
                 data: { user: mockUser },
                 error: null,
             })
-            mockSupabase.from().insert.mockResolvedValue({ error: null })
+            mockInsert.mockResolvedValue({ error: null })
 
             const request = createMockRequest({
                 username: 'testuser',
@@ -374,7 +337,7 @@ describe('POST /api/auth/signup', () => {
 
             await POST(request)
 
-            expect(mockSupabase.from().insert).toHaveBeenCalledWith({
+            expect(mockInsert).toHaveBeenCalledWith({
                 id: 'user-123',
                 email: 'test@example.com',
                 username: 'testuser',
@@ -384,4 +347,3 @@ describe('POST /api/auth/signup', () => {
         })
     })
 })
-
