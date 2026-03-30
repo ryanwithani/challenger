@@ -68,7 +68,7 @@ export function SimAchievements({ sim, achievements }: SimAchievementsProps) {
     return (
         <div className="space-y-6">
             {/* Achievement Summary */}
-            <div className="bg-gradient-to-r from-brand-500 to-accent-500 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 text-white">
+            <div className="bg-brand-500 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 text-white">
                 <div className="flex items-center justify-between">
                     <div>
                         <h2><SafeText className="text-2xl font-bold">{sim.name}</SafeText>'s Achievements</h2>
@@ -151,12 +151,12 @@ export function SimAchievements({ sim, achievements }: SimAchievementsProps) {
                 /* No Achievements State */
                 <div className="text-center py-12">
                     <div className="text-6xl mb-4">🏆</div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">No Achievements Yet</h3>
-                    <p className="text-gray-600 dark:text-gray-300 mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-warmGray-100 mb-2">No Achievements Yet</h3>
+                    <p className="text-gray-600 dark:text-warmGray-200 mb-4">
                         <SafeText>{sim.name}</SafeText> hasn't completed any goals yet. Start playing and achieving goals to see them here!
                     </p>
                     <div className="bg-gray-50 dark:bg-brand-900/20 rounded-xl p-4 max-w-md mx-auto">
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
+                        <p className="text-sm text-gray-600 dark:text-warmGray-200">
                             💡 <strong>Tip:</strong> Achievements are earned when you complete goals in the challenge.
                             Visit the Scoring tab to mark goals as complete and they'll appear here.
                         </p>

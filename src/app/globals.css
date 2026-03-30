@@ -56,58 +56,18 @@
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
-    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif !important;
+    font-family: var(--font-body), Georgia, serif;
+    font-optical-sizing: auto;
+    line-height: 1.6;
     transition: background-color 0.3s ease, color 0.3s ease;
   }
 
-  /* Responsive font scaling for high-DPI displays */
-  @media (min-resolution: 2dppx) {
-    html {
-      font-size: 14px;
-      /* Reduce base font size for high-DPI displays */
-    }
+  .dark body {
+    color: #f0ebe3;
   }
 
-  @media (min-width: 1920px) {
-    html {
-      font-size: 15px;
-      /* Slightly larger for very wide screens */
-    }
-  }
-
-  @media (min-width: 2560px) {
-    html {
-      font-size: 16px;
-      /* Standard size for ultra-wide displays */
-    }
-  }
-
-  /* High-DPI specific font size adjustments */
-  @media (min-resolution: 2dppx) {
-    .text-5xl {
-      font-size: 2.5rem;
-    }
-
-    /* 40px instead of 48px */
-    .text-4xl {
-      font-size: 2rem;
-    }
-
-    /* 32px instead of 36px */
-    .text-3xl {
-      font-size: 1.75rem;
-    }
-
-    /* 28px instead of 30px */
-    .text-2xl {
-      font-size: 1.5rem;
-    }
-
-    /* 24px instead of 28px */
-  }
-
-  .font-exo2 {
-    font-family: 'Exo 2', ui-sans-serif, system-ui, sans-serif !important;
+  .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+    color: #f5e6d3;
   }
 
   /* Ensure SVG logos have transparent backgrounds */
@@ -118,15 +78,15 @@
 
 @layer components {
   .btn-primary {
-    @apply bg-brand-500 hover:bg-brand-600 text-white font-bold py-2 px-4 rounded transition-colors;
+    @apply bg-brand-500 hover:bg-brand-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors;
   }
 
   .btn-secondary {
-    @apply bg-brand-300 hover:bg-brand-400 text-white font-bold py-2 px-4 rounded transition-colors;
+    @apply bg-brand-300 hover:bg-brand-400 text-white font-semibold py-2 px-4 rounded-lg transition-colors;
   }
 
   .card {
-    @apply rounded-lg shadow-md p-6 transition-colors;
+    @apply rounded-lg p-6 transition-colors;
     background-color: hsl(var(--card));
     border: 1px solid hsl(var(--border));
   }
@@ -143,89 +103,6 @@
 
 @layer utilities {
 
-  /* Text color utilities for dark mode */
-  .text-gray-900 {
-    color: rgb(17 24 39);
-  }
-
-  .dark .text-gray-900 {
-    color: rgb(243 244 246);
-  }
-
-  .text-gray-800 {
-    color: rgb(31 41 55);
-  }
-
-  .dark .text-gray-800 {
-    color: rgb(229 231 235);
-  }
-
-  .text-gray-700 {
-    color: rgb(55 65 81);
-  }
-
-  .dark .text-gray-700 {
-    color: rgb(209 213 219);
-  }
-
-  .text-gray-600 {
-    color: rgb(75 85 99);
-  }
-
-  .dark .text-gray-600 {
-    color: rgb(156 163 175);
-  }
-
-  .text-gray-500 {
-    color: rgb(107 114 128);
-  }
-
-  .dark .text-gray-500 {
-    color: rgb(107 114 128);
-  }
-
-  /* Background color utilities for dark mode */
-  .bg-white {
-    background-color: rgb(255 255 255);
-  }
-
-  .dark .bg-white {
-    background-color: rgb(31 41 55);
-  }
-
-  .bg-gray-50 {
-    background-color: rgb(249 250 251);
-  }
-
-  .dark .bg-gray-50 {
-    background-color: rgb(17 24 39);
-  }
-
-  .bg-gray-100 {
-    background-color: rgb(243 244 246);
-  }
-
-  .dark .bg-gray-100 {
-    background-color: rgb(31 41 55);
-  }
-
-  /* Border color utilities for dark mode */
-  .border-gray-200 {
-    border-color: rgb(229 231 235);
-  }
-
-  .dark .border-gray-200 {
-    border-color: rgb(55 65 81);
-  }
-
-  .border-gray-300 {
-    border-color: rgb(209 213 219);
-  }
-
-  .dark .border-gray-300 {
-    border-color: rgb(75 85 99);
-  }
-
   /* Brand color utilities for dark mode */
   .bg-brand-50 {
     background-color: rgb(255 245 240);
@@ -241,117 +118,5 @@
 
   .dark .bg-brand-100 {
     background-color: rgb(162 43 17);
-  }
-
-  /* SVG Icon Color Filters for Brand Colors */
-  /* Lighter filter that preserves some gradient effect */
-  .icon-brand-gradient {
-    filter: brightness(0.9) saturate(120%) invert(47%) sepia(93%) saturate(1352%) hue-rotate(346deg) brightness(101%) contrast(101%);
-  }
-
-  .dark .icon-brand-gradient {
-    filter: brightness(0.85) saturate(130%) invert(35%) sepia(100%) saturate(2000%) hue-rotate(346deg) brightness(95%) contrast(95%);
-  }
-
-  /* For icons that need single color (no gradient) */
-  .icon-brand {
-    filter: brightness(0) saturate(100%) invert(47%) sepia(93%) saturate(1352%) hue-rotate(346deg) brightness(101%) contrast(101%);
-  }
-
-  .dark .icon-brand {
-    filter: brightness(0) saturate(100%) invert(35%) sepia(100%) saturate(2000%) hue-rotate(346deg) brightness(95%) contrast(95%);
-  }
-
-  /* Gradient mask for icons - uses SVG as mask with brand gradient */
-  .icon-gradient-mask {
-    position: relative;
-  }
-
-  .icon-gradient-mask::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, #ff6b35 0%, #e84a1f 50%, #c73615 100%);
-    -webkit-mask-image: url('/ChallengerCrown.svg');
-    -webkit-mask-size: contain;
-    -webkit-mask-repeat: no-repeat;
-    -webkit-mask-position: center;
-    mask-image: url('/ChallengerCrown.svg');
-    mask-size: contain;
-    mask-repeat: no-repeat;
-    mask-position: center;
-    z-index: 1;
-  }
-
-  .dark .icon-gradient-mask::before {
-    background: linear-gradient(135deg, #ff6b35 0%, #e84a1f 50%, #a22b11 100%);
-  }
-
-  /* Hide the Image component when using mask */
-  .icon-gradient-mask img {
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  /* Gradient mask for Challenge icon */
-  .challenge-icon-gradient-mask {
-    position: relative;
-  }
-
-  .challenge-icon-gradient-mask::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, #ff6b35 0%, #e84a1f 50%, #c73615 100%);
-    -webkit-mask-image: url('/ChallengeIcon.svg');
-    -webkit-mask-size: contain;
-    -webkit-mask-repeat: no-repeat;
-    -webkit-mask-position: center;
-    mask-image: url('/ChallengeIcon.svg');
-    mask-size: contain;
-    mask-repeat: no-repeat;
-    mask-position: center;
-    z-index: 1;
-  }
-
-  .dark .challenge-icon-gradient-mask::before {
-    background: linear-gradient(135deg, #ff6b35 0%, #e84a1f 50%, #a22b11 100%);
-  }
-
-  /* Hide the Image component when using mask */
-  .challenge-icon-gradient-mask img {
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  /* Gradient mask for Sim icon */
-  .sim-icon-gradient-mask {
-    position: relative;
-  }
-
-  .sim-icon-gradient-mask::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, #ff6b35 0%, #e84a1f 50%, #c73615 100%);
-    -webkit-mask-image: url('/SimIcon.svg');
-    -webkit-mask-size: contain;
-    -webkit-mask-repeat: no-repeat;
-    -webkit-mask-position: center;
-    mask-image: url('/SimIcon.svg');
-    mask-size: contain;
-    mask-repeat: no-repeat;
-    mask-position: center;
-    z-index: 1;
-  }
-
-  .dark .sim-icon-gradient-mask::before {
-    background: linear-gradient(135deg, #ff6b35 0%, #e84a1f 50%, #a22b11 100%);
-  }
-
-  /* Hide the Image component when using mask */
-  .sim-icon-gradient-mask img {
-    opacity: 0;
-    pointer-events: none;
   }
 }

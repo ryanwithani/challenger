@@ -3,17 +3,16 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/src/lib/utils/cn'
 
 const buttonVariants = cva(
-    'inline-flex items-center justify-center gap-2 rounded-2xl font-medium transition-all duration-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+    'inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
     {
         variants: {
             variant: {
-                primary: 'bg-gradient-to-r from-brand-500 to-brand-600 dark:from-brand-600 dark:to-brand-700 text-white hover:from-brand-600 hover:to-brand-700 dark:hover:from-brand-700 dark:hover:to-brand-800 shadow-lg border-none',
-                secondary: 'bg-gradient-to-r from-brand-400 to-brand-500 dark:from-brand-500 dark:to-brand-600 text-white hover:from-brand-500 hover:to-brand-600 dark:hover:from-brand-600 dark:hover:to-brand-700 shadow-lg border-none',
-                accent: 'bg-accent-500 text-white shadow-md hover:bg-accent-600 hover:shadow-lg active:bg-accent-700 dark:bg-accent-600 dark:hover:bg-accent-700',
-                outline: 'border-2 border-brand-500 dark:border-brand-400 text-brand-500 dark:text-brand-400 bg-transparent hover:bg-brand-50 dark:hover:bg-brand-900/20 active:bg-brand-100 dark:active:bg-brand-800/30',
+                primary: 'bg-brand-500 dark:bg-brand-600 text-white hover:bg-brand-600 dark:hover:bg-brand-700 border-none',
+                secondary: 'bg-brand-400 dark:bg-brand-500 text-white hover:bg-brand-500 dark:hover:bg-brand-600 border-none',
+                accent: 'bg-accent-500 text-white hover:bg-accent-600 active:bg-accent-700 dark:bg-accent-600 dark:hover:bg-accent-700',
+                outline: 'border border-brand-500 dark:border-brand-400 text-brand-500 dark:text-brand-400 bg-transparent hover:bg-brand-50 dark:hover:bg-brand-900/20 active:bg-brand-100 dark:active:bg-brand-800/30',
                 ghost: 'text-brand-600 dark:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-900/20 hover:text-brand-700 dark:hover:text-brand-300 active:bg-brand-100 dark:active:bg-brand-800/30',
-                destructive: 'bg-red-600 text-white shadow-md hover:bg-red-700 hover:shadow-lg active:bg-red-800 dark:bg-red-700 dark:hover:bg-red-800',
-                gradient: 'bg-gradient-to-r from-brand-500 to-brand-600 dark:from-brand-600 dark:to-brand-700 text-white shadow-lg hover:from-brand-600 hover:to-brand-700 dark:hover:from-brand-700 dark:hover:to-brand-800 hover:shadow-xl',
+                destructive: 'bg-red-600 text-white hover:bg-red-700 active:bg-red-800 dark:bg-red-700 dark:hover:bg-red-800',
             },
             size: {
                 sm: 'h-8 px-3 text-xs',

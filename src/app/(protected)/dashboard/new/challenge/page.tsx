@@ -67,7 +67,7 @@ export default function NewChallengePage() {
               </div>
             </div>
           )}
-          <div className="bg-white p-8 rounded-2xl shadow-lg dark:bg-gray-800">
+          <div className="bg-white p-8 rounded-2xl shadow-lg dark:bg-warmGray-900">
             <ChallengeWizard 
               onSubmit={handleSubmit} 
               onCancel={() => router.push('/dashboard')} 

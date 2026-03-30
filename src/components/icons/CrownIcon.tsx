@@ -11,15 +11,8 @@ interface CrownIconProps {
 export function CrownIcon({ className, size = 48 }: CrownIconProps) {
     return (
         <div
-            className={cn(
-                'relative transition-all duration-300 hover:scale-105',
-                'icon-gradient-mask',
-                className
-            )}
-            style={{
-                width: size,
-                height: size,
-            }}
+            className={cn('relative', className)}
+            style={{ width: size, height: size }}
         >
             <Image
                 src="/ChallengerCrown.svg"

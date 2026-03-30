@@ -184,7 +184,7 @@ export default function SimsPage() {
   return (
     <div className="flex h-full flex-col">
       {/* Toolbar */}
-      <div className="sticky top-0 z-10 border-b bg-white/90 backdrop-blur">
+      <div className="sticky top-0 z-10 border-b bg-white/90 dark:bg-warmGray-900/90 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3">
           <div className="flex items-center gap-2">
             <h1 className="text-xl font-semibold">Sims</h1>
@@ -192,15 +192,15 @@ export default function SimsPage() {
           </div>
           <div className="flex items-center gap-2">
             {/* Tabs */}
-            <nav className="rounded-lg border bg-white p-1 text-sm">
+            <nav className="rounded-lg border border-gray-200 dark:border-warmGray-700 bg-white dark:bg-warmGray-900 p-1 text-sm">
               <button
-                className={clsx('rounded-md px-3 py-1', tab === 'by_challenge' ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-100')}
+                className={clsx('rounded-md px-3 py-1', tab === 'by_challenge' ? 'bg-brand-500 text-white' : 'text-gray-700 dark:text-warmGray-300 hover:bg-gray-100 dark:hover:bg-warmGray-800')}
                 onClick={() => setTab('by_challenge')}
               >
                 By Challenge
               </button>
               <button
-                className={clsx('rounded-md px-3 py-1', tab === 'all' ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-100')}
+                className={clsx('rounded-md px-3 py-1', tab === 'all' ? 'bg-brand-500 text-white' : 'text-gray-700 dark:text-warmGray-300 hover:bg-gray-100 dark:hover:bg-warmGray-800')}
                 onClick={() => setTab('all')}
               >
                 All Sims
@@ -213,11 +213,11 @@ export default function SimsPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search name, career, aspiration…"
-              className="w-64 rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-64 rounded-md border border-gray-300 dark:border-warmGray-700 px-3 py-1.5 text-sm bg-white dark:bg-warmGray-900 text-gray-900 dark:text-warmGray-100 focus:outline-none focus:ring-2 focus:ring-brand-400"
             />
 
             {/* Add Sim */}
-            <Link href="/sims/new" className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700">
+            <Link href="/sims/new" className="rounded-md bg-brand-500 px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-600">
               Add Sim
             </Link>
           </div>
@@ -229,7 +229,7 @@ export default function SimsPage() {
             <button
               className={clsx(
                 'rounded-full border px-3 py-1 text-xs',
-                heirsOnly ? 'border-indigo-300 bg-indigo-50 text-indigo-700' : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                heirsOnly ? 'border-brand-300 bg-brand-50 text-brand-700' : 'border-gray-300 text-gray-700 hover:bg-gray-50'
               )}
               onClick={() => setHeirsOnly(v => !v)}
               title="Show only current heirs"
@@ -239,7 +239,7 @@ export default function SimsPage() {
             <button
               className={clsx(
                 'rounded-full border px-3 py-1 text-xs',
-                hasTraitsOnly ? 'border-indigo-300 bg-indigo-50 text-indigo-700' : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                hasTraitsOnly ? 'border-brand-300 bg-brand-50 text-brand-700' : 'border-gray-300 text-gray-700 hover:bg-gray-50'
               )}
               onClick={() => setHasTraitsOnly(v => !v)}
               title="Show Sims that have traits"
@@ -305,7 +305,7 @@ export default function SimsPage() {
                 key={challenge.id}
                 title={challenge.challenge_type ?? ''}
                 subtitle={challenge.description ?? undefined}
-                action={<Link className="text-sm text-indigo-600 hover:underline" href={`/challenges/${challenge.id}`}>Open</Link>}
+                action={<Link className="text-sm text-brand-600 dark:text-brand-400 hover:underline" href={`/challenges/${challenge.id}`}>Open</Link>}
               >
                 <SimGrid
                   sims={sims}
@@ -353,12 +353,11 @@ function Section({
 
 function EmptyState() {
   return (
-    <div className="rounded-2xl border-2 border-dashed border-gray-200 p-10 text-center">
-      <div className="text-2xl">🧑‍🤝‍🧑</div>
-      <h3 className="mt-2 text-base font-semibold text-gray-900">No Sims yet</h3>
-      <p className="mt-1 text-sm text-gray-500">Create your first Sim to get started.</p>
-      <div className="mt-6">
-        <Link href="/sims/new" className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
+    <div className="rounded-lg border border-dashed border-gray-300 dark:border-warmGray-700 p-10 text-center">
+      <h3 className="text-base font-semibold text-gray-900 dark:text-warmGray-100">No Sims yet</h3>
+      <p className="mt-1 text-sm text-gray-500 dark:text-warmGray-400">Create your first Sim to get started.</p>
+      <div className="mt-4">
+        <Link href="/sims/new" className="inline-flex items-center rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600">
           Add Sim
         </Link>
       </div>
@@ -390,7 +389,7 @@ function SimGrid({
           challenge={challenge ?? null}
           challengeSim={challengeSimBySimId.get(sim.id) ?? null}
           traitCatalog={Traits}
-          onEdit={(s) => { window.location.href = `/sims/${s.id}` }}
+          onEdit={(s) => { window.location.href = `/sim/${s.id}` }}
           onToggleFavorite={async (id, next) => {
             // quick optimistic favorite toggle
             const supabase = createSupabaseBrowserClient()

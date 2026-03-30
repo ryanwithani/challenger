@@ -17,25 +17,21 @@ export function Navbar() {
   const router = useRouter()
 
   const handleSignOut = async () => {
-    console.log('Sign out button clicked');
     try {
-      console.log('Calling signOut from authStore...');
       await signOut();
-      console.log('SignOut function completed'); // This likely won't execute due to the redirect
     } catch (error) {
-      console.error('Error signing out:', error);
       alert('Failed to sign out: ' + (error as any).message);
     }
   };
 
   return (
     <>
-      <nav className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 shadow-sm">
+      <nav className="bg-white dark:bg-warmGray-900 border-b border-gray-200 dark:border-warmGray-700 px-6 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <Link href="/" className="flex items-center space-x-2">
-              <CrownIcon size={48} className="w-12 h-12" />
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-brand-500 to-brand-600 dark:from-brand-600 dark:to-brand-700 text-transparent bg-clip-text font-exo2">
+              <CrownIcon size={32} className="w-8 h-8" />
+              <h1 className="text-xl font-semibold text-brand-500 font-exo2">
                 Challenger
               </h1>
             </Link>
@@ -44,7 +40,7 @@ export function Navbar() {
           <div className="flex items-center space-x-4">
             {userProfile ? (
               <div className="flex items-center space-x-3">
-                <div className="text-sm text-gray-600 dark:text-gray-300">
+                <div className="text-sm text-gray-600 dark:text-warmGray-200">
                   Welcome, {userProfile?.display_name || userProfile?.username || 'User'}
                 </div>
                 <ThemeToggleCompact />
@@ -70,11 +66,8 @@ export function Navbar() {
                 <Button
                   variant="secondary"
                   size="sm"
-                  onClick={() => {
-                    console.log('Opening login modal');
-                    setIsLoginModalOpen(true);
-                  }}
-                  className="bg-gradient-to-r from-brand-500 to-brand-600 hover:opacity-90 text-white"
+                  onClick={() => setIsLoginModalOpen(true)}
+                  className="bg-brand-500 hover:bg-brand-600 text-white"
                 >
                   Sign In
                 </Button>
@@ -86,10 +79,7 @@ export function Navbar() {
 
       <LoginModal
         isOpen={isLoginModalOpen}
-        onClose={() => {
-          console.log('Modal close called');
-          setIsLoginModalOpen(false);
-        }}
+        onClose={() => setIsLoginModalOpen(false)}
       />
 
       <PasswordUpdateModal

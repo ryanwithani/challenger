@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { createSupabaseBrowserClient } from '@/src/lib/supabase/client'
+import { useAuthStore } from '@/src/lib/store/authStore'
 import { type SimWizardData } from '@/src/lib/validations/sim'
 import { BasicInfoStep, TraitsStep, PersonalityStep, ReviewStep } from './steps'
 import { Button } from '@/src/components/ui/Button'
@@ -43,6 +44,7 @@ export function SimWizard({ onSubmit, onCancel, loading }: SimWizardProps) {
   });
   const [isClient, setIsClient] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  const { user } = useAuthStore();
   const [errorState, setErrorState] = useState<ErrorState>({
     hasError: false,
     errors: [],
@@ -97,7 +99,7 @@ export function SimWizard({ onSubmit, onCancel, loading }: SimWizardProps) {
         } else if (context === 'data_persistence') {
           // Retry data persistence
           try {
-            localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify({ currentStep }));
+            localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify({ currentStep, userId: user?.id }));
             if (wizardData.basicInfo) {
               localStorage.setItem(BASIC_INFO_STORAGE_KEY, JSON.stringify(wizardData.basicInfo));
             }
@@ -156,28 +158,33 @@ export function SimWizard({ onSubmit, onCancel, loading }: SimWizardProps) {
 
     try {
       const savedProgress = localStorage.getItem(PROGRESS_STORAGE_KEY);
-      const savedBasicInfo = localStorage.getItem(BASIC_INFO_STORAGE_KEY);
-      const savedTraits = localStorage.getItem(TRAITS_STORAGE_KEY);
-      const savedPersonality = localStorage.getItem(PERSONALITY_STORAGE_KEY);
 
       if (savedProgress) {
         const parsed = JSON.parse(savedProgress);
-        setCurrentStep(parsed.currentStep || 1);
-      }
 
-      if (savedBasicInfo) {
-        const parsed = JSON.parse(savedBasicInfo);
-        setWizardData(prev => ({ ...prev, basicInfo: parsed }));
-      }
+        // Clear saved data if it belongs to a different user
+        if (parsed.userId !== user?.id) {
+          localStorage.removeItem(PROGRESS_STORAGE_KEY);
+          localStorage.removeItem(BASIC_INFO_STORAGE_KEY);
+          localStorage.removeItem(TRAITS_STORAGE_KEY);
+          localStorage.removeItem(PERSONALITY_STORAGE_KEY);
+        } else {
+          setCurrentStep(parsed.currentStep || 1);
 
-      if (savedTraits) {
-        const parsed = JSON.parse(savedTraits);
-        setWizardData(prev => ({ ...prev, traits: parsed }));
-      }
+          const savedBasicInfo = localStorage.getItem(BASIC_INFO_STORAGE_KEY);
+          const savedTraits = localStorage.getItem(TRAITS_STORAGE_KEY);
+          const savedPersonality = localStorage.getItem(PERSONALITY_STORAGE_KEY);
 
-      if (savedPersonality) {
-        const parsed = JSON.parse(savedPersonality);
-        setWizardData(prev => ({ ...prev, personality: parsed }));
+          if (savedBasicInfo) {
+            setWizardData(prev => ({ ...prev, basicInfo: JSON.parse(savedBasicInfo) }));
+          }
+          if (savedTraits) {
+            setWizardData(prev => ({ ...prev, traits: JSON.parse(savedTraits) }));
+          }
+          if (savedPersonality) {
+            setWizardData(prev => ({ ...prev, personality: JSON.parse(savedPersonality) }));
+          }
+        }
       }
     } catch (error) {
       handleError(error, 'data_loading', 'persistence');
@@ -186,7 +193,7 @@ export function SimWizard({ onSubmit, onCancel, loading }: SimWizardProps) {
     // Fetch challenges for the dropdown
     fetchChallengesData();
     setIsInitialized(true);
-  }, [fetchChallengesData, handleError]);
+  }, [fetchChallengesData, handleError, user?.id]);
 
   // Auto-save functionality with debouncing
   useEffect(() => {
@@ -195,7 +202,7 @@ export function SimWizard({ onSubmit, onCancel, loading }: SimWizardProps) {
     const timeoutId = setTimeout(() => {
       try {
         // Save current step
-        localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify({ currentStep }));
+        localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify({ currentStep, userId: user?.id }));
         
         // Save basic info if available
         if (wizardData.basicInfo) {
@@ -220,7 +227,7 @@ export function SimWizard({ onSubmit, onCancel, loading }: SimWizardProps) {
     }, 500); // Debounce auto-save
 
     return () => clearTimeout(timeoutId);
-  }, [isClient, currentStep, wizardData, handleError, clearError]);
+  }, [isClient, currentStep, wizardData, handleError, clearError, user?.id]);
 
   // Step data handlers with error handling
   const handleBasicInfoNext = useCallback((data: SimWizardData['basicInfo']) => {
@@ -415,8 +422,8 @@ export function SimWizard({ onSubmit, onCancel, loading }: SimWizardProps) {
                     ${isComplete
                       ? 'border-brand-500 bg-brand-500'
                       : isCurrent
-                        ? 'border-brand-500 bg-white dark:bg-gray-800'
-                        : 'border-gray-300 bg-white dark:bg-gray-800'
+                        ? 'border-brand-500 bg-white dark:bg-warmGray-900'
+                        : 'border-gray-300 bg-white dark:bg-warmGray-900'
                     }
                   `}>
                     {isComplete ? (

@@ -25,18 +25,14 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Login form submitted with email:', email);
     setError('');
     setLoading(true);
 
     try {
-      console.log('Attempting to sign in...');
       await signIn(email, password);
-      console.log('Sign in successful!');
       onClose();
       router.push('/dashboard');
     } catch (err: any) {
-      console.error('Sign in error details:', err);
       setError(err.message || 'Failed to sign in');
     } finally {
       setLoading(false);
@@ -109,7 +105,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
             <Button
               type="submit"
-              variant="gradient"
+              variant="primary"
               className="w-full"
               disabled={loading}
               loading={loading}

@@ -9,6 +9,6 @@ return () => clearTimeout(id)
 }, [])
 if (!open) return null
 return (
-<div className={`fixed bottom-4 right-4 rounded-xl px-4 py-2 text-sm text-white shadow-card ${type === 'success' ? 'bg-emerald-600' : 'bg-red-600'}`}>{message}</div>
+<div className={`fixed bottom-4 right-4 rounded-lg px-4 py-2 text-sm text-white shadow-lg ${type === 'success' ? 'bg-emerald-600' : 'bg-red-600'}`}>{message}</div>
 )
 }

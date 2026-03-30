@@ -23,17 +23,13 @@ export default function LandingPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('Login form submitted with email:', email)
     setError('')
     setLoading(true)
 
     try {
-      console.log('Attempting to sign in...')
       await signIn(email, password)
-      console.log('Sign in successful!')
       router.push('/dashboard')
     } catch (err: any) {
-      console.error('Sign in error details:', err)
       setError(err.message || 'Failed to sign in')
     } finally {
       setLoading(false)
@@ -45,14 +41,14 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-brand-100 to-accent-400/20 dark:from-surface-dark dark:to-brand-900/30 flex flex-col">
+    <div className="min-h-screen bg-cozy-cream dark:bg-surface-dark flex flex-col">
       <AuthInitializer />
       <main className="container mx-auto px-4 flex-1 flex flex-col items-center justify-center">
         {/* Header Section */}
         <div className="flex flex-col items-center justify-center mb-12">
           <div className="flex items-center space-x-3 mb-4">
             <CrownIcon size={64} className="w-16 h-16" />
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-brand-500 to-brand-600 dark:from-brand-600 dark:to-brand-700 text-transparent bg-clip-text font-exo2 leading-normal">
+            <h1 className="text-5xl font-bold text-brand-500 font-exo2 leading-normal">
               Challenger
             </h1>
           </div>
@@ -73,7 +69,7 @@ export default function LandingPage() {
 
           {/* Center: Blurb Text */}
           <div className="flex-1 max-w-md text-center lg:text-left">
-            <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
+            <p className="text-lg text-gray-700 dark:text-warmGray-200 leading-relaxed">
               Track your legacy challenge across 10 generations with built-in scoring, family trees, and goal management.
             </p>
           </div>
@@ -119,7 +115,7 @@ export default function LandingPage() {
 
                 <Button
                   type="submit"
-                  variant="gradient"
+                  variant="primary"
                   className="w-full"
                   disabled={loading}
                   loading={loading}
@@ -130,7 +126,7 @@ export default function LandingPage() {
               </form>
 
               <div className="mt-6 text-center">
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-sm text-gray-600 dark:text-warmGray-300">
                   Don't have an account?{' '}
                   <Link
                     href="/signup"

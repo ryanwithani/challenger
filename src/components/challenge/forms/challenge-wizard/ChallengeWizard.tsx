@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useUserPreferencesStore } from '@/src/lib/store/userPreferencesStore'
+import { useAuthStore } from '@/src/lib/store/authStore'
 import { BasicInfoStep } from './BasicInfoStep'
 import { ConfigurationStep } from './ConfigurationStep'
 import { SummaryStep } from './SummaryStep'
@@ -31,6 +32,7 @@ export function ChallengeWizard({ onSubmit, onCancel, loading }: ChallengeWizard
   const [wizardData, setWizardData] = useState<WizardData>({})
   const [isClient, setIsClient] = useState(false)
   const { preferences, fetchPreferences } = useUserPreferencesStore()
+  const { user } = useAuthStore()
 
   // Load saved progress from localStorage
   useEffect(() => {
@@ -39,27 +41,34 @@ export function ChallengeWizard({ onSubmit, onCancel, loading }: ChallengeWizard
 
     try {
       const savedProgress = localStorage.getItem(PROGRESS_STORAGE_KEY)
+      if (!savedProgress) return
+
+      const parsed = JSON.parse(savedProgress)
+
+      // Clear saved data if it belongs to a different user
+      if (parsed.userId !== user?.id) {
+        localStorage.removeItem(PROGRESS_STORAGE_KEY)
+        localStorage.removeItem(BASIC_INFO_STORAGE_KEY)
+        localStorage.removeItem(CONFIG_STORAGE_KEY)
+        return
+      }
+
+      setCurrentStep(parsed.currentStep || 1)
+
       const savedBasicInfo = localStorage.getItem(BASIC_INFO_STORAGE_KEY)
       const savedConfig = localStorage.getItem(CONFIG_STORAGE_KEY)
 
-      if (savedProgress) {
-        const parsed = JSON.parse(savedProgress)
-        setCurrentStep(parsed.currentStep || 1)
-      }
-
       if (savedBasicInfo) {
-        const parsed = JSON.parse(savedBasicInfo)
-        setWizardData(prev => ({ ...prev, basicInfo: parsed }))
+        setWizardData(prev => ({ ...prev, basicInfo: JSON.parse(savedBasicInfo) }))
       }
 
       if (savedConfig) {
-        const parsed = JSON.parse(savedConfig)
-        setWizardData(prev => ({ ...prev, configuration: parsed }))
+        setWizardData(prev => ({ ...prev, configuration: JSON.parse(savedConfig) }))
       }
     } catch (error) {
       console.warn('Failed to load saved challenge wizard data:', error)
     }
-  }, [fetchPreferences])
+  }, [fetchPreferences, user?.id])
 
   // Memoized steps array to prevent recreation
   const steps = useMemo(() => {
@@ -93,7 +102,7 @@ export function ChallengeWizard({ onSubmit, onCancel, loading }: ChallengeWizard
     const timeoutId = setTimeout(() => {
       try {
         // Save current step
-        localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify({ currentStep }))
+        localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify({ currentStep, userId: user?.id }))
         
         // Save basic info if available
         if (wizardData.basicInfo) {
@@ -110,7 +119,7 @@ export function ChallengeWizard({ onSubmit, onCancel, loading }: ChallengeWizard
     }, 500) // Debounce auto-save
 
     return () => clearTimeout(timeoutId)
-  }, [isClient, currentStep, wizardData])
+  }, [isClient, currentStep, wizardData, user?.id])
 
   // Memoized handlers with useCallback
   const handleBasicInfoNext = useCallback((data: BasicInfoData) => {
@@ -208,8 +217,8 @@ export function ChallengeWizard({ onSubmit, onCancel, loading }: ChallengeWizard
                     ${isComplete
                       ? 'border-brand-500 bg-brand-500'
                       : isCurrent
-                        ? 'border-brand-500 bg-white dark:bg-gray-800'
-                        : 'border-gray-300 bg-white dark:bg-gray-800'
+                        ? 'border-brand-500 bg-white dark:bg-warmGray-900'
+                        : 'border-gray-300 bg-white dark:bg-warmGray-900'
                     }
                   `}>
                     {isComplete ? (

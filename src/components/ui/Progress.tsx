@@ -65,10 +65,10 @@ export function Progress({
                     isComplete
                       ? 'border-brand-500 bg-brand-500'
                       : isCurrent
-                        ? 'border-brand-500 bg-white dark:bg-gray-800'
+                        ? 'border-brand-500 bg-white dark:bg-warmGray-900'
                         : isDisabled
                           ? 'border-gray-300 bg-gray-100'
-                          : 'border-gray-300 bg-white dark:bg-gray-800'
+                          : 'border-gray-300 bg-white dark:bg-warmGray-900'
                   )}
                   aria-current={isCurrent ? 'step' : undefined}
                 >
@@ -168,10 +168,10 @@ export function Progress({
                     isComplete
                       ? 'border-brand-500 bg-brand-500'
                       : isCurrent
-                        ? 'border-brand-500 bg-white dark:bg-gray-800'
+                        ? 'border-brand-500 bg-white dark:bg-warmGray-900'
                         : isDisabled
                           ? 'border-gray-300 bg-gray-100'
-                          : 'border-gray-300 bg-white dark:bg-gray-800'
+                          : 'border-gray-300 bg-white dark:bg-warmGray-900'
                   )}
                   aria-current={isCurrent ? 'step' : undefined}
                 >

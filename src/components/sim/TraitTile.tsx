@@ -26,7 +26,7 @@ export default function TraitTile({ trait, selected, disabled, onToggle }: Props
                 'grid place-items-center text-center',
                 'px-2',
                 // base skin (subtle Sims card)
-                'bg-gradient-to-b from-sky-50 to-sky-100',
+                'bg-sky-50',
                 'border border-sky-200',
                 'shadow-[inset_0_1px_0_rgba(255,255,255,.7)]',
                 // interactions
@@ -35,7 +35,7 @@ export default function TraitTile({ trait, selected, disabled, onToggle }: Props
                 selected ? 'ring-0 border-brand-600' : 'hover:border-brand-400/60',
                 disabled && !selected ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
                 // dark
-                'dark:from-zinc-900 dark:to-zinc-800 dark:border-zinc-700',
+                'dark:bg-zinc-900 dark:border-zinc-700',
             ].join(' ')}
         >
             {/* check badge */}
@@ -54,7 +54,7 @@ export default function TraitTile({ trait, selected, disabled, onToggle }: Props
                             {trait.label ?? '⭐'}
                         </span>
                 </div>
-                <div className="text-xs font-semibold leading-tight text-gray-800 dark:text-gray-100">
+                <div className="text-xs font-semibold leading-tight text-gray-800 dark:text-warmGray-100">
                     {trait.label}
                 </div>
             </div>

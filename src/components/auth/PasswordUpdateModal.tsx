@@ -86,7 +86,7 @@ export function PasswordUpdateModal({ open, onClose }: PasswordUpdateModalProps)
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             showValidation={true}
-                            className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
+                            className="bg-white dark:bg-warmGray-900 text-gray-900 dark:text-white border-gray-300 dark:border-warmGray-700"
                             placeholder="New Password"
                             required
                             disabled={loading}
@@ -96,7 +96,7 @@ export function PasswordUpdateModal({ open, onClose }: PasswordUpdateModalProps)
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
                             showValidation={false}
-                            className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
+                            className="bg-white dark:bg-warmGray-900 text-gray-900 dark:text-white border-gray-300 dark:border-warmGray-700"
                             placeholder="Confirm New Password"
                             required
                             disabled={loading}
@@ -124,7 +124,7 @@ export function PasswordUpdateModal({ open, onClose }: PasswordUpdateModalProps)
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                             Password Updated!
                         </h3>
-                        <p className="text-gray-600 dark:text-gray-400">
+                        <p className="text-gray-600 dark:text-warmGray-300">
                             Redirecting to dashboard...
                         </p>
                     </div>

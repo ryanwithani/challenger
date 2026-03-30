@@ -56,7 +56,7 @@ export function Sidebar() {
   }
 
   return (
-    <div className="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col transition-colors">
+    <div className="w-64 bg-white dark:bg-warmGray-900 border-r border-gray-200 dark:border-warmGray-700 flex flex-col transition-colors">
       <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
         {/* Main Navigation */}
         <nav className="mt-5 flex-1 px-2 space-y-1">
@@ -69,10 +69,10 @@ export function Sidebar() {
                   key={item.name}
                   href={item.href}
                   className={clsx(
-                    'group flex items-center px-3 py-2 text-sm font-medium rounded-xl transition-all duration-300',
+                    'group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors',
                     {
-                      'bg-gradient-to-r from-brand-500 to-accent-500 dark:from-brand-600 dark:to-accent-600 text-white shadow-lg': isActive,
-                      'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700': !isActive,
+                      'bg-brand-50 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300': isActive,
+                      'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-warmGray-200 dark:hover:bg-warmGray-800': !isActive,
                     }
                   )}
                 >
@@ -80,19 +80,14 @@ export function Sidebar() {
                     className={clsx(
                       'mr-3 h-5 w-5 flex-shrink-0',
                       {
-                        'text-white': isActive,  // Keep white for active
-                        'text-gray-400 group-hover:text-gray-500 dark:text-gray-400 dark:group-hover:text-gray-300': !isActive,
+                        'text-brand-600 dark:text-brand-400': isActive,
+                        'text-gray-400 group-hover:text-gray-500 dark:text-warmGray-300 dark:group-hover:text-warmGray-200': !isActive,
                       }
                     )}
                     aria-hidden="true"
                   />
                   <div className="flex-1">
                     <div>{item.name}</div>
-                    {!isActive && (
-                      <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                        {item.description}
-                      </div>
-                    )}
                   </div>
                 </Link>
               )
@@ -102,26 +97,23 @@ export function Sidebar() {
       </div>
 
       {/* User Section */}
-      <div className="flex-shrink-0 flex border-t border-gray-200 dark:border-gray-700 p-4">
+      <div className="flex-shrink-0 flex border-t border-gray-200 dark:border-warmGray-700 p-4">
         <div className="flex items-center w-full">
           <div className="flex-shrink-0">
-            <div className="w-8 h-8 bg-gradient-to-br from-brand-500 to-accent-500 rounded-full flex items-center justify-center">
+            <div className="w-8 h-8 bg-brand-500 rounded-full flex items-center justify-center">
               <span className="text-white text-sm font-bold">S</span>
             </div>
           </div>
           <div className="ml-3 flex-1">
-            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            <p className="text-sm font-medium text-gray-700 dark:text-warmGray-200">
               Sims Challenger
-            </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              Challenge your gameplay
             </p>
           </div>
 
           {/* Settings Icon */}
           <Link
             href="/profile"
-            className="ml-2 p-1 rounded-lg text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            className="ml-2 p-1 rounded-lg text-gray-400 hover:text-gray-600 dark:text-warmGray-500 dark:hover:text-warmGray-200 hover:bg-gray-100 dark:hover:bg-warmGray-800 transition-colors"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />

@@ -1,13 +1,29 @@
 import type { Metadata } from 'next'
-import { Inter, Exo_2 } from 'next/font/google'
+import { Source_Serif_4, Fraunces, Playfair_Display } from 'next/font/google'
 import { ThemeProvider } from '@/src/context/ThemeProvider'
 import './globals.css'
 
-const inter = Inter({ 
+const sourceSerif4 = Source_Serif_4({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700', '800', '900']
+  axes: ['opsz'],
+  variable: '--font-body',
+  display: 'swap',
 })
-const exo2 = Exo_2({ subsets: ['latin'] })
+
+const fraunces = Fraunces({
+  subsets: ['latin'],
+  axes: ['SOFT', 'opsz'],
+  variable: '--font-display',
+  display: 'swap',
+})
+
+const playfairDisplay = Playfair_Display({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  style: ['normal', 'italic'],
+  variable: '--font-brand',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   title: 'Sims Challenge Tracker',
@@ -26,8 +42,8 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} ${exo2.className}`}>
+    <html lang="en" suppressHydrationWarning className={`${sourceSerif4.variable} ${fraunces.variable} ${playfairDisplay.variable}`}>
+      <body>
         <ThemeProvider>
           {children}
         </ThemeProvider>

@@ -49,7 +49,7 @@ export default function ProtectedLayout({
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center space-y-4">
           <div className="w-12 h-12 border-4 border-brand-500 dark:border-brand-400 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <div className="text-gray-600 dark:text-gray-300 mt-4">Loading...</div>
+          <div className="text-gray-600 dark:text-warmGray-200 mt-4">Loading...</div>
           <div className="text-sm text-gray-400">
             If loading takes more than 10 seconds, please
             <button
@@ -64,7 +64,7 @@ export default function ProtectedLayout({
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-100 dark:bg-gray-800"> {/* CHANGE: h-screen to min-h-screen */}
+    <div className="flex min-h-screen bg-cozy-cream dark:bg-surface-dark">
       <Sidebar />
       <div className="flex-1 flex flex-col"> {/* REMOVE: overflow-hidden */}
         <Navbar />

@@ -7,6 +7,7 @@ import { ChallengeTile } from '@/src/components/challenge/ChallengeTile'
 import { Button } from '@/src/components/ui/Button'
 import { Input } from '@/src/components/ui/Input'
 import { ErrorMessage } from '@/src/components/ui/ErrorMessage'
+import { TbBolt, TbCheck, TbTarget, TbCalendar } from 'react-icons/tb'
 
 interface FilterState {
   searchTerm: string
@@ -91,26 +92,23 @@ export default function ChallengesPage() {
   }, [fetchChallenges])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-brand-50 to-accent-400/20 dark:from-surface-dark dark:via-brand-900/30 dark:to-brand-800/20">
-      <div className="max-w-[1400px] mx-auto p-6 space-y-8">
+    <div className="max-w-[1400px] mx-auto space-y-8">
         {/* Header */}
-        <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-xl border-2 border-gray-100 dark:border-gray-700">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 dark:from-blue-500 dark:to-purple-600 bg-clip-text text-transparent">
-                All Challenges
-              </h1>
-              <p className="text-lg text-gray-600 dark:text-gray-400 mt-2">
-                {filteredChallenges.length} of {challenges.length} challenges
-                {filters.searchTerm && ` matching "${filters.searchTerm}"`}
-              </p>
-            </div>
-            <Link href="/dashboard/new/challenge">
-              <Button variant="primary" className="px-6 py-3">
-                Create New Challenge
-              </Button>
-            </Link>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="font-display text-2xl text-brand-700 dark:text-brand-300">
+              All Challenges
+            </h1>
+            <p className="text-base text-gray-600 dark:text-warmGray-300 mt-1">
+              {filteredChallenges.length} of {challenges.length} challenges
+              {filters.searchTerm && ` matching "${filters.searchTerm}"`}
+            </p>
           </div>
+          <Link href="/dashboard/new/challenge">
+            <Button variant="primary">
+              Create New Challenge
+            </Button>
+          </Link>
         </div>
 
         {/* Error State */}
@@ -121,30 +119,30 @@ export default function ChallengesPage() {
         )}
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: 'Active', value: stats.active, color: 'from-emerald-500 to-teal-600', icon: '⚡' },
-            { label: 'Completed', value: stats.completed, color: 'from-blue-500 to-indigo-600', icon: '✅' },
-            { label: 'Legacy', value: stats.legacy, color: 'from-brand-500 to-brand-600 dark:from-brand-600 dark:to-brand-700', icon: '🎯' },
-            { label: 'This Month', value: stats.thisMonth, color: 'from-amber-500 to-orange-600', icon: '📅' }
+            { label: 'Active', value: stats.active, icon: TbBolt, iconClass: 'text-brand-500' },
+            { label: 'Completed', value: stats.completed, icon: TbCheck, iconClass: 'text-green-500' },
+            { label: 'Legacy', value: stats.legacy, icon: TbTarget, iconClass: 'text-brand-500' },
+            { label: 'This Month', value: stats.thisMonth, icon: TbCalendar, iconClass: 'text-brand-400' }
           ].map((stat, index) => (
-            <div key={index} className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border-2 border-gray-100 dark:border-gray-700 hover:shadow-xl transition-shadow duration-200">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-3xl">{stat.icon}</span>
-                <div className={`text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
-                  {stat.value}
-                </div>
+            <div key={index} className="card">
+              <div className="flex items-center gap-3 mb-2">
+                <stat.icon className={`w-5 h-5 ${stat.iconClass}`} />
+                <span className="text-sm text-gray-600 dark:text-warmGray-300">{stat.label}</span>
               </div>
-              <div className="text-gray-600 dark:text-gray-400 font-medium">{stat.label}</div>
+              <div className="text-2xl font-semibold text-gray-900 dark:text-warmGray-100">
+                {stat.value}
+              </div>
             </div>
           ))}
         </div>
 
         {/* Filters */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border-2 border-gray-100 dark:border-gray-700">
+        <div className="card">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-warmGray-200 mb-2">
                 Search Challenges
               </label>
               <Input
@@ -157,13 +155,13 @@ export default function ChallengesPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-warmGray-200 mb-2">
                 Status
               </label>
               <select
                 value={filters.statusFilter}
                 onChange={(e) => updateFilter('statusFilter', e.target.value)}
-                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-brand-800 rounded-xl focus:border-brand-400 dark:focus:border-brand-500 focus:outline-none bg-white dark:bg-surface-dark text-gray-900 dark:text-gray-100"
+                className="w-full px-3 py-2 border border-gray-200 dark:border-warmGray-700 rounded-lg focus:border-brand-400 dark:focus:border-brand-500 focus:outline-none bg-white dark:bg-warmGray-900 text-gray-900 dark:text-warmGray-100"
               >
                 <option value="all">All Statuses</option>
                 <option value="active">Active</option>
@@ -174,13 +172,13 @@ export default function ChallengesPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-warmGray-200 mb-2">
                 Type
               </label>
               <select
                 value={filters.typeFilter}
                 onChange={(e) => updateFilter('typeFilter', e.target.value)}
-                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-brand-800 rounded-xl focus:border-brand-400 dark:focus:border-brand-500 focus:outline-none bg-white dark:bg-surface-dark text-gray-900 dark:text-gray-100"
+                className="w-full px-3 py-2 border border-gray-200 dark:border-warmGray-700 rounded-lg focus:border-brand-400 dark:focus:border-brand-500 focus:outline-none bg-white dark:bg-warmGray-900 text-gray-900 dark:text-warmGray-100"
               >
                 <option value="all">All Types</option>
                 {challengeTypes.map((type) => (
@@ -207,45 +205,29 @@ export default function ChallengesPage() {
         {challengesLoading ? (
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-4 border-brand-500 dark:border-brand-400 border-t-transparent mx-auto"></div>
-            <p className="text-gray-500 dark:text-gray-400 mt-4">Loading challenges...</p>
+            <p className="text-gray-500 dark:text-warmGray-300 mt-4">Loading challenges...</p>
           </div>
         ) : challenges.length === 0 ? (
-          <div className="bg-white dark:bg-gray-800 rounded-3xl p-12 shadow-lg border-2 border-gray-100 dark:border-gray-700 text-center">
-            <div className="text-8xl mb-6">🎯</div>
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">No challenges yet</h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-8 text-lg">Create your first challenge to start tracking your Sims gameplay</p>
+          <div className="card text-center py-12">
+            <h3 className="font-display text-xl text-brand-700 dark:text-brand-300 mb-2">No challenges yet</h3>
+            <p className="text-sm text-gray-500 dark:text-warmGray-400 mb-6">Create a challenge to start tracking your gameplay</p>
             <Link href="/dashboard/new/challenge">
-              <Button variant="gradient" className="px-8 py-3">
-                Create Your First Challenge
-              </Button>
+              <Button variant="primary">Create a Challenge</Button>
             </Link>
           </div>
         ) : filteredChallenges.length === 0 ? (
-          <div className="bg-white dark:bg-gray-800 rounded-3xl p-12 shadow-lg border-2 border-gray-100 dark:border-gray-700 text-center">
-            <div className="text-6xl mb-6">🔍</div>
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">No challenges match your filters</h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-8 text-lg">Try adjusting your search or filter criteria</p>
-            <Button
-              variant="primary"
-              onClick={clearFilters}
-              className="px-8 py-3"
-            >
-              Clear All Filters
-            </Button>
+          <div className="card text-center py-12">
+            <h3 className="font-display text-xl text-brand-700 dark:text-brand-300 mb-2">No matches</h3>
+            <p className="text-sm text-gray-500 dark:text-warmGray-400 mb-6">Try adjusting your search or filters</p>
+            <Button variant="outline" onClick={clearFilters}>Clear Filters</Button>
           </div>
         ) : (
           <div className="space-y-8">
             {Object.entries(challengesByStatus).map(([status, statusChallenges]) => (
-              <div key={status} className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border-2 border-gray-100 dark:border-gray-700">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6 flex items-center">
-                  <span className="mr-3 text-2xl">
-                    {status === 'active' ? '⚡' :
-                      status === 'completed' ? '✅' :
-                        status === 'paused' ? '⏸️' :
-                          status === 'archived' ? '📦' : '❓'}
-                  </span>
-                  {status.charAt(0).toUpperCase() + status.slice(1)} Challenges
-                  <span className="ml-3 px-3 py-1 bg-brand-100 dark:bg-brand-900 text-brand-600 dark:text-brand-400 text-sm rounded-full">
+              <div key={status} className="card">
+                <h3 className="font-display text-lg text-gray-900 dark:text-warmGray-100 mb-6 flex items-center">
+                  {status.charAt(0).toUpperCase() + status.slice(1)}
+                  <span className="ml-2 px-2 py-0.5 bg-gray-100 dark:bg-warmGray-800 text-gray-600 dark:text-warmGray-300 text-xs rounded-full">
                     {statusChallenges.length}
                   </span>
                 </h3>
@@ -264,6 +246,5 @@ export default function ChallengesPage() {
           </div>
         )}
       </div>
-    </div>
   )
 }

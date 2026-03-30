@@ -94,9 +94,9 @@ export default function PacksStep({ onBack, onNext }: PacksStepProps) {
   return (
     <div className="p-8 md:p-12 space-y-6">
       {/* Stats */}
-      <div className="text-center p-4 bg-gradient-to-r from-brand-50 to-brand-100 dark:from-brand-900/30 dark:to-brand-800/30 rounded-2xl border border-brand-200 dark:border-brand-800">
+      <div className="text-center p-4 bg-brand-50 dark:bg-brand-900/30 rounded-2xl border border-brand-200 dark:border-brand-800">
         <div className="text-2xl font-bold text-brand-600 dark:text-brand-400">{totalSelected}</div>
-        <div className="text-sm text-gray-600 dark:text-gray-400">Packs Selected</div>
+        <div className="text-sm text-gray-600 dark:text-warmGray-300">Packs Selected</div>
       </div>
 
       {/* Category Tabs */}
@@ -106,7 +106,7 @@ export default function PacksStep({ onBack, onNext }: PacksStepProps) {
           onClick={() => setActiveCategory('Expansion Pack')}
           className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all ${activeCategory === 'Expansion Pack'
             ? 'bg-brand-500 text-white shadow-md'
-            : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+            : 'bg-gray-100 dark:bg-warmGray-900 text-gray-600 dark:text-warmGray-300 hover:bg-gray-200 dark:hover:bg-warmGray-800'
             }`}
         >
           <div className="font-semibold">Expansion Packs</div>
@@ -119,7 +119,7 @@ export default function PacksStep({ onBack, onNext }: PacksStepProps) {
           onClick={() => setActiveCategory('Game Pack')}
           className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all ${activeCategory === 'Game Pack'
             ? 'bg-brand-500 text-white shadow-md'
-            : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+            : 'bg-gray-100 dark:bg-warmGray-900 text-gray-600 dark:text-warmGray-300 hover:bg-gray-200 dark:hover:bg-warmGray-800'
             }`}
         >
           <div className="font-semibold">Game Packs</div>
@@ -166,7 +166,7 @@ export default function PacksStep({ onBack, onNext }: PacksStepProps) {
             >
               <div className={`border-2 rounded-xl p-2 transition-all duration-200 w-full h-full ${isSelected
                 ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20 shadow-lg ring-2 ring-brand-200 dark:ring-brand-800'
-                : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-md'
+                : 'border-gray-200 dark:border-warmGray-700 bg-white dark:bg-warmGray-900 hover:border-gray-300 dark:hover:border-warmGray-700 hover:shadow-md'
                 }`}>
                 <div className="flex flex-col items-center justify-center h-full">
                   <PackIcon
@@ -174,12 +174,12 @@ export default function PacksStep({ onBack, onNext }: PacksStepProps) {
                     size={96}
                     className="mx-auto mb-2 w-8 h-8 object-contain flex-shrink-0"
                   />
-                  <div className="text-xs font-medium text-gray-900 dark:text-gray-100 leading-tight text-center min-h-[42px] flex items-center">
+                  <div className="text-xs font-medium text-gray-900 dark:text-warmGray-100 leading-tight text-center min-h-[42px] flex items-center">
                     {pack.name as string}
                   </div>
                 </div>
                 {isSelected && (
-                  <div className="absolute -top-1 -right-1 w-6 h-6 bg-brand-500 rounded-full flex items-center justify-center shadow-lg ring-2 ring-white dark:ring-gray-800">
+                  <div className="absolute -top-1 -right-1 w-6 h-6 bg-brand-500 rounded-full flex items-center justify-center shadow-lg ring-2 ring-white dark:ring-warmGray-800">
                     <svg className="w-3 h-3 text-white" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>

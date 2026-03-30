@@ -28,7 +28,7 @@ export default function OnboardingProgress({ steps, currentStep }: OnboardingPro
               {/* Step Circle */}
               <div className={`relative flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all duration-300 ${
                 isCompleted
-                  ? 'bg-gradient-to-br from-green-500 to-green-600 border-green-500'
+                  ? 'bg-green-500 border-green-500'
                   : isActive
                     ? 'bg-white border-brand-500 shadow-lg'
                     : 'bg-gray-100 border-gray-300'
@@ -58,7 +58,7 @@ export default function OnboardingProgress({ steps, currentStep }: OnboardingPro
               {/* Connector Line */}
               {index < steps.length - 1 && (
                 <div className={`mx-4 sm:mx-6 h-1 w-12 sm:w-16 rounded-full transition-all duration-300 ${
-                  step.completed ? 'bg-gradient-to-r from-green-500 to-green-600' : 'bg-gray-200'
+                  step.completed ? 'bg-green-500' : 'bg-gray-200'
                 }`} />
               )}
             </div>
@@ -70,7 +70,7 @@ export default function OnboardingProgress({ steps, currentStep }: OnboardingPro
       <div className="max-w-2xl mx-auto">
         <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-brand-500 to-brand-600 rounded-full transition-all duration-500 ease-out"
+            className="h-full bg-brand-500 rounded-full transition-all duration-500 ease-out"
             style={{ width: `${progress}%` }}
           />
         </div>

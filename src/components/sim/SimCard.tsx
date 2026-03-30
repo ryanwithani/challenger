@@ -9,6 +9,7 @@ import { Database } from '@/src/types/database.types'
 import { PackIcon } from '@/src/components/sim/PackIcon'
 import { TraitIcon } from '@/src/components/sim/TraitIcon'
 import { SafeText } from '../ui/SafeText'
+import { TbCrown, TbHeart, TbHeartFilled, TbPencil } from 'react-icons/tb'
 
 // Types
 type Sim = Database['public']['Tables']['sims']['Row']
@@ -91,10 +92,10 @@ export const SimCard = memo(function SimCard({
   return (
     <article
       className={clsx(
-        'group relative overflow-hidden rounded-2xl border-2 transition-shadow cursor-pointer',
-        'bg-white dark:bg-gray-800',
-        'border-gray-100 dark:border-gray-700',
-        'shadow hover:shadow-lg focus-within:shadow-lg',
+        'group relative overflow-hidden rounded-xl border transition-colors cursor-pointer',
+        'bg-white dark:bg-warmGray-900',
+        'border-gray-200 dark:border-warmGray-700',
+        'hover:shadow-md',
         isHeir && 'border-amber-300 dark:border-amber-500'
       )}
       tabIndex={0}
@@ -102,7 +103,7 @@ export const SimCard = memo(function SimCard({
       onClick={onClick}
     >
       {/* Top media */}
-      <div className={clsx('relative w-full', compact ? 'h-28' : 'h-36', 'bg-gradient-to-br from-indigo-50 to-white dark:from-indigo-900/20 dark:to-gray-800')}>
+      <div className={clsx('relative w-full', compact ? 'h-28' : 'h-36', 'bg-cozy-sand dark:bg-surface-dark')}>
         <Image
           src={sim.avatar_url || '/images/avatars/default_sim.png'}
           alt={`${sim.name} avatar`}
@@ -117,7 +118,7 @@ export const SimCard = memo(function SimCard({
         <div className="absolute top-2 left-2 flex items-center gap-2">
           {isHeir && (
             <span className="inline-flex items-center gap-1 rounded-full bg-amber-100/90 px-2 py-0.5 text-xs font-semibold text-amber-900 ring-1 ring-amber-200">
-              <span>👑</span> Heir
+              <TbCrown className="w-3 h-3" /> Heir
             </span>
           )}
           {typeof generation === 'number' && (
@@ -146,7 +147,7 @@ export const SimCard = memo(function SimCard({
             aria-label={fav ? 'Unfavorite' : 'Favorite'}
             title={fav ? 'Unfavorite' : 'Favorite'}
           >
-            {fav ? '♥' : '♡'}
+            {fav ? <TbHeartFilled className="w-3.5 h-3.5" /> : <TbHeart className="w-3.5 h-3.5" />}
           </button>
 
           <button
@@ -155,7 +156,7 @@ export const SimCard = memo(function SimCard({
             className="rounded-full p-1.5 text-white/90 bg-black/30 hover:bg-black/40 backdrop-blur ring-1 ring-white/40 focus:outline-none focus:ring-2 focus:ring-white/60"
             title="Edit"
           >
-            ✎
+            <TbPencil className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
@@ -165,10 +166,10 @@ export const SimCard = memo(function SimCard({
         {/* Name & nav */}
         <div className="flex items-start justify-between gap-2">
           <div>
-            <Link href={`/sims/${sim.id}`} className="block text-base font-semibold text-gray-900 dark:text-gray-100 hover:underline">
+            <Link href={`/sim/${sim.id}`} className="block text-base font-semibold text-gray-900 dark:text-warmGray-100 hover:underline">
               <SafeText>{sim.name}</SafeText>
             </Link>
-            <div className="mt-0.5 text-xs text-gray-600 dark:text-gray-400">
+            <div className="mt-0.5 text-xs text-gray-600 dark:text-warmGray-300">
               {titleCaseAge(sim.age_stage)}{sim.career ? ` • ${sim.career}` : ''}{sim.aspiration ? ` • ${sim.aspiration}` : ''}
             </div>
           </div>
@@ -179,7 +180,7 @@ export const SimCard = memo(function SimCard({
               <button
                 type="button"
                 onClick={() => onUnlinkFromChallenge?.(sim)}
-                className="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-2 py-1 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600"
+                className="rounded-md border border-gray-300 dark:border-warmGray-700 bg-white dark:bg-warmGray-850 px-2 py-1 text-xs text-gray-700 dark:text-warmGray-200 hover:bg-gray-50 dark:hover:bg-warmGray-700"
                 title="Unlink from challenge"
               >
                 Unlink
@@ -188,7 +189,7 @@ export const SimCard = memo(function SimCard({
               <button
                 type="button"
                 onClick={() => onLinkToChallenge?.(sim)}
-                className="rounded-md bg-indigo-600 px-2 py-1 text-xs font-medium text-white hover:bg-indigo-700"
+                className="rounded-md bg-brand-500 px-2 py-1 text-xs font-medium text-white hover:bg-brand-600"
                 title="Link to this challenge"
               >
                 Link
@@ -200,11 +201,11 @@ export const SimCard = memo(function SimCard({
         {/* Traits */}
         <div className="mt-3">
           {shown.length === 0 ? (
-            <div className="text-xs text-gray-500 dark:text-gray-400">No traits</div>
+            <div className="text-xs text-gray-500 dark:text-warmGray-300">No traits</div>
           ) : (
             <ul className={clsx('flex flex-wrap gap-2', compact && 'gap-1.5')}>
               {shown.map(t => (
-                <li key={t.id} className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-2 py-0.5 text-[11px] text-gray-800 dark:text-gray-200">
+                <li key={t.id} className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 dark:border-warmGray-700 bg-white dark:bg-warmGray-850 px-2 py-0.5 text-[11px] text-gray-800 dark:text-warmGray-100">
                   <TraitIcon label={t.label} size={16} />
                   <span>{t.label}</span>
                   {shouldShowPackIcon(t.expansionPack) && (
@@ -218,7 +219,7 @@ export const SimCard = memo(function SimCard({
                 </li>
               ))}
               {hiddenCount > 0 && (
-                <li className="inline-flex items-center rounded-full bg-gray-100 dark:bg-gray-600 px-2 py-0.5 text-[11px] text-gray-700 dark:text-gray-300">
+                <li className="inline-flex items-center rounded-full bg-gray-100 dark:bg-warmGray-800 px-2 py-0.5 text-[11px] text-gray-700 dark:text-warmGray-200">
                   +{hiddenCount} more
                 </li>
               )}

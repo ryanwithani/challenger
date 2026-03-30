@@ -12,8 +12,8 @@ export function ChallengeTile({ challenge }: ChallengeTileProps) {
 
   return (
     <div
-      className={`card mb-4 hover:shadow-lg transition-shadow cursor-pointer ${isActive
-        ? 'border-2 border-brand-500 dark:border-brand-400 bg-brand-500/10 dark:bg-brand-500/20 shadow-md'
+      className={`card mb-4 cursor-pointer transition-colors hover:bg-brand-50/30 dark:hover:bg-warmGray-850 ${isActive
+        ? 'border-l-[3px] border-l-brand-500 dark:border-l-brand-400'
         : ''
         }`}
       role="button"
@@ -29,26 +29,26 @@ export function ChallengeTile({ challenge }: ChallengeTileProps) {
       {/* Active status indicator */}
       {isActive && (
         <div className="flex items-center mb-3">
-          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse mr-2"></div>
-          <span className="text-xs font-medium text-green-500 uppercase tracking-wide">
+          <div className="w-1.5 h-1.5 bg-green-500 rounded-full mr-2"></div>
+          <span className="text-xs font-medium text-green-600 dark:text-green-400 uppercase tracking-wide">
             Active
           </span>
         </div>
       )}
 
-      <h3 className={`text-xl font-semibold mb-2 ${isActive ? 'text-brand-500 dark:text-brand-400' : 'text-gray-900 dark:text-gray-100'
+      <h3 className={`text-xl font-semibold mb-2 ${isActive ? 'text-brand-500 dark:text-brand-400' : 'text-gray-900 dark:text-warmGray-100'
         }`}>
         <SafeText>{challenge.name}</SafeText>
       </h3>
 
       {challenge.description && (
-        <p className={`text-sm mb-4 ${isActive ? 'text-brand-600 dark:text-brand-400' : 'text-gray-600 dark:text-gray-300'
+        <p className={`text-sm mb-4 ${isActive ? 'text-brand-600 dark:text-brand-400' : 'text-gray-600 dark:text-warmGray-200'
           }`}>
           <SafeText>{challenge.description}</SafeText>
         </p>
       )}
 
-      <div className={`flex justify-between items-center text-sm ${isActive ? 'text-brand-600 dark:text-brand-400' : 'text-gray-500 dark:text-gray-400'
+      <div className={`flex justify-between items-center text-sm ${isActive ? 'text-brand-600 dark:text-brand-400' : 'text-gray-500 dark:text-warmGray-300'
         }`}>
         <span className="capitalize">{challenge.challenge_type || 'Custom'}</span>
         <span>

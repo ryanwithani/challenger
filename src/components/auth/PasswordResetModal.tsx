@@ -70,7 +70,7 @@ export function PasswordResetModal({ isOpen, onClose, initialEmail = '' }: Passw
 
                 {!success ? (
                     <form onSubmit={handleSubmit} className="space-y-4">
-                        <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+                        <p className="text-gray-600 dark:text-warmGray-300 text-sm mb-4">
                             Enter your email address and we'll send you a link to reset your password.
                         </p>
 
@@ -79,7 +79,7 @@ export function PasswordResetModal({ isOpen, onClose, initialEmail = '' }: Passw
                             placeholder="Email address"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
+                            className="bg-white dark:bg-warmGray-900 text-gray-900 dark:text-white border-gray-300 dark:border-warmGray-700"
                             required
                             disabled={loading}
                         />
@@ -108,7 +108,7 @@ export function PasswordResetModal({ isOpen, onClose, initialEmail = '' }: Passw
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                             Check your email
                         </h3>
-                        <p className="text-gray-600 dark:text-gray-400 text-sm">
+                        <p className="text-gray-600 dark:text-warmGray-300 text-sm">
                             We've sent password reset instructions to {email}
                         </p>
                     </div>

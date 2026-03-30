@@ -68,11 +68,11 @@ export default function NewSimClient() {
 
   // 3. The JSX is now just a clean wrapper for the wizard.
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-cozy-cream dark:bg-surface-dark flex items-center justify-center p-4">
       <div className="w-full max-w-4xl">
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-8">
+        <div className="bg-white dark:bg-warmGray-900 rounded-2xl shadow-xl border border-gray-200 dark:border-warmGray-700 p-8">
           {/* Header with mascot */}
-          <div className="flex items-center gap-2 mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex items-center gap-2 mb-6 pb-6 border-b border-gray-200 dark:border-warmGray-700">
             <Image
               src="/mascot/pointing.png"
               alt="Mascot pointing"
@@ -80,7 +80,7 @@ export default function NewSimClient() {
               height={80}
               className="w-20 h-20 object-contain -mr-2"
             />
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-brand-500 to-brand-600 dark:from-brand-600 dark:to-brand-700 text-transparent bg-clip-text font-exo2">
+            <h1 className="text-2xl font-bold text-brand-500 font-exo2">
               Create a Sim
             </h1>
           </div>

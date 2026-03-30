@@ -48,11 +48,11 @@ export function SimTimeline({ sim, achievements }: SimTimelineProps) {
         <div className="space-y-6">
             {/* Timeline Header */}
             <div className="bg-white dark:bg-surface-dark rounded-lg border border-gray-200 dark:border-brand-800 p-6">
-                <h3 className="text-lg font-semibold mb-2 flex items-center text-gray-900 dark:text-gray-100">
+                <h3 className="text-lg font-semibold mb-2 flex items-center text-gray-900 dark:text-warmGray-100">
                     <span className="mr-2">📅</span>
                     {sim.name}'s Timeline
                 </h3>
-                <p className="text-gray-600 dark:text-gray-300">Key moments and achievements in their legacy journey</p>
+                <p className="text-gray-600 dark:text-warmGray-200">Key moments and achievements in their legacy journey</p>
             </div>
 
             {/* Timeline */}
@@ -74,8 +74,8 @@ export function SimTimeline({ sim, achievements }: SimTimelineProps) {
                                     <div className="flex-1 min-w-0 pb-6">
                                         <div className="flex items-start justify-between">
                                             <div className="flex-1">
-                                                <h4 className="font-semibold text-gray-900 dark:text-gray-100">{event.title}</h4>
-                                                <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{event.description}</p>
+                                                <h4 className="font-semibold text-gray-900 dark:text-warmGray-100">{event.title}</h4>
+                                                <p className="text-sm text-gray-600 dark:text-warmGray-200 mt-1">{event.description}</p>
                                                 <p className="text-xs text-gray-500 mt-2">
                                                     {new Date(event.date).toLocaleDateString('en-US', {
                                                         year: 'numeric',
@@ -100,8 +100,8 @@ export function SimTimeline({ sim, achievements }: SimTimelineProps) {
                 ) : (
                     <div className="text-center py-8">
                         <div className="text-4xl mb-2">📅</div>
-                        <h4 className="font-medium text-gray-700 dark:text-gray-200 mb-2">Timeline Starting</h4>
-                        <p className="text-gray-600 dark:text-gray-300 text-sm">
+                        <h4 className="font-medium text-gray-700 dark:text-warmGray-100 mb-2">Timeline Starting</h4>
+                        <p className="text-gray-600 dark:text-warmGray-200 text-sm">
                             {sim.name}'s story is just beginning. Achievements and milestones will appear here as they happen.
                         </p>
                     </div>

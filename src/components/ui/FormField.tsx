@@ -19,12 +19,12 @@ export function FormField({
 }: FormFieldProps) {
     return (
         <div className={cn("space-y-2", className)}>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label className="block text-sm font-medium text-gray-700 dark:text-warmGray-200">
                 {label}
                 {required && <span className="text-red-500 ml-1">*</span>}
             </label>
             {description && (
-                <p className="text-xs text-gray-500 dark:text-gray-400">{description}</p>
+                <p className="text-xs text-gray-500 dark:text-warmGray-300">{description}</p>
             )}
             {children}
             {error && (

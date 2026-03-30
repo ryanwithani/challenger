@@ -93,31 +93,31 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-8">
-      <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+      <h1 className="text-2xl font-semibold text-gray-900 dark:text-warmGray-100">
         Profile Settings
       </h1>
 
       {/* Account Settings */}
       <div className="card">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-warmGray-100 mb-4">
           Account Information
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-warmGray-200 mb-2">
               Email
             </label>
             <Input
               type="email"
               value={user?.email || ''}
               disabled
-              className="bg-gray-100 dark:bg-gray-700"
+              className="bg-gray-100 dark:bg-warmGray-850"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-warmGray-200 mb-2">
               Username
             </label>
             <Input
