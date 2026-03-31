@@ -6,7 +6,7 @@ import { PackIcon } from '@/src/components/sim/PackIcon'
 import { calculateLegacyScoring } from '@/src/lib/utils/legacy-scoring'
 import { formatConfigValue, getDifficultyColor } from '@/src/lib/utils/format'
 import { CHALLENGE_TEMPLATES } from '@/src/data/challenge-templates'
-import { PACKS } from '@/src/components/profile/Packs'
+import { getPackName } from '@/src/data/packs'
 import type { BasicInfoData, LegacyConfigData, ExpansionPackData } from '@/src/lib/validations/challenge'
 
 interface WizardData {
@@ -26,10 +26,7 @@ export function SummaryStep({ data, onSubmit, onBack, loading }: SummaryStepProp
     const template = CHALLENGE_TEMPLATES.find(t => t.value === data.basicInfo?.challenge_type)
     const isLegacyChallenge = data.basicInfo?.challenge_type === 'legacy'
 
-    const selectedPacks = data.expansionPacks ?
-        Object.entries(data.expansionPacks)
-            .filter(([key, value]) => key !== 'base_game' && value === true)
-            .map(([key]) => key) : []
+    const selectedPacks = data.expansionPacks ?? []
 
     const legacyScoring = isLegacyChallenge ? calculateLegacyScoring(selectedPacks) : null
 

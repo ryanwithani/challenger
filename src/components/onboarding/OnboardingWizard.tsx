@@ -8,13 +8,11 @@ import AccountStep from '@/src/components/onboarding/steps/AccountStep'
 import PacksStep from '@/src/components/onboarding/steps/PacksStep'
 import WelcomeStep from '@/src/components/onboarding/steps/WelcomeStep'
 import OnboardingProgress from '@/src/components/onboarding/OnboardingProgress'
-import type { ExpansionPacks } from '@/src/lib/store/userPreferencesStore'
-
 type OnboardingStep = 'account' | 'packs' | 'welcome'
 
 interface OnboardingData {
   accountCreated: boolean
-  packs?: Record<string, boolean>
+  packs?: string[]
 }
 
 const PROGRESS_STORAGE_KEY = 'onboarding_progress'
@@ -86,10 +84,10 @@ export function OnboardingWizard() {
     goNext()
   }, [data, saveProgress, goNext])
 
-  const handlePacksSelected = useCallback(async (packs: Record<string, boolean>) => {
+  const handlePacksSelected = useCallback(async (packs: string[]) => {
     setLoading(true)
     try {
-      await createInitialPreferences({ ...packs, base_game: true } as ExpansionPacks)
+      await createInitialPreferences(packs)
       const newData = { ...data, packs }
       setData(newData)
       saveProgress('welcome', newData)
@@ -107,10 +105,9 @@ export function OnboardingWizard() {
   }, [data, createInitialPreferences, saveProgress, goNext])
 
   const handleSkipPacks = useCallback(() => {
-    // Create default preferences with just base game
-    createInitialPreferences({ base_game: true } as ExpansionPacks)
+    createInitialPreferences([])
       .catch(err => console.error('Failed to create default preferences:', err))
-    const newData = { ...data, packs: {} }
+    const newData = { ...data, packs: [] }
     setData(newData)
     saveProgress('welcome', newData)
     goNext()

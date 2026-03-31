@@ -1,45 +1,11 @@
 import { create } from 'zustand'
 import { createSupabaseBrowserClient } from '@/src/lib/supabase/client'
-
-export interface ExpansionPacks {
-  base_game: boolean
-  get_to_work: boolean
-  get_together: boolean
-  city_living: boolean
-  cats_dogs: boolean
-  seasons: boolean
-  get_famous: boolean
-  island_living: boolean
-  discover_university: boolean
-  eco_lifestyle: boolean
-  snowy_escape: boolean
-  cottage_living: boolean
-  high_school_years: boolean
-  growing_together: boolean
-  horse_ranch: boolean
-  for_rent: boolean
-  lovestruck: boolean  // These are already optional
-  life_and_death: boolean
-  enchanted_by_nature: boolean
-  businesses_and_hobbies: boolean
-  outdoor_retreat: boolean
-  spa_day: boolean
-  strangerville: boolean
-  dine_out: boolean
-  vampires: boolean
-  parenthood: boolean
-  jungle_adventure: boolean
-  realm_of_magic: boolean
-  journey_to_batuu: boolean
-  dream_home_decorator: boolean
-  my_wedding_stories: boolean
-  werewolves: boolean
-}
+import { migrateLegacyPacks } from '@/src/data/packs'
 
 interface UserPreferences {
   id?: string
   user_id?: string
-  expansion_packs: ExpansionPacks
+  expansion_packs: string[]
   created_at?: string
   updated_at?: string
 }
@@ -47,127 +13,111 @@ interface UserPreferences {
 interface UserPreferencesState {
   preferences: UserPreferences | null
   loading: boolean
-  
+
   fetchPreferences: () => Promise<void>
-  updateExpansionPacks: (expansionPacks: ExpansionPacks) => Promise<void>
-  createInitialPreferences: (expansionPacks: ExpansionPacks) => Promise<void>
+  updateExpansionPacks: (ownedPacks: string[]) => Promise<void>
+  createInitialPreferences: (ownedPacks: string[]) => Promise<void>
+}
+
+/**
+ * Detects legacy boolean-map format and converts to acronym array.
+ * If the DB row has the old format, it migrates in-place and persists.
+ */
+function normalizePacksFromDB(
+  raw: unknown
+): { packs: string[]; needsMigration: boolean } {
+  if (Array.isArray(raw)) {
+    return { packs: raw, needsMigration: false }
+  }
+  return { packs: migrateLegacyPacks(raw), needsMigration: true }
 }
 
 export const useUserPreferencesStore = create<UserPreferencesState>((set, get) => ({
   preferences: null,
   loading: false,
-  
+
   fetchPreferences: async () => {
     set({ loading: true })
     const supabase = createSupabaseBrowserClient()
     const { data: { user } } = await supabase.auth.getUser()
-    
+
     if (!user) {
       set({ loading: false })
       return
     }
-    
+
     const { data, error } = await supabase
       .from('user_preferences')
       .select('*')
       .eq('user_id', user.id)
       .single()
-    
+
     if (data) {
-      set({ preferences: data, loading: false })
+      const { packs, needsMigration } = normalizePacksFromDB(data.expansion_packs)
+      const preferences: UserPreferences = { ...data, expansion_packs: packs }
+      set({ preferences, loading: false })
+
+      if (needsMigration) {
+        await supabase
+          .from('user_preferences')
+          .update({ expansion_packs: packs, updated_at: new Date().toISOString() })
+          .eq('user_id', user.id)
+      }
     } else if (error?.code === 'PGRST116') {
-      // No preferences found, create default ones
-      await get().createInitialPreferences({
-        base_game: true,
-        get_to_work: false,
-        get_together: false,
-        city_living: false,
-        cats_dogs: false,
-        seasons: false,
-        get_famous: false,
-        island_living: false,
-        discover_university: false,
-        eco_lifestyle: false,
-        snowy_escape: false,
-        cottage_living: false,
-        high_school_years: false,
-        growing_together: false,
-        horse_ranch: false,
-        for_rent: false,
-        lovestruck: false,
-        life_and_death: false,
-        enchanted_by_nature: false,
-        businesses_and_hobbies: false,
-        outdoor_retreat: false,
-        spa_day: false,
-        strangerville: false,
-        dine_out: false,
-        vampires: false,
-        parenthood: false,
-        jungle_adventure: false,
-        realm_of_magic: false,
-        journey_to_batuu: false,
-        dream_home_decorator: false,
-        my_wedding_stories: false,
-        werewolves: false
-      })
+      await get().createInitialPreferences([])
     } else {
       set({ loading: false })
     }
   },
-  
-  createInitialPreferences: async (expansionPacks: ExpansionPacks) => {
+
+  createInitialPreferences: async (ownedPacks: string[]) => {
     const supabase = createSupabaseBrowserClient()
     const { data: { user } } = await supabase.auth.getUser()
-    
+
     if (!user) throw new Error('User not authenticated')
-    
+
     const { data, error } = await supabase
       .from('user_preferences')
       .insert({
         user_id: user.id,
-        expansion_packs: expansionPacks,
+        expansion_packs: ownedPacks,
       })
       .select()
       .single()
-    
+
     if (error) {
-      console.error('Failed to create user preferences:', error)
       throw new Error(error.message)
     }
-    
+
     set({ preferences: data, loading: false })
   },
-  
-  updateExpansionPacks: async (expansionPacks: ExpansionPacks) => {
+
+  updateExpansionPacks: async (ownedPacks: string[]) => {
     const supabase = createSupabaseBrowserClient()
     const { data: { user } } = await supabase.auth.getUser()
-    
+
     if (!user) throw new Error('User not authenticated')
-    
+
     const currentPreferences = get().preferences
-    
+
     if (currentPreferences) {
-      // Update existing preferences
       const { data, error } = await supabase
         .from('user_preferences')
         .update({
-          expansion_packs: expansionPacks,
+          expansion_packs: ownedPacks,
           updated_at: new Date().toISOString(),
         })
         .eq('user_id', user.id)
         .select()
         .single()
-      
+
       if (error) {
-        console.error('Failed to update user preferences:', error)
         throw new Error(error.message)
       }
-      
+
       set({ preferences: data })
     } else {
-      // Create new preferences
-      await get().createInitialPreferences(expansionPacks)
+      await get().createInitialPreferences(ownedPacks)
     }
   },
 }))

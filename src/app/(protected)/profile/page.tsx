@@ -6,7 +6,7 @@ import { createSupabaseBrowserClient } from '@/src/lib/supabase/client'
 import { Input } from '@/src/components/ui/Input'
 import { Button } from '@/src/components/ui/Button'
 import { ThemeToggle } from '@/src/components/layout/ThemeToggle'
-import ExpansionPacks, { ExpansionPacksValue } from '@/src/components/profile/Packs'
+import Packs from '@/src/components/profile/Packs'
 import { useUserPreferencesStore } from '@/src/lib/store/userPreferencesStore'
 
 export default function ProfilePage() {
@@ -17,37 +17,11 @@ export default function ProfilePage() {
 
   const { preferences, loading: preferencesLoading, fetchPreferences, updateExpansionPacks } = useUserPreferencesStore();
 
-  const [packs, setPacks] = useState<ExpansionPacksValue>({
-    base_game: true,
-    get_to_work: false,
-    get_together: false,
-    city_living: false,
-    cats_dogs: false,
-    seasons: false,
-    get_famous: false,
-    island_living: false,
-    discover_university: false,
-    eco_lifestyle: false,
-    snowy_escape: false,
-    cottage_living: false,
-    high_school_years: false,
-    growing_together: false,
-    horse_ranch: false,
-    for_rent: false,
-    lovestruck: false,
-    life_death: false,
-  });
+  const [packs, setPacks] = useState<string[]>([])
 
   useEffect(() => {
     if (preferences?.expansion_packs) {
       setPacks(preferences.expansion_packs)
-    }
-  }, [preferences])
-
-  useEffect(() => {
-    if (preferences?.expansion_packs) {
-      setPacks(preferences.expansion_packs)
-      setLoading(false)
     }
   }, [preferences])
 
@@ -69,6 +43,11 @@ export default function ProfilePage() {
     if (data) {
       setUsername(data.username || '')
     }
+  }
+
+  const handlePacksChange = async (next: string[]) => {
+    setPacks(next)
+    await updateExpansionPacks(next)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -148,9 +127,9 @@ export default function ProfilePage() {
         <ThemeToggle />
       </div>
 
-      {/* Additional Settings */}
+      {/* Pack Preferences */}
       <div className="card">
-        <ExpansionPacks value={packs} onChange={setPacks} />
+        <Packs value={packs} onChange={handlePacksChange} />
       </div>
     </div>
   )

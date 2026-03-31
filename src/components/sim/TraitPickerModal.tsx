@@ -4,6 +4,10 @@ import React, { useEffect, useMemo, useState } from 'react'
 import clsx from 'clsx'
 import { TraitIcon } from './TraitIcon'
 import { PackIcon } from './PackIcon'
+import { PACKS } from '@/src/data/packs'
+
+// Reverse lookup: pack display name → acronym (bridges trait catalog's full names to owned pack acronyms)
+const NAME_TO_ACRONYM = new Map(PACKS.map((p) => [p.name, p.acronym]))
 
 type AgeStage = 'infant' | 'toddler' | 'child' | 'teen' | 'young_adult' | 'adult' | 'elder'
 
@@ -89,7 +93,9 @@ export default function TraitPickerModal({
   function isPackCompatible(t: CatalogTrait, ownedPacks?: string[]) {
     if (!t.expansionPack) return true      // base game -> allowed
     if (!ownedPacks?.length) return true   // not enforcing packs -> allowed
-    return ownedPacks.includes(t.expansionPack)
+    // Trait catalog uses full names ("Spa Day"), ownedPacks uses acronyms ("SD")
+    const acronym = NAME_TO_ACRONYM.get(t.expansionPack) ?? t.expansionPack
+    return ownedPacks.includes(acronym)
   }
   
   /** Allow deselects even at the max. Only block selecting new ones. */
@@ -222,8 +228,8 @@ export default function TraitPickerModal({
                       </div>
 
                       <div className="mt-2 flex flex-wrap gap-1">
-                      {t.expansionPack  && (
-  <PackIcon name={t.expansionPack} size={16} owned={ownedPacks?.includes(t.expansionPack)} className="mr-1" />
+                      {t.expansionPack && (
+  <PackIcon name={NAME_TO_ACRONYM.get(t.expansionPack) ?? t.expansionPack} size={16} owned={ownedPacks?.includes(NAME_TO_ACRONYM.get(t.expansionPack) ?? t.expansionPack)} className="mr-1" />
 )}
                         {t.ageStage && (
                           <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] text-gray-700">
