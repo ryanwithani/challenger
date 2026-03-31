@@ -19,16 +19,16 @@ interface AuthState {
   isFetchingProfile: boolean
   profileFetched: boolean
   initialized: boolean
-  showPasswordUpdateModal: boolean // ADD THIS
+  showPasswordUpdateModal: boolean
   signIn: (email: string, password: string) => Promise<void>
   signUp: (email: string, password: string) => Promise<void>
   signOut: () => Promise<void>
-  fetchUserProfile: () => Promise<void>
+  fetchUserProfile: (userId?: string) => Promise<void>
   initialize: () => void
-  getAuthErrorMessage: (error: any) => string
-  requestPasswordReset: (email: string) => Promise<void> // ADD THIS
-  updatePassword: (password: string) => Promise<void> // ADD THIS
-  setShowPasswordUpdateModal: (show: boolean) => void // ADD THIS
+  getAuthErrorMessage: (error: unknown) => string
+  requestPasswordReset: (email: string) => Promise<void>
+  updatePassword: (password: string) => Promise<void>
+  setShowPasswordUpdateModal: (show: boolean) => void
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -38,7 +38,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   initialized: false,
   isFetchingProfile: false,
   profileFetched: false,
-  showPasswordUpdateModal: false, // ADD THIS
+  showPasswordUpdateModal: false,
 
   initialize: () => {
     if (get().initialized) return;
@@ -47,11 +47,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     const supabase = createSupabaseBrowserClient();
 
-    supabase.auth.onAuthStateChange(async (event, session) => {
+    supabase.auth.onAuthStateChange((event, session) => {
       set({ user: session?.user ?? null, loading: false });
 
       if (session?.user) {
-        await get().fetchUserProfile();
+        // Fire-and-forget — do NOT await inside onAuthStateChange.
+        // Awaiting here holds the @supabase/gotrue-js navigator.locks lock,
+        // which deadlocks all subsequent Supabase operations (queries, getSession, etc.)
+        get().fetchUserProfile(session.user.id);
       } else {
         set({ userProfile: null, profileFetched: false, isFetchingProfile: false });
       }
@@ -75,20 +78,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     });
   },
 
-  fetchUserProfile: async () => {
+  fetchUserProfile: async (userId?: string) => {
     const state = get()
 
-    // ✅ GUARD 1: Don't fetch if already fetching
-    if (state.isFetchingProfile) {
-      console.log('⚠️ Profile fetch already in progress, skipping')
-      return
-    }
+    if (state.isFetchingProfile) return
 
-    const supabase = createSupabaseBrowserClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    // ✅ GUARD 2: No user means clear profile and exit
-    if (!user) {
+    // Use passed userId (from onAuthStateChange session) or fall back to store
+    const uid = userId ?? state.user?.id
+    if (!uid) {
       set({
         userProfile: null,
         profileFetched: false,
@@ -97,20 +94,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return
     }
 
-    // ✅ GUARD 3: Already have profile for this user? Skip fetch.
-    if (state.profileFetched && state.userProfile?.id === user.id) {
-      console.log('✓ Profile already loaded for this user')
+    if (state.profileFetched && state.userProfile?.id === uid) {
       return
     }
 
-    // ✅ Mark as fetching to prevent concurrent calls
+    const supabase = createSupabaseBrowserClient()
+
     set({ isFetchingProfile: true })
 
     try {
       const { data, error } = await supabase
         .from('users')
         .select('id, username, display_name, avatar_url, email')
-        .eq('id', user.id)
+        .eq('id', uid)
         .single()
 
       if (error) {
@@ -120,12 +116,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       if (data) {
         set({
           userProfile: data,
-          profileFetched: true,  // ✅ Mark as successfully fetched
+          profileFetched: true,
           isFetchingProfile: false
         })
       }
     } catch (error) {
-      console.error('Failed to fetch/create profile:', error)
       set({
         isFetchingProfile: false,
         profileFetched: false
@@ -135,19 +130,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
 
   signIn: async (email: string, password: string) => {
-    // Goes through the API route, which applies rate limiting and CSRF protection
-    await signInAPI(email, password)
+    // API route signs in server-side and sets session cookies.
+    const result = await signInAPI(email, password)
 
-    // The API route signs in server-side and sets session cookies.
-    // Call getSession() so the browser client picks up those cookies.
-    const supabase = createSupabaseBrowserClient()
-    const { data: { session }, error } = await supabase.auth.getSession()
-
-    if (error || !session?.user) {
-      throw new Error('Authentication failed: No session returned')
+    // Set user from the API response directly — the browser client
+    // won't see the httpOnly session cookies via getSession().
+    if (result?.user) {
+      set({ user: result.user })
     }
-
-    set({ user: session.user })
   },
 
   signUp: async (email: string, password: string) => {
@@ -162,40 +152,26 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   signOut: async () => {
-    try {
-      console.log('Signing out user...');
-      const supabase = createSupabaseBrowserClient();
+    const supabase = createSupabaseBrowserClient();
 
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error('Error during sign out:', error);
-        throw error;
-      }
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
 
-      console.log('Sign out successful, clearing user state');
+    set({
+      user: null,
+      userProfile: null,
+      profileFetched: false,
+      isFetchingProfile: false
+    });
 
-      // Clear all user state
-      set({
-        user: null,
-        userProfile: null,
-        profileFetched: false,
-        isFetchingProfile: false
-      });
-
-      // Force a redirect to home page instead of /login
-      if (typeof window !== 'undefined') {
-        window.location.href = '/';
-      }
-
-      console.log('User state cleared');
-    } catch (error) {
-      console.error('Caught error during sign out:', error);
-      throw error;
+    if (typeof window !== 'undefined') {
+      window.location.href = '/';
     }
   },
 
-  getAuthErrorMessage: (error: any): string => {
-    switch (error.message) {
+  getAuthErrorMessage: (error: unknown): string => {
+    const message = error instanceof Error ? error.message : String(error)
+    switch (message) {
       case 'Invalid login credentials':
         return 'Invalid email or password'
       case 'Email not confirmed':
@@ -205,9 +181,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  // ADD THIS: Request password reset
   requestPasswordReset: async (email: string) => {
-    // Remove client-side rate limiting code
     const response = await fetch('/api/auth/reset-password', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -221,22 +195,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  // ADD THIS: Update password after reset
   updatePassword: async (password: string) => {
     const supabase = createSupabaseBrowserClient()
 
     const { error } = await supabase.auth.updateUser({ password })
     if (error) throw error
-
-    // Clear any rate limits for this user
-    const { data: { user } } = await supabase.auth.getUser()
-    if (user?.email) {
-      localStorage.removeItem(`rate_limit_${user.email}`)
-      localStorage.removeItem(`reset_request_${user.email}`)
-    }
   },
 
-  // ADD THIS: Control password update modal
   setShowPasswordUpdateModal: (show: boolean) => {
     set({ showPasswordUpdateModal: show })
   },

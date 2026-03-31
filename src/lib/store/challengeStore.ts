@@ -9,8 +9,63 @@ type Sim = Database['public']['Tables']['sims']['Row']
 type Goal = Database['public']['Tables']['goals']['Row']
 type Progress = Database['public']['Tables']['progress']['Row']
 
-// Define a cache timeout (5 minutes)
 const CACHE_TIMEOUT_MS = 5 * 60 * 1000;
+const GOAL_SEED_TIMEOUT_MS = 30_000;
+
+function isPenalty(goal: Goal): boolean {
+  return (
+    goal.goal_type === 'penalty' ||
+    (goal.point_value !== undefined && goal.point_value !== null && goal.point_value < 0) ||
+    goal.category === 'penalties' ||
+    goal.category === 'penalty'
+  )
+}
+
+function calculatePointsForGoals(goals: Goal[], progress: Progress[]): number {
+  if (goals.length === 0) return 0
+
+  return goals.reduce((total, goal) => {
+    if (isPenalty(goal)) {
+      if (goal.goal_type === 'counter') {
+        const currentValue = goal.current_value || 0
+        return total + (currentValue * (goal.point_value || 0))
+      }
+      const penaltyCount = progress.filter(p => p.goal_id === goal.id).length
+      return total + (penaltyCount * (goal.point_value || 0))
+    }
+
+    if (goal.goal_type === 'milestone') {
+      const isCompleted = progress.some(p => p.goal_id === goal.id)
+      return isCompleted ? total + (goal.point_value || 0) : total
+    }
+
+    if (goal.goal_type === 'counter') {
+      const currentValue = goal.current_value || 0
+      const points = currentValue * (goal.point_value || 0)
+      const maxPoints = goal.max_points || Infinity
+      return total + Math.min(points, maxPoints)
+    }
+
+    if (goal.goal_type === 'threshold') {
+      const currentValue = goal.current_value || 0
+      const thresholds = goal.thresholds ? JSON.parse(goal.thresholds) : []
+
+      let points = 0
+      for (const threshold of thresholds) {
+        if (currentValue >= threshold.value) {
+          points = threshold.points
+        } else {
+          break
+        }
+      }
+      return total + points
+    }
+
+    // Fallback for legacy goals without types
+    const isCompleted = progress.some(p => p.goal_id === goal.id)
+    return isCompleted ? total + (goal.point_value || 0) : total
+  }, 0)
+}
 
 interface ChallengeState {
   challenges: Challenge[]
@@ -19,6 +74,7 @@ interface ChallengeState {
   goals: Goal[]
   progress: Progress[]
   loading: boolean
+  error: string | null
   challengesLoading: boolean // Separate loading state for challenges
   lastChallengesFetch: number | null // Timestamp of last fetch
   
@@ -71,6 +127,7 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
   goals: [],
   progress: [],
   loading: false,
+  error: null,
   challengesLoading: false,  // Separate loading state for challenges
   lastChallengesFetch: null, // Track when we last fetched challenges
 
@@ -88,7 +145,6 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
     
     // If we have data and the cache is valid, and we're not forcing a refresh, return immediately
     if (challenges.length > 0 && cacheValid && !forceRefresh) {
-      console.log('Using cached challenges data');
       return;
     }
     
@@ -100,7 +156,6 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
     }
     
     try {
-      console.log('Fetching challenges from API');
       const supabase = createSupabaseBrowserClient();
       const { data, error } = await supabase
         .from('challenges')
@@ -115,140 +170,93 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
         challengesLoading: false,
         lastChallengesFetch: now
       });
-      console.log('Successfully fetched challenges');
     } catch (error) {
-      console.error('Error fetching challenges:', error);
       set({ challengesLoading: false });
     }
   },
 
   fetchChallenge: async (id: string) => {
-    
-    set({ loading: true });
+    set({ loading: true, error: null });
     try {
       const supabase = createSupabaseBrowserClient();
 
-      // Fetch challenge details
-      const { data: challenge, error: challengeError } = await supabase
-        .from('challenges')
-        .select('*')
-        .eq('id', id)
-        .single();
+      // Fetch challenge, sims, and goals in parallel (all keyed by challenge id)
+      const [challengeResult, simsResult, goalsResult] = await Promise.all([
+        supabase.from('challenges').select('*').eq('id', id).single(),
+        supabase.from('sims').select('*').eq('challenge_id', id).order('generation', { ascending: true }),
+        supabase.from('goals').select('*').eq('challenge_id', id).order('order_index', { ascending: true }),
+      ]);
 
-      if (challengeError) throw challengeError;
+      if (challengeResult.error) throw challengeResult.error;
 
-      // Fetch related data
-      const { data: sims } = await supabase
-        .from('sims')
-        .select('*')
-        .eq('challenge_id', id)
-        .order('generation', { ascending: true });
-
-      const { data: goals } = await supabase
-        .from('goals')
-        .select('*')
-        .eq('challenge_id', id)
-        .order('order_index', { ascending: true });
-
-      const { data: progress } = await supabase
-        .from('progress')
-        .select('*')
-        .in('goal_id', goals?.map((g: Goal) => g.id) || []);
+      // Guard empty array — .in() with [] generates invalid SQL in PostgREST
+      const goalIds = goalsResult.data?.map((g: Goal) => g.id) || [];
+      const { data: progress } = goalIds.length > 0
+        ? await supabase.from('progress').select('*').in('goal_id', goalIds)
+        : { data: [] as Progress[] };
 
       set({
-        currentChallenge: challenge,
-        sims: sims || [],
-        goals: goals || [],
+        currentChallenge: challengeResult.data,
+        sims: simsResult.data || [],
+        goals: goalsResult.data || [],
         progress: progress || [],
-        loading: false
+        loading: false,
+        error: null,
       });
     } catch (error) {
-      console.error('Error fetching challenge:', error);
-      set({ loading: false });
+      const message = error instanceof Error ? error.message : 'Failed to load challenge';
+      set({ loading: false, error: message });
     }
   },
 
   createChallenge: async (challenge: Partial<Challenge>) => {
-    console.log('🚀 Starting challenge creation process...', challenge);
-    
-    try {
-      const supabase = createSupabaseBrowserClient();
-      console.log('📡 Getting user authentication...');
-      
-      const { data: { user } } = await supabase.auth.getUser();
+    const supabase = createSupabaseBrowserClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
-      if (!user) {
-        console.error('❌ User not authenticated');
-        throw new Error('User not authenticated');
-      }
-      
-      console.log('✅ User authenticated:', user.id);
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
 
-      console.log('💾 Inserting challenge into database...');
-      const { data, error } = await supabase
-        .from('challenges')
-        .insert({
-          ...challenge,
-          user_id: user.id,
-          status: 'active',
-          // Initialize with zero points to avoid negative starting points
-          points: 0,
-          completion_percentage: 0,
-        })
-        .select()
-        .single();
+    const { data, error } = await supabase
+      .from('challenges')
+      .insert({
+        ...challenge,
+        user_id: user.id,
+        status: 'active',
+        points: 0,
+        completion_percentage: 0,
+      })
+      .select()
+      .single();
 
-      if (error) {
-        console.error('❌ Supabase error:', error);
-        throw new Error(error.message || 'Failed to create challenge');
-      }
+    if (error) {
+      throw new Error(error.message || 'Failed to create challenge');
+    }
 
-      console.log('✅ Challenge created successfully:', data);
+    if (data) {
+      set({
+        challenges: [...get().challenges, data],
+        lastChallengesFetch: Date.now()
+      });
 
-      if (data) {
-        // Update the challenges array with the new challenge
-        console.log('🔄 Updating local state...');
-        set({ 
-          challenges: [...get().challenges, data],
-          lastChallengesFetch: Date.now() // Update timestamp since we modified data
-        });
+      // Seed legacy challenges with predefined goals
+      if (data.challenge_type === 'legacy') {
+        try {
+          const config = data.configuration as LegacyChallengeConfig;
+          const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Goal seeding timeout')), GOAL_SEED_TIMEOUT_MS)
+          );
 
-        // If this is a Legacy Challenge, seed it with predefined goals
-        if (data.challenge_type === 'legacy') {
-          console.log('🎯 Legacy challenge detected, seeding goals...');
-          try {
-            const config = data.configuration as LegacyChallengeConfig;
-            console.log('📋 Configuration:', config);
-            
-            // Add a timeout to prevent hanging
-            const timeoutPromise = new Promise((_, reject) => 
-              setTimeout(() => reject(new Error('Goal seeding timeout')), 30000)
-            );
-            
-            console.log('⏱️ Starting goal seeding with 30s timeout...');
-            await Promise.race([
-              seedLegacyChallengeGoals(data.id, config, supabase),
-              timeoutPromise
-            ]);
-            
-            console.log('✅ Legacy Challenge goals seeded successfully');
-          } catch (seedError) {
-            console.error('⚠️ Failed to seed Legacy Challenge goals:', seedError);
-            // Don't throw here - challenge was created successfully, just goals failed
-            // But we should still show the user that the challenge was created
-          }
-        } else {
-          console.log('ℹ️ Non-legacy challenge, skipping goal seeding');
+          await Promise.race([
+            seedLegacyChallengeGoals(data.id, config, supabase),
+            timeoutPromise
+          ]);
+        } catch {
+          // Challenge created successfully; goal seeding is non-critical
         }
-        
-        console.log('🎉 Challenge creation process completed successfully');
-        
-        // Return the created challenge data
-        return data;
       }
-    } catch (error) {
-      console.error('❌ Error creating challenge:', error);
-      throw error;
+
+      return data;
     }
   },
 
@@ -275,7 +283,6 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
         lastChallengesFetch: Date.now() // Update timestamp since we modified data
       });
     } catch (error) {
-      console.error('Error updating challenge:', error);
       throw error;
     }
   },
@@ -295,7 +302,6 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
         lastChallengesFetch: Date.now() // Update timestamp since we modified data
       });
     } catch (error) {
-      console.error('Error deleting challenge:', error);
       throw error;
     }
   },
@@ -317,7 +323,6 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
         set({ sims: [...get().sims, data] });
       }
     } catch (error) {
-      console.error('Error adding sim:', error);
       throw error;
     }
   },
@@ -338,7 +343,6 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
         )
       });
     } catch (error) {
-      console.error('Error updating sim:', error);
       throw error;
     }
   },
@@ -357,7 +361,6 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
         sims: get().sims.filter(s => s.id !== id)
       });
     } catch (error) {
-      console.error('Error deleting sim:', error);
       throw error;
     }
   },
@@ -377,7 +380,6 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
         set({ goals: [...get().goals, data] });
       }
     } catch (error) {
-      console.error('Error adding goal:', error);
       throw error;
     }
   },
@@ -398,7 +400,6 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
         )
       });
     } catch (error) {
-      console.error('Error updating goal:', error);
       throw error;
     }
   },
@@ -417,23 +418,11 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
         goals: get().goals.filter(g => g.id !== id)
       });
     } catch (error) {
-      console.error('Error deleting goal:', error);
       throw error;
     }
   },
 
-  // Helper function to check if a goal is a penalty
-  isPenaltyGoal: (goal: Goal) => {
-    return (
-      // Check if it's marked as a penalty goal in the database
-      goal.goal_type === 'penalty' ||
-      // Or if it has negative points (legacy detection)
-      (goal.point_value !== undefined && goal.point_value && goal.point_value < 0) ||
-      // Or if it belongs to a penalties category
-      goal.category === 'penalties' ||
-      goal.category === 'penalty'
-    );
-  },
+  isPenaltyGoal: (goal: Goal) => isPenalty(goal),
 
   toggleGoalProgress: async (goalId: string, simId?: string) => {
     try {
@@ -446,7 +435,6 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
       
       // If this is a penalty goal, don't allow toggling - penalties should only be incremented/decremented
       if (goal && get().isPenaltyGoal(goal)) {
-        console.warn("Penalties should be incremented/decremented, not toggled");
         return;
       }
 
@@ -488,7 +476,6 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
 
       await get().persistPoints();
     } catch (error) {
-      console.error('Error toggling goal progress:', error);
       throw error;
     }
   },
@@ -500,7 +487,6 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
       
       // Verify this is a penalty goal
       if (!goal || !get().isPenaltyGoal(goal)) {
-        console.error("Attempted to increment a non-penalty goal");
         return;
       }
       
@@ -545,7 +531,6 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
         await get().persistPoints();
       }
     } catch (error) {
-      console.error('Error incrementing penalty:', error);
       throw error;
     }
   },
@@ -557,7 +542,6 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
       
       // Verify this is a penalty goal
       if (!goal || !get().isPenaltyGoal(goal)) {
-        console.error("Attempted to decrement a non-penalty goal");
         return;
       }
       
@@ -620,7 +604,6 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
         }
       }
     } catch (error) {
-      console.error('Error decrementing penalty:', error);
       throw error;
     }
   },
@@ -643,7 +626,6 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
 
       await get().persistPoints();
     } catch (error) {
-      console.error('Error updating goal value:', error);
       throw error;
     }
   },
@@ -654,114 +636,14 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
   },
   
   calculatePoints: () => {
-    const { goals, progress } = get();
-    
-    // If no goals, return 0
-    if (goals.length === 0) {
-      return 0;
-    }
-    
-    return goals.reduce((total, goal) => {
-      // Handle penalty goals
-      if (get().isPenaltyGoal(goal)) {
-        if (goal.goal_type === 'counter') {
-          // For counter penalties, multiply current value by point value
-          const currentValue = goal.current_value || 0;
-          return total + (currentValue * (goal.point_value || 0));
-        } else {
-          // For non-counter penalties, count each occurrence
-          const penaltyCount = progress.filter(p => p.goal_id === goal.id).length;
-          return total + (penaltyCount * (goal.point_value || 0));
-        }
-      }
-      
-      // Handle different regular goal types
-      if (goal.goal_type === 'milestone') {
-        // Milestone goals: completed = full points
-        const isCompleted = progress.some(p => p.goal_id === goal.id);
-        return isCompleted ? total + (goal.point_value || 0) : total;
-      }
-      else if (goal.goal_type === 'counter') {
-        // Counter goals: current_value * point_value, capped at max_points
-        const currentValue = goal.current_value || 0;
-        const points = currentValue * (goal.point_value || 0);
-        const maxPoints = goal.max_points || Infinity;
-        return total + Math.min(points, maxPoints);
-      }
-      else if (goal.goal_type === 'threshold') {
-        // Threshold goals: check which threshold is met
-        const currentValue = goal.current_value || 0;
-        const thresholds = goal.thresholds ? JSON.parse(goal.thresholds) : [];
-
-        let points = 0;
-        for (const threshold of thresholds) {
-          if (currentValue >= threshold.value) {
-            points = threshold.points;
-          } else {
-            break;
-          }
-        }
-        return total + points;
-      }
-
-      // Fallback for legacy goals without types
-      const isCompleted = progress.some(p => p.goal_id === goal.id);
-      return isCompleted ? total + (goal.point_value || 0) : total;
-    }, 0);
+    const { goals, progress } = get()
+    return calculatePointsForGoals(goals, progress)
   },
 
   calculateCategoryPoints: (category: string) => {
-    const { goals, progress } = get();
-    const categoryGoals = goals.filter(goal => goal.category === category);
-    
-    // If no goals in this category, return 0
-    if (categoryGoals.length === 0) {
-      return 0;
-    }
-    
-    return categoryGoals.reduce((total, goal) => {
-      // Handle penalty goals
-      if (get().isPenaltyGoal(goal)) {
-        if (goal.goal_type === 'counter') {
-          // For counter penalties, multiply current value by point value
-          const currentValue = goal.current_value || 0;
-          return total + (currentValue * (goal.point_value || 0));
-        } else {
-          // For non-counter penalties, count each occurrence
-          const penaltyCount = progress.filter(p => p.goal_id === goal.id).length;
-          return total + (penaltyCount * (goal.point_value || 0));
-        }
-      }
-      
-      // Handle regular goal types
-      if (goal.goal_type === 'milestone') {
-        const isCompleted = progress.some(p => p.goal_id === goal.id);
-        return isCompleted ? total + (goal.point_value || 0) : total;
-      }
-      else if (goal.goal_type === 'counter') {
-        const currentValue = goal.current_value || 0;
-        const points = currentValue * (goal.point_value || 0);
-        const maxPoints = goal.max_points || Infinity;
-        return total + Math.min(points, maxPoints);
-      }
-      else if (goal.goal_type === 'threshold') {
-        const currentValue = goal.current_value || 0;
-        const thresholds = goal.thresholds ? JSON.parse(goal.thresholds) : [];
-
-        let points = 0;
-        for (const threshold of thresholds) {
-          if (currentValue >= threshold.value) {
-            points = threshold.points;
-          } else {
-            break;
-          }
-        }
-        return total + points;
-      }
-
-      const isCompleted = progress.some(p => p.goal_id === goal.id);
-      return isCompleted ? total + (goal.point_value || 0) : total;
-    }, 0);
+    const { goals, progress } = get()
+    const categoryGoals = goals.filter(goal => goal.category === category)
+    return calculatePointsForGoals(categoryGoals, progress)
   },
 
   addSimAchievement: async (simId: string, achievement: {
@@ -790,11 +672,9 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
         .single();
 
       if (error) {
-        console.error('Error adding sim achievement:', error);
         // Don't throw - this is secondary functionality
       }
     } catch (error) {
-      console.error('Error in addSimAchievement:', error);
     }
   },
 
@@ -825,13 +705,11 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
         .order('achieved_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching sim achievements:', error);
         return [];
       }
 
       return data || [];
     } catch (error) {
-      console.error('Error in getSimAchievements:', error);
       return [];
     }
   },
@@ -847,7 +725,6 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
       
       // If this is a penalty goal, don't allow completing it this way
       if (goal && get().isPenaltyGoal(goal)) {
-        console.warn("Penalties should be incremented/decremented, not completed");
         return;
       }
 
@@ -921,7 +798,6 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
 
       await get().persistPoints();
     } catch (error) {
-      console.error('Error completing goal with details:', error);
       throw error;
     }
   },
@@ -939,7 +815,6 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
       .eq('id', currentChallenge.id);
 
     if (error) {
-      console.error('Error persisting points:', error);
       return;
     }
 

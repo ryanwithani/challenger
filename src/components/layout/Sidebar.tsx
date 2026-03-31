@@ -56,7 +56,7 @@ export function Sidebar() {
   }
 
   return (
-    <div className="w-64 bg-white dark:bg-warmGray-900 border-r border-gray-200 dark:border-warmGray-700 flex flex-col transition-colors">
+    <div className="w-64 bg-surface-muted dark:bg-warmGray-900 border-r border-brand-100 dark:border-warmGray-700 flex flex-col transition-colors">
       <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
         {/* Main Navigation */}
         <nav className="mt-5 flex-1 px-2 space-y-1">

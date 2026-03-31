@@ -2,15 +2,29 @@ import { csrfTokenManager } from '@/src/lib/utils/csrf-client'
 
 const API_TIMEOUT_MS = 15_000
 
+export class ApiFieldError extends Error {
+    field: string
+    constructor(field: string, message: string) {
+        super(message)
+        this.name = 'ApiFieldError'
+        this.field = field
+    }
+}
+
 function createTimeoutSignal(ms: number): { signal: AbortSignal; clear: () => void } {
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), ms)
     return { signal: controller.signal, clear: () => clearTimeout(timeoutId) }
 }
 
+function parseErrorResponse(response: Response): Promise<string> {
+    return response.json()
+        .then(data => data.error || 'Request failed')
+        .catch(() => `Request failed with status ${response.status}`)
+}
+
 export async function signIn(email: string, password: string) {
     const headers = await csrfTokenManager.getHeaders()
-
     const { signal, clear } = createTimeoutSignal(API_TIMEOUT_MS)
 
     try {
@@ -23,8 +37,8 @@ export async function signIn(email: string, password: string) {
         })
 
         if (!response.ok) {
-            const error = await response.json()
-            throw new Error(error.error || 'Sign in failed')
+            const message = await parseErrorResponse(response)
+            throw new Error(message)
         }
 
         return response.json()
@@ -39,19 +53,24 @@ export async function signIn(email: string, password: string) {
 }
 
 export async function signUp(username: string, email: string, password: string) {
+    const headers = await csrfTokenManager.getHeaders()
     const { signal, clear } = createTimeoutSignal(API_TIMEOUT_MS)
 
     try {
         const response = await fetch('/api/auth/signup', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers,
+            credentials: 'include',
             body: JSON.stringify({ username, email, password }),
             signal,
         })
 
         if (!response.ok) {
-            const error = await response.json()
-            throw new Error(error.error || 'Sign up failed')
+            const data = await response.json().catch(() => null)
+            if (data?.field && data?.error) {
+                throw new ApiFieldError(data.field, data.error)
+            }
+            throw new Error(data?.error || `Sign up failed with status ${response.status}`)
         }
 
         return response.json()
@@ -66,22 +85,19 @@ export async function signUp(username: string, email: string, password: string) 
 }
 
 export async function resetPassword(email: string) {
-    const headers = await csrfTokenManager.getHeaders()
-
     const { signal, clear } = createTimeoutSignal(API_TIMEOUT_MS)
 
     try {
         const response = await fetch('/api/auth/reset-password', {
             method: 'POST',
-            headers,
-            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email }),
             signal,
         })
 
         if (!response.ok) {
-            const error = await response.json()
-            throw new Error(error.error || 'Password reset failed')
+            const message = await parseErrorResponse(response)
+            throw new Error(message)
         }
 
         return response.json()

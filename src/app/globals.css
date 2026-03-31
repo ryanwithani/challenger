@@ -5,7 +5,7 @@
 @layer base {
   :root {
     /* Light mode colors - Warm Sunset Theme */
-    --background: 0 0% 100%;
+    --background: 30 90% 98%;
     --foreground: 18 60% 15%;
     /* warm dark brown for text */
     --background-dark: 20 25% 8%;
@@ -19,7 +19,7 @@
     --border-dark: 20 20% 20%;
     /* warm dark border */
 
-    --card: 0 0% 100%;
+    --card: 34 100% 98%;
     --card-dark: 20 20% 12%;
     /* warm dark card background */
 

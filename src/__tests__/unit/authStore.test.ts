@@ -40,17 +40,21 @@ describe('authStore', () => {
     })
 
     describe('signIn', () => {
-        test('sets user state on successful sign in', async () => {
+        test('sets user state from API response', async () => {
             const mockUser = { id: 'user-123', email: 'test@example.com' }
-            ;(signInAPI as jest.Mock).mockResolvedValue(undefined)
-            mockSupabase.auth.getSession.mockResolvedValue({
-                data: { session: { user: mockUser } },
-                error: null,
-            })
+            ;(signInAPI as jest.Mock).mockResolvedValue({ user: mockUser })
 
             await useAuthStore.getState().signIn('test@example.com', 'pass')
 
             expect(useAuthStore.getState().user).toEqual(mockUser)
+        })
+
+        test('succeeds without setting user when API returns no user', async () => {
+            ;(signInAPI as jest.Mock).mockResolvedValue({})
+
+            await useAuthStore.getState().signIn('test@example.com', 'pass')
+
+            expect(useAuthStore.getState().user).toBeNull()
         })
 
         test('throws when signInAPI fails', async () => {
@@ -59,30 +63,6 @@ describe('authStore', () => {
             await expect(
                 useAuthStore.getState().signIn('test@example.com', 'wrong')
             ).rejects.toThrow('Invalid credentials')
-        })
-
-        test('throws when no session is returned after sign in', async () => {
-            ;(signInAPI as jest.Mock).mockResolvedValue(undefined)
-            mockSupabase.auth.getSession.mockResolvedValue({
-                data: { session: null },
-                error: null,
-            })
-
-            await expect(
-                useAuthStore.getState().signIn('test@example.com', 'pass')
-            ).rejects.toThrow('Authentication failed: No session returned')
-        })
-
-        test('throws when getSession returns an error', async () => {
-            ;(signInAPI as jest.Mock).mockResolvedValue(undefined)
-            mockSupabase.auth.getSession.mockResolvedValue({
-                data: { session: null },
-                error: { message: 'Session error' },
-            })
-
-            await expect(
-                useAuthStore.getState().signIn('test@example.com', 'pass')
-            ).rejects.toThrow('Authentication failed: No session returned')
         })
     })
 
@@ -114,8 +94,7 @@ describe('authStore', () => {
     })
 
     describe('fetchUserProfile', () => {
-        test('fetches and sets user profile', async () => {
-            const mockUser = { id: 'user-123' }
+        test('fetches and sets user profile when userId is passed', async () => {
             const mockProfile = {
                 id: 'user-123',
                 username: 'testuser',
@@ -123,27 +102,41 @@ describe('authStore', () => {
                 display_name: 'Test User',
                 avatar_url: '',
             }
-            mockSupabase.auth.getUser.mockResolvedValue({ data: { user: mockUser } })
             mockSingle.mockResolvedValue({ data: mockProfile, error: null })
 
-            await useAuthStore.getState().fetchUserProfile()
+            await useAuthStore.getState().fetchUserProfile('user-123')
 
             expect(useAuthStore.getState().userProfile).toEqual(mockProfile)
             expect(useAuthStore.getState().profileFetched).toBe(true)
             expect(useAuthStore.getState().isFetchingProfile).toBe(false)
         })
 
-        test('skips fetch when already fetching', async () => {
-            useAuthStore.setState({ isFetchingProfile: true })
+        test('falls back to store user.id when no userId passed', async () => {
+            const mockProfile = {
+                id: 'user-456',
+                username: 'storeuser',
+                email: 'store@example.com',
+                display_name: 'Store User',
+                avatar_url: '',
+            }
+            useAuthStore.setState({ user: { id: 'user-456' } as any })
+            mockSingle.mockResolvedValue({ data: mockProfile, error: null })
 
             await useAuthStore.getState().fetchUserProfile()
 
-            expect(mockSupabase.auth.getUser).not.toHaveBeenCalled()
+            expect(useAuthStore.getState().userProfile).toEqual(mockProfile)
+            expect(useAuthStore.getState().profileFetched).toBe(true)
         })
 
-        test('clears profile when no user is authenticated', async () => {
-            mockSupabase.auth.getUser.mockResolvedValue({ data: { user: null } })
+        test('skips fetch when already fetching', async () => {
+            useAuthStore.setState({ isFetchingProfile: true })
 
+            await useAuthStore.getState().fetchUserProfile('user-123')
+
+            expect(mockSingle).not.toHaveBeenCalled()
+        })
+
+        test('clears profile when no userId and no store user', async () => {
             await useAuthStore.getState().fetchUserProfile()
 
             expect(useAuthStore.getState().userProfile).toBeNull()
@@ -151,24 +144,20 @@ describe('authStore', () => {
         })
 
         test('skips DB fetch when profile already loaded for the same user', async () => {
-            const mockUser = { id: 'user-123' }
             useAuthStore.setState({
                 profileFetched: true,
                 userProfile: { id: 'user-123', email: '', username: '', display_name: '', avatar_url: '' },
             })
-            mockSupabase.auth.getUser.mockResolvedValue({ data: { user: mockUser } })
 
-            await useAuthStore.getState().fetchUserProfile()
+            await useAuthStore.getState().fetchUserProfile('user-123')
 
             expect(mockSupabase.from).not.toHaveBeenCalled()
         })
 
         test('resets isFetchingProfile on Supabase error', async () => {
-            const mockUser = { id: 'user-123' }
-            mockSupabase.auth.getUser.mockResolvedValue({ data: { user: mockUser } })
             mockSingle.mockResolvedValue({ data: null, error: { message: 'DB error' } })
 
-            await useAuthStore.getState().fetchUserProfile()
+            await useAuthStore.getState().fetchUserProfile('user-123')
 
             expect(useAuthStore.getState().isFetchingProfile).toBe(false)
             expect(useAuthStore.getState().profileFetched).toBe(false)
@@ -239,17 +228,22 @@ describe('authStore', () => {
 
     describe('getAuthErrorMessage', () => {
         test('maps Invalid login credentials to user-friendly message', () => {
-            const msg = useAuthStore.getState().getAuthErrorMessage({ message: 'Invalid login credentials' })
+            const msg = useAuthStore.getState().getAuthErrorMessage(new Error('Invalid login credentials'))
             expect(msg).toBe('Invalid email or password')
         })
 
         test('maps Email not confirmed', () => {
-            const msg = useAuthStore.getState().getAuthErrorMessage({ message: 'Email not confirmed' })
+            const msg = useAuthStore.getState().getAuthErrorMessage(new Error('Email not confirmed'))
             expect(msg).toContain('confirmation email')
         })
 
         test('returns generic message for unrecognized errors', () => {
-            const msg = useAuthStore.getState().getAuthErrorMessage({ message: 'Something unknown' })
+            const msg = useAuthStore.getState().getAuthErrorMessage(new Error('Something unknown'))
+            expect(msg).toBe('Something went wrong. Please try again.')
+        })
+
+        test('handles non-Error values gracefully', () => {
+            const msg = useAuthStore.getState().getAuthErrorMessage('plain string error')
             expect(msg).toBe('Something went wrong. Please try again.')
         })
     })

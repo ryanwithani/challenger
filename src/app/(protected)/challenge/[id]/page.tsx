@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback, useMemo } from 'react'
+import { Suspense, useEffect, useState, useCallback, useMemo } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
 import { useChallengeStore } from '@/src/lib/store/challengeStore'
 import { SimCard } from '@/src/components/sim/SimCard'
@@ -14,6 +14,14 @@ import { LegacyTracker } from '@/src/components/challenge/LegacyTracker'
 import { Traits } from '@/src/components/sim/TraitsCatalog'
 
 export default function ChallengePage() {
+  return (
+    <Suspense fallback={<div className="text-center py-12"><p className="text-gray-500 dark:text-warmGray-400">Loading challenge...</p></div>}>
+      <ChallengePageContent />
+    </Suspense>
+  )
+}
+
+function ChallengePageContent() {
   const params = useParams()
   const searchParams = useSearchParams()
   const challengeId = params.id as string
@@ -24,7 +32,8 @@ export default function ChallengePage() {
   const goals = useChallengeStore(state => state.goals)
   const progress = useChallengeStore(state => state.progress)
   const loading = useChallengeStore(state => state.loading)
-  
+  const error = useChallengeStore(state => state.error)
+
   // Get functions separately and memoize them to prevent re-renders
   const fetchChallenge = useCallback(useChallengeStore.getState().fetchChallenge, [])
   const addSim = useCallback(useChallengeStore.getState().addSim, [])
@@ -84,10 +93,21 @@ export default function ChallengePage() {
   }, [])
   
 
+  if (error) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-red-600 dark:text-red-400">{error}</p>
+        <Button onClick={() => fetchChallenge(challengeId)} variant="outline" className="mt-4">
+          Retry
+        </Button>
+      </div>
+    )
+  }
+
   if (loading || !currentChallenge) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500">Loading challenge...</p>
+        <p className="text-gray-500 dark:text-warmGray-400">Loading challenge...</p>
       </div>
     )
   }

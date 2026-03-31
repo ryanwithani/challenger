@@ -6,7 +6,7 @@ import { Label } from '@/src/components/ui/Label'
 import { Button } from '@/src/components/ui/Button'
 import { PasswordInput } from '@/src/components/auth/PasswordInput'
 import { PASSWORD_MIN, signUpSchema, usernameSchema, emailSchema, passwordSchema } from '@/src/lib/utils/validators'
-import { csrfTokenManager } from '@/src/lib/utils/csrf-client'
+import { signUp, ApiFieldError } from '@/src/lib/api/auth'
 import { LoginModal } from '@/src/components/auth/LoginModal'
 
 interface AccountStepProps {
@@ -45,7 +45,7 @@ export default function AccountStep({ onSuccess, initialData }: AccountStepProps
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(formData))
       } catch (error) {
-        console.warn('Failed to save form data:', error)
+        // localStorage save is best-effort
       }
     }, 500) // Debounce auto-save
 
@@ -70,8 +70,7 @@ export default function AccountStep({ onSuccess, initialData }: AccountStepProps
         return result.error.issues[0].message
       }
       return null
-    } catch (error) {
-      console.error('Validation error:', error)
+    } catch {
       return 'Validation error occurred'
     }
   }, [validationSchemas])
@@ -106,10 +105,9 @@ export default function AccountStep({ onSuccess, initialData }: AccountStepProps
     setGlobalError(null)
     setErrors({})
 
-    // Check honeypot
+    // Honeypot check — silent rejection for bots
     const honeypotValue = (e.target as HTMLFormElement).website?.value
     if (honeypotValue && honeypotValue.trim() !== '') {
-      console.warn('Honeypot triggered - possible bot submission')
       setGlobalError('Submission blocked - please try again')
       return
     }
@@ -129,44 +127,25 @@ export default function AccountStep({ onSuccess, initialData }: AccountStepProps
     setLoading(true)
 
     try {
-      // Get CSRF token and headers
-      const headers = await csrfTokenManager.getHeaders()
+      await signUp(
+        formData.username.trim(),
+        formData.email.trim(),
+        formData.password,
+      )
 
-      // Call signup API directly - server will handle additional validation
-      const response = await fetch('/api/auth/signup', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          username: formData.username.trim(),
-          email: formData.email.trim(),
-          password: formData.password,
-          website: '', // Honeypot field - should always be empty
-        }),
-      })
-
-      const result = await response.json()
-
-      if (!response.ok) {
-        // Handle server-side validation errors
-        if (result.field && result.error) {
-          setErrors({ [result.field]: result.error })
-        } else {
-          setGlobalError(result.error || 'Failed to create account. Please try again.')
-        }
-        return
-      }
-
-      // Success - clear saved data and proceed
       localStorage.removeItem(STORAGE_KEY)
       onSuccess({
         username: formData.username.trim(),
         email: formData.email.trim(),
         password: formData.password,
       })
-
-    } catch (err: any) {
-      console.error('Signup error:', err)
-      setGlobalError('Failed to create account. Please check your connection and try again.')
+    } catch (err: unknown) {
+      if (err instanceof ApiFieldError) {
+        setErrors({ [err.field]: err.message })
+      } else {
+        const message = err instanceof Error ? err.message : 'Failed to create account.'
+        setGlobalError(message)
+      }
     } finally {
       setLoading(false)
     }

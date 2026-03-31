@@ -112,7 +112,7 @@ export function DashboardClient({ initialChallenges, initialSims }: DashboardCli
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-gray-200 dark:border-warmGray-700">
+      <div className="border-b border-brand-100 dark:border-warmGray-700">
         <nav className="flex gap-6" role="tablist">
           {DASHBOARD_TABS.map((tab) => (
             <button
@@ -137,7 +137,7 @@ export function DashboardClient({ initialChallenges, initialSims }: DashboardCli
           <div role="tabpanel">
             <div className="grid lg:grid-cols-2 gap-8">
               {/* Recent Challenges */}
-              <div className="bg-white dark:bg-warmGray-900 rounded-lg p-6 border border-gray-200 dark:border-warmGray-800">
+              <div className="bg-surface-muted dark:bg-warmGray-900 rounded-lg p-6 border border-brand-100 dark:border-warmGray-800">
                 <h2 className="font-display text-xl text-brand-700 dark:text-brand-300 mb-6">Recent Challenges</h2>
                 {recentChallenges.length > 0 ? (
                   <div className="space-y-4">
@@ -148,14 +148,14 @@ export function DashboardClient({ initialChallenges, initialSims }: DashboardCli
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-10 border border-dashed rounded-lg border-gray-300 dark:border-warmGray-700">
+                  <div className="text-center py-10 border border-dashed rounded-lg border-brand-200 dark:border-warmGray-700">
                     <p className="text-sm text-gray-500 dark:text-warmGray-400 mb-3">No challenges yet</p>
                     <Link href="/dashboard/new/challenge"><Button size="sm">Create One</Button></Link>
                   </div>
                 )}
               </div>
               {/* Recent Sims */}
-              <div className="bg-white dark:bg-warmGray-900 rounded-lg p-6 border border-gray-200 dark:border-warmGray-800">
+              <div className="bg-surface-muted dark:bg-warmGray-900 rounded-lg p-6 border border-brand-100 dark:border-warmGray-800">
                 <h2 className="font-display text-xl text-brand-700 dark:text-brand-300 mb-6">Recent Sims</h2>
                 {recentSims.length > 0 ? (
                   <div className="grid grid-cols-2 gap-4">
@@ -164,7 +164,7 @@ export function DashboardClient({ initialChallenges, initialSims }: DashboardCli
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-10 border border-dashed rounded-lg border-gray-300 dark:border-warmGray-700">
+                  <div className="text-center py-10 border border-dashed rounded-lg border-brand-200 dark:border-warmGray-700">
                     <p className="text-sm text-gray-500 dark:text-warmGray-400 mb-3">No sims yet</p>
                     <Link href="/dashboard/new/sim"><Button size="sm">Add Sim</Button></Link>
                   </div>
@@ -175,7 +175,7 @@ export function DashboardClient({ initialChallenges, initialSims }: DashboardCli
         )}
 
         {activeTab === 'challenges' && (
-          <div role="tabpanel" className="bg-white dark:bg-warmGray-900 rounded-lg p-6 border border-gray-200 dark:border-warmGray-800">
+          <div role="tabpanel" className="bg-surface-muted dark:bg-warmGray-900 rounded-lg p-6 border border-brand-100 dark:border-warmGray-800">
             <h2 className="font-display text-xl text-brand-700 dark:text-brand-300 mb-6">All Challenges</h2>
             {challenges.length > 0 ? (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -195,7 +195,7 @@ export function DashboardClient({ initialChallenges, initialSims }: DashboardCli
         )}
 
         {activeTab === 'sims' && (
-          <div role="tabpanel" className="bg-white dark:bg-warmGray-900 rounded-lg p-6 border border-gray-200 dark:border-warmGray-800">
+          <div role="tabpanel" className="bg-surface-muted dark:bg-warmGray-900 rounded-lg p-6 border border-brand-100 dark:border-warmGray-800">
             <h2 className="font-display text-xl text-brand-700 dark:text-brand-300 mb-6">All Sims</h2>
             {allSims.length > 0 ? (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

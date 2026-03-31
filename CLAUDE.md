@@ -2,6 +2,15 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Quick Start
+
+```bash
+git clone <repo-url> && cd challenger
+cp .env.example .env.local   # Fill in Supabase + Upstash keys (see Environment Variables below)
+npm install
+npm run dev                   # http://localhost:3000
+```
+
 ## Commands
 
 ```bash
@@ -34,6 +43,17 @@ NEXT_PUBLIC_SITE_URL=               # used for password reset redirect URLs
 NEXT_PUBLIC_GOOGLE_CLIENT_ID=       # optional, Google OAuth
 ```
 
+## CI/CD
+
+GitHub Actions workflow (`.github/workflows/ci.yml`) runs on pushes to `main` and PRs targeting `main`:
+
+1. **Lint** — `npm run lint`
+2. **Type Check** — `npm run type-check`
+3. **Test** — `npm run test:ci` (coverage uploaded as artifact)
+4. **Build** — `npm run build` (runs after lint + type-check + test pass)
+
+Deployment is handled by Vercel (auto-deploys on push to main).
+
 ## Architecture
 
 This is a **Next.js 15 App Router** app for tracking Sims 4 legacy challenge progress. Backend is **Supabase** (Postgres + auth). State is **Zustand**. Styling is **Tailwind CSS**.
@@ -47,7 +67,7 @@ This is a **Next.js 15 App Router** app for tracking Sims 4 legacy challenge pro
 ### Auth architecture
 Authentication has **two layers** that must stay in sync:
 
-1. **`middleware.ts`** — Edge middleware runs on every request. Uses Upstash Redis + `@upstash/ratelimit` for sliding-window rate limiting (10 req/10s on auth/write endpoints). Handles session cookie refresh via `@supabase/ssr`. Redirects unauthenticated users from protected paths to `/login`, and verified users away from `/login` to `/dashboard`. Generates CSRF tokens for authenticated users on first visit to protected routes.
+1. **`middleware.ts`** — Edge middleware. Uses Upstash Redis + `@upstash/ratelimit` for sliding-window rate limiting (10 req/10s on auth/write endpoints). Creates a single Supabase client and calls `getUser()` once — reuses the result for protected route redirect, email verification check, auth page redirect, and CSRF token generation. Handles session cookie refresh via `@supabase/ssr`.
 
 2. **`src/lib/store/authStore.ts`** — Zustand store, the client-side source of truth. `initialize()` must be called once (done in `(protected)/layout.tsx`). It sets up `onAuthStateChange` and fetches the initial session. `signIn()` calls the API route (`src/lib/api/auth.ts`) — **not** Supabase directly — so that rate limiting and CSRF protection apply. After the API route sets session cookies server-side, the browser client calls `getSession()` to pick them up.
 
@@ -109,44 +129,26 @@ All API routes in `src/app/api/auth/` follow: validate input with Zod → rate l
 ### File organization (src/)
 ```
 src/
-├── app/                          # Next.js App Router pages
-│   ├── (auth)/                   # Public: signup
-│   ├── (protected)/              # Requires login
-│   │   ├── dashboard/            # Main hub: overview, challenges, sims tabs
-│   │   │   ├── DashboardClient   # Client component for dashboard
-│   │   │   ├── challenges/       # Challenge list page
-│   │   │   ├── sims/             # Sim list page
-│   │   │   └── new/              # Create forms (challenge wizard, sim wizard)
-│   │   ├── challenge/[id]/       # Challenge detail (goals, sims, points)
-│   │   ├── sim/[id]/             # Sim profile (achievements, timeline)
-│   │   └── profile/              # User profile + pack preferences
-│   ├── api/auth/                 # Auth API routes (see API route pattern above)
-│   └── api/csrf-token/           # CSRF token endpoint
-├── components/
-│   ├── auth/                     # LoginModal, PasswordReset, OneTap, AuthInitializer
-│   ├── challenge/                # ChallengeTile, LegacyTracker, GoalCard, PointTracker
-│   │   └── forms/challenge-wizard/ # Multi-step challenge creation
-│   ├── forms/                    # GoalForm, SimForm, InlineEditable
-│   ├── icons/                    # BrandIcon, ChallengeIcon, CrownIcon, SimIcon
-│   ├── layout/                   # Sidebar, Navbar, Footer, GridPageShell, ThemeToggle
-│   ├── onboarding/               # OnboardingWizard + steps (Welcome, Account, Packs)
-│   ├── profile/                  # Packs component
-│   ├── sim/                      # SimCard, SimModal, SimProfile, SimTimeline, TraitTile
-│   │   └── form/                 # SimWizard + steps (BasicInfo, Traits, Personality, Review)
-│   └── ui/                       # Primitives: Button, Card, ModernCard, Input, Toast, etc.
-├── context/                      # ThemeProvider
-├── data/                         # Static data: challenge-templates, legacy-rules
-├── hooks/                        # useFocusManagement, useMaxSelect, useWizardNavigation
+├── app/                     # Next.js App Router pages
+│   ├── (auth)/              # Public: signup
+│   ├── (protected)/         # Requires login: dashboard, challenge/[id], sim/[id], profile
+│   └── api/                 # auth/ (signin, signup, etc.) + csrf-token/
+├── components/              # auth, challenge, sim, layout, onboarding, ui, icons, forms
+├── context/                 # ThemeProvider
+├── data/                    # Static: challenge-templates, legacy-rules
+├── hooks/                   # useFocusManagement, useMaxSelect, useWizardNavigation
 ├── lib/
-│   ├── api/auth.ts               # Client-side auth API calls (used by authStore)
-│   ├── constants.ts              # DASHBOARD_TABS, CHALLENGE_STATUS, LOCAL_STORAGE_KEYS, wizard keys, UI_VARIANTS
-│   ├── middleware/csrf.ts        # withCSRFProtection() wrapper
-│   ├── store/                    # Zustand stores (auth, challenge, sim, userPreferences)
-│   ├── supabase/                 # Client factories: client.ts, server.ts, admin.ts, middleware.ts, auth-config.ts
-│   ├── utils/                    # cn, format, csrf, csrf-client, validators, rateLimit, legacy-scoring, etc.
-│   └── validations/              # Zod schemas: challenge.ts, sim.ts, env.ts
-└── types/                        # challenge.ts, legacy.ts, database.types.ts (auto-generated)
+│   ├── api/auth.ts          # Client-side auth API calls (used by authStore)
+│   ├── constants.ts         # Tabs, statuses, storage keys, UI variants
+│   ├── middleware/csrf.ts   # withCSRFProtection() wrapper
+│   ├── store/               # Zustand: auth, challenge, sim, userPreferences
+│   ├── supabase/            # Client factories: client, server, admin, middleware
+│   ├── utils/               # cn, format, csrf, csrf-client, validators, rateLimit, etc.
+│   └── validations/         # Zod schemas: challenge, sim, env
+└── types/                   # challenge, legacy, database.types (auto-generated)
 ```
+
+See `docs/component_map.md` and `docs/architecture-overview.md` for full details.
 
 ### Hooks
 - `useFocusManagement` — accessibility focus trapping/restoration for modals and wizards
@@ -233,3 +235,11 @@ The file also exports entity factories (`createMockUser`, `createMockChallenge`,
 
 ### Store testing pattern
 Zustand stores are singletons. Reset state in `beforeEach` with `useStore.setState(initialState)`. Call actions via `useStore.getState().actionName()`. Pure selectors like `calculatePoints` can be tested by setting state directly with `setState` then calling the function — no async needed.
+
+## Gotchas
+
+- **`csrf-client.ts` must stay client-only.** It is imported by `src/lib/api/auth.ts` which runs in the browser. Never add server imports (`next/headers`, `next/server`, Node `crypto`) to this file — they will break the signin flow silently. Server-side CSRF utilities live in `src/lib/utils/csrf.ts`.
+- **`database.types.ts` is auto-generated.** Do not edit manually. Regenerate from Supabase when the schema changes.
+- **Middleware creates the Supabase client once and calls `getUser()` once.** Do not add additional client creations or auth checks — this was consolidated to avoid redundant network calls that caused performance issues.
+- **Auth API calls go through `src/lib/api/auth.ts`, not Supabase directly.** This ensures rate limiting and CSRF protection are always applied. The authStore's `signIn()` calls the API route, then picks up the session cookie via `getSession()`.
+- **`@/` resolves to repo root, not `src/`.** Imports look like `@/src/lib/...` not `@/lib/...`.

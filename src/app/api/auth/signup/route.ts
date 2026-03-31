@@ -107,9 +107,8 @@ async function signupHandler(request: NextRequest) {
         })
 
       if (profileError) {
-        console.error('Failed to create user profile:', profileError)
         return NextResponse.json(
-          { error: 'Failed to create account. Please try again.' },
+          { error: `Profile creation failed: ${profileError.message}` },
           { status: 500 }
         )
       }
@@ -122,9 +121,9 @@ async function signupHandler(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Signup error:', error)
+    const message = error instanceof Error ? error.message : String(error)
     return NextResponse.json(
-      { error: 'Failed to create account. Please try again.' },
+      { error: `Signup failed: ${message}` },
       { status: 500 }
     )
   }

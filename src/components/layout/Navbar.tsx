@@ -26,7 +26,7 @@ export function Navbar() {
 
   return (
     <>
-      <nav className="bg-white dark:bg-warmGray-900 border-b border-gray-200 dark:border-warmGray-700 px-6 py-3">
+      <nav className="bg-surface-muted dark:bg-warmGray-900 border-b border-brand-100 dark:border-warmGray-700 px-6 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <Link href="/" className="flex items-center space-x-2">
@@ -38,10 +38,10 @@ export function Navbar() {
           </div>
 
           <div className="flex items-center space-x-4">
-            {userProfile ? (
+            {user ? (
               <div className="flex items-center space-x-3">
                 <div className="text-sm text-gray-600 dark:text-warmGray-200">
-                  Welcome, {userProfile?.display_name || userProfile?.username || 'User'}
+                  Welcome, {userProfile?.display_name || userProfile?.username || user.user_metadata?.username || 'User'}
                 </div>
                 <ThemeToggleCompact />
                 <Button

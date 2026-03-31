@@ -123,8 +123,7 @@ describe('simStore', () => {
         test('sets familyMembers from provided sims array', () => {
             const sims = [{ id: 'sim-1' }, { id: 'sim-2' }] as any[]
             useSimStore.getState().setSims(sims)
-            // setSims updates familyMembers — verify state was touched
-            expect(useSimStore.getState()).toBeDefined()
+            expect(useSimStore.getState().familyMembers).toEqual(sims)
         })
     })
 })
