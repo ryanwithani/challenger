@@ -205,6 +205,7 @@ export function createBrowserSupabaseMock() {
                 eq: jest.fn().mockReturnValue({
                     single: mockSingle,
                     maybeSingle: mockMaybeSingle,
+                    order: mockOrder,
                 }),
                 ilike: jest.fn().mockReturnValue({
                     maybeSingle: mockMaybeSingle,
