@@ -4,6 +4,22 @@ export const DASHBOARD_TABS: { id: string; name: string }[] = [
   { id: 'sims', name: 'Sims' }
 ] as const;
 
+export const SIMS_TABS = [
+  { id: 'all', label: 'All Sims' },
+  { id: 'by-challenge', label: 'By Challenge' },
+  { id: 'family-tree', label: 'Family Tree' },
+] as const
+
+export type SimsTabId = typeof SIMS_TABS[number]['id']
+
+export type SimSortKey =
+  | 'name-asc'
+  | 'name-desc'
+  | 'newest'
+  | 'oldest'
+  | 'generation-asc'
+  | 'generation-desc'
+
 export const CHALLENGE_STATUS: { id: string; name: string }[] = [
   { id: 'active', name: 'Active' },
   { id: 'completed', name: 'Completed' },
