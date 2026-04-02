@@ -69,9 +69,12 @@ export function createMockSim(overrides: Record<string, any> = {}) {
     return {
         id: 'sim-1',
         user_id: 'user-123',
+        challenge_id: null,
         name: 'Test Sim',
+        age_stage: 'young_adult',
         generation: 1,
         is_heir: false,
+        relationship_to_heir: null,
         traits: [],
         career: null,
         aspiration: null,
