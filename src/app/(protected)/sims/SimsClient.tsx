@@ -12,6 +12,11 @@ import { Traits } from '@/src/components/sim/TraitsCatalog'
 import { SIMS_TABS, type SimsTabId, type SimSortKey } from '@/src/lib/constants'
 import { cn } from '@/src/lib/utils/cn'
 import { Database } from '@/src/types/database.types'
+import SimsToolbar from '@/src/components/sim/SimsToolbar'
+import SimDetailPanel from '@/src/components/sim/SimDetailPanel'
+import BulkActionBar from '@/src/components/sim/BulkActionBar'
+import ByChallengeView from '@/src/components/sim/ByChallengeView'
+import FamilyTreeView from '@/src/components/sim/FamilyTreeView'
 
 type Sim = Database['public']['Tables']['sims']['Row']
 
@@ -171,76 +176,7 @@ function SimsGrid({
   )
 }
 
-/** Minimal inline toolbar -- will be replaced by full SimsToolbar in Task 6 */
-function InlineToolbar({
-  searchQuery,
-  onSearchChange,
-  sortBy,
-  onSortChange,
-  isBulkMode,
-  onToggleBulkMode,
-}: {
-  searchQuery: string
-  onSearchChange: (q: string) => void
-  sortBy: SimSortKey
-  onSortChange: (key: SimSortKey) => void
-  isBulkMode: boolean
-  onToggleBulkMode: () => void
-}) {
-  const SORT_OPTIONS: { value: SimSortKey; label: string }[] = [
-    { value: 'newest', label: 'Newest' },
-    { value: 'oldest', label: 'Oldest' },
-    { value: 'name-asc', label: 'Name A-Z' },
-    { value: 'name-desc', label: 'Name Z-A' },
-    { value: 'generation-asc', label: 'Gen (low)' },
-    { value: 'generation-desc', label: 'Gen (high)' },
-  ]
-
-  return (
-    <div className="flex flex-wrap items-center gap-3">
-      <input
-        type="search"
-        placeholder="Search sims..."
-        value={searchQuery}
-        onChange={e => onSearchChange(e.target.value)}
-        className={cn(
-          'flex-1 min-w-[180px] rounded-lg border px-3 py-2 text-sm',
-          'border-warmGray-200 dark:border-warmGray-700',
-          'bg-white dark:bg-warmGray-800',
-          'text-warmGray-900 dark:text-warmGray-100',
-          'placeholder:text-warmGray-400 dark:placeholder:text-warmGray-500',
-          'focus:outline-none focus:ring-2 focus:ring-brand-400',
-        )}
-      />
-
-      <select
-        value={sortBy}
-        onChange={e => onSortChange(e.target.value as SimSortKey)}
-        className={cn(
-          'rounded-lg border px-3 py-2 text-sm',
-          'border-warmGray-200 dark:border-warmGray-700',
-          'bg-white dark:bg-warmGray-800',
-          'text-warmGray-900 dark:text-warmGray-100',
-          'focus:outline-none focus:ring-2 focus:ring-brand-400',
-        )}
-      >
-        {SORT_OPTIONS.map(opt => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
-
-      <Button
-        variant={isBulkMode ? 'outline' : 'ghost'}
-        size="sm"
-        onClick={onToggleBulkMode}
-      >
-        {isBulkMode ? 'Cancel' : 'Select'}
-      </Button>
-    </div>
-  )
-}
+// InlineToolbar removed — using SimsToolbar component
 
 // ---------------------------------------------------------------------------
 // Main component
@@ -252,7 +188,7 @@ export default function SimsClient({ initialSims }: SimsClientProps) {
   const pathname = usePathname()
 
   // Store hooks
-  const { familyMembers: allSims, setSims, loading, error, fetchAllSims } = useSimStore()
+  const { familyMembers: allSims, setSims, loading, error, fetchAllSims, assignToChallenge, unassignFromChallenge, deleteSim } = useSimStore()
   const { challenges, fetchChallenges } = useChallengeStore()
 
   // URL-persisted state
@@ -415,11 +351,16 @@ export default function SimsClient({ initialSims }: SimsClientProps) {
     >
     <div className="space-y-6">
       {/* Toolbar */}
-      <InlineToolbar
+      <SimsToolbar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         sortBy={sortBy}
         onSortChange={s => updateParams({ sort: s })}
+        heirsOnly={filters.heirs}
+        hasTraitsOnly={filters.hasTraits}
+        challengeIdFilter={filters.challengeId}
+        challenges={challenges}
+        onFilterChange={f => setFilters(prev => ({ ...prev, ...f }))}
         isBulkMode={isBulkMode}
         onToggleBulkMode={() => (isBulkMode ? exitBulkMode() : enterBulkMode())}
       />
@@ -477,17 +418,50 @@ export default function SimsClient({ initialSims }: SimsClientProps) {
         )}
 
         {!loading && !error && activeTab === 'by-challenge' && (
-          <div className="text-center py-16 text-warmGray-500 dark:text-warmGray-400 text-sm">
-            By Challenge view coming soon.
-          </div>
+          <ByChallengeView
+            groupedSims={groupedSims}
+            unassigned={unassignedSims}
+            challenges={challenges}
+            traitCatalog={Traits}
+            onOpenPanel={openPanel}
+            isBulkMode={isBulkMode}
+            selectedSimIds={selectedSimIds}
+            onSelect={isBulkMode ? toggleSelect : undefined}
+          />
         )}
 
         {!loading && !error && activeTab === 'family-tree' && (
-          <div className="text-center py-16 text-warmGray-500 dark:text-warmGray-400 text-sm">
-            Family Tree view coming soon.
-          </div>
+          <FamilyTreeView
+            allSims={filteredSims}
+            challenges={challenges}
+            onOpenPanel={openPanel}
+          />
         )}
       </div>
+
+      {/* Detail panel */}
+      {activePanelSimId && panelNav && (
+        <SimDetailPanel
+          simId={activePanelSimId}
+          allSims={filteredSims}
+          panelNav={panelNav}
+          onClose={() => setActivePanelSimId(null)}
+          onNavigate={openPanel}
+        />
+      )}
+
+      {/* Bulk action bar */}
+      {isBulkMode && Object.keys(selectedSimIds).length > 0 && (
+        <BulkActionBar
+          selectedCount={Object.keys(selectedSimIds).length}
+          selectedIds={Object.keys(selectedSimIds)}
+          challenges={challenges}
+          onAssign={handleBulkAssign}
+          onUnassign={handleBulkUnassign}
+          onDelete={handleBulkDelete}
+          onDeselect={exitBulkMode}
+        />
+      )}
     </div>
     </PageShell>
   )
