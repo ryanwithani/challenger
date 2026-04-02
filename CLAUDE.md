@@ -6,9 +6,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 git clone <repo-url> && cd challenger
-cp .env.example .env.local   # Fill in Supabase + Upstash keys (see Environment Variables below)
+cp .env.local.example .env.local   # Fill in Supabase + Upstash keys (see Environment Variables below)
 npm install
-npm run dev                   # http://localhost:3000
+npm run dev                        # http://localhost:3000
 ```
 
 ## Commands
@@ -22,11 +22,15 @@ npm test             # Run all Jest tests
 npm run test:watch   # Jest in watch mode
 npm run test:coverage  # Jest with coverage (70% threshold enforced)
 npm run test:ci      # Jest with coverage, CI mode (maxWorkers=2)
+npm run test:e2e     # Playwright e2e tests (headless, auto-starts dev server)
+npm run test:e2e:headed  # Playwright e2e tests (visible browser)
+npm run test:e2e:ui  # Playwright interactive UI mode
 ```
 
 Run a single test file:
 ```bash
-npx jest src/__tests__/api/signup.test.ts
+npx jest src/__tests__/api/signup.test.ts        # Jest unit test
+npx playwright test e2e/tests/login.spec.ts      # Playwright e2e test
 ```
 
 ## Environment Variables
@@ -51,6 +55,7 @@ GitHub Actions workflow (`.github/workflows/ci.yml`) runs on pushes to `main` an
 2. **Type Check** — `npm run type-check`
 3. **Test** — `npm run test:ci` (coverage uploaded as artifact)
 4. **Build** — `npm run build` (runs after lint + type-check + test pass)
+5. **E2E** — `npx playwright test` (runs after build, requires GitHub secrets for Supabase test credentials)
 
 Deployment is handled by Vercel (auto-deploys on push to main).
 
@@ -84,10 +89,9 @@ Authentication has **two layers** that must stay in sync:
 - `createSupabaseAdminClient()` — server-only, uses `SUPABASE_SERVICE_ROLE_KEY`, bypasses RLS
 
 ### Database schema (key tables in `public`)
-- `users` — app profile (id mirrors `auth.users`), created lazily in `fetchUserProfile()` if missing
+- `users` — app profile (id mirrors `auth.users`), created automatically by the `handle_new_user()` DB trigger on `auth.users` INSERT
 - `challenges` — owned by a user; has `configuration: Json`, `challenge_type`, status, points
-- `sims` — belong to a challenge; have traits, career, aspiration, generation, heir flag
-- `challenge_sims` — join table linking sims to challenges with generation/heir metadata
+- `sims` — owned by a user (`user_id`); optionally linked to one challenge (`challenge_id` nullable); carry generation, heir flag, and relationship metadata directly
 - `goals` — belong to a challenge; point-based with `goal_type`, thresholds, current/target values
 - `progress` — records goal completions per user/challenge/sim
 - `audit_log` — security events
@@ -106,7 +110,7 @@ All API routes in `src/app/api/auth/` follow: validate input with Zod → rate l
 - **Form/Validation**: react-hook-form 7.48, Zod 3.23
 - **State**: Zustand 4.4
 - **UI**: class-variance-authority (CVA), clsx, tailwind-merge — combined via `cn()` from `src/lib/utils/cn.ts`
-- **Icons**: react-icons (Tabler set — `TbHome`, `TbTarget`, etc.)
+- **Icons**: react-icons (Tabler `Tb*`, AntDesign `AiOutline*`, Bootstrap `Bs*`)
 - **Sanitization**: isomorphic-dompurify
 - **Rate Limiting**: @upstash/ratelimit + @upstash/redis (middleware), lru-cache (in-route fallback)
 
@@ -116,7 +120,7 @@ All API routes in `src/app/api/auth/` follow: validate input with Zod → rate l
 ### Styling conventions
 - Dark mode: Tailwind `class` strategy (not `media`)
 - Brand palette: warm peach/coral (`brand-50`–`brand-900`, primary at `brand-500` = #ff6b35). Accent is golden/amber.
-- Font: `font-display` class for headings (serif/display font — intentionally warm and playful). Body uses system sans-serif.
+- Font: `font-display` (Fraunces) for all headings and brand text. `font-body` (Nunito Sans) for body — warm sans-serif with rounded terminals.
 - Utility: `cn()` from `src/lib/utils/cn.ts` merges clsx + twMerge. Always use this instead of raw template literals for conditional classes.
 
 ### Component patterns
@@ -236,6 +240,9 @@ The file also exports entity factories (`createMockUser`, `createMockChallenge`,
 ### Store testing pattern
 Zustand stores are singletons. Reset state in `beforeEach` with `useStore.setState(initialState)`. Call actions via `useStore.getState().actionName()`. Pure selectors like `calculatePoints` can be tested by setting state directly with `setState` then calling the function — no async needed.
 
+### E2E tests (Playwright)
+E2E tests live in `e2e/tests/` with Page Object Models in `e2e/pages/`. Config: `playwright.config.ts`. Requires `e2e/.env.e2e` with real Supabase test credentials (`E2E_TEST_EMAIL`, `E2E_TEST_PASSWORD`, plus Supabase connection vars). Tests run against Chromium only, serialized (`workers: 1`) because login tests share auth state.
+
 ## Gotchas
 
 - **`csrf-client.ts` must stay client-only.** It is imported by `src/lib/api/auth.ts` which runs in the browser. Never add server imports (`next/headers`, `next/server`, Node `crypto`) to this file — they will break the signin flow silently. Server-side CSRF utilities live in `src/lib/utils/csrf.ts`.
@@ -243,3 +250,5 @@ Zustand stores are singletons. Reset state in `beforeEach` with `useStore.setSta
 - **Middleware creates the Supabase client once and calls `getUser()` once.** Do not add additional client creations or auth checks — this was consolidated to avoid redundant network calls that caused performance issues.
 - **Auth API calls go through `src/lib/api/auth.ts`, not Supabase directly.** This ensures rate limiting and CSRF protection are always applied. The authStore's `signIn()` calls the API route, then picks up the session cookie via `getSession()`.
 - **`@/` resolves to repo root, not `src/`.** Imports look like `@/src/lib/...` not `@/lib/...`.
+- **`public.users` rows are created by the `handle_new_user()` DB trigger, not application code.** The trigger fires on `auth.users` INSERT and reads `raw_user_meta_data->>'username'`. Do NOT also insert into `public.users` from API routes — this causes a duplicate key violation. Migration: `supabase/migrations/20260401_add_handle_new_user_trigger.sql`.
+- **E2E tests require a real Supabase project.** Test credentials go in `e2e/.env.e2e` (gitignored). The `webServer` config auto-starts `npm run dev` locally or `npm start` in CI.
