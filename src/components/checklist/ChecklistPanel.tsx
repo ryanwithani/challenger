@@ -32,13 +32,13 @@ export function ChecklistPanel({ items, completions, onToggle }: ChecklistPanelP
     }
 
     const result: SubcategoryGroup[] = []
-    for (const [name, groupItems] of groupMap) {
+    groupMap.forEach((groupItems, name) => {
       result.push({
         name,
         items: groupItems,
-        completedCount: groupItems.filter(i => completions.has(i.key)).length,
+        completedCount: groupItems.filter((i: ChecklistItem) => completions.has(i.key)).length,
       })
-    }
+    })
 
     return result
   }, [items, completions])

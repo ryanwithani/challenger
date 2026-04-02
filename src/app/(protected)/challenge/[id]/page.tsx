@@ -12,6 +12,10 @@ import { GoalForm } from '@/src/components/forms/GoalForm'
 import { Modal } from '@/src/components/sim/SimModal'
 import { LegacyTracker } from '@/src/components/challenge/LegacyTracker'
 import { Traits } from '@/src/components/sim/TraitsCatalog'
+import { ChecklistCategoryTabs, ChecklistPanel } from '@/src/components/checklist'
+import { CATALOG_BY_TYPE } from '@/src/data/checklists'
+import type { CatalogType } from '@/src/data/checklists/types'
+import { cn } from '@/src/lib/utils/cn'
 
 export default function ChallengePage() {
   return (
@@ -50,6 +54,14 @@ function ChallengePageContent() {
 
   const [showSimForm, setShowSimForm] = useState(false)
   const [showGoalForm, setShowGoalForm] = useState(false)
+  const [activeTab, setActiveTab] = useState<'overview' | 'checklist'>('overview')
+  const [checklistCategory, setChecklistCategory] = useState<CatalogType>('skills')
+
+  const completions = useChallengeStore(state => state.completions)
+  const toggleCompletion = useCallback(
+    (itemKey: string) => useChallengeStore.getState().toggleCompletion(challengeId, itemKey),
+    [challengeId]
+  )
 
   // Handle URL parameters for actions
   useEffect(() => {
@@ -119,19 +131,60 @@ function ChallengePageContent() {
   if (isLegacyChallenge) {
     return (
       <div>
-        <LegacyTracker
-          challenge={currentChallenge}
-          sims={memoizedSims}
-          goals={memoizedGoals}
-          progress={memoizedProgress}
-          onAddSim={handleAddSim}
-          onToggleGoal={handleToggleGoal}
-          onUpdateGoalValue={updateGoalValue}
-          onCompleteGoalWithDetails={completeGoalWithDetails}
-          calculatePoints={calculatePoints}
-          calculateCategoryPoints={calculateCategoryPoints}
-          onSelectHeir={updateSimAsHeir}
-        />
+        {/* Overview / Checklist tabs */}
+        <div className="flex gap-2 mb-6">
+          <button
+            onClick={() => setActiveTab('overview')}
+            className={cn(
+              'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+              activeTab === 'overview'
+                ? 'bg-brand-500 text-white'
+                : 'bg-warmGray-100 dark:bg-warmGray-800 text-warmGray-600 dark:text-warmGray-400'
+            )}
+          >
+            Overview
+          </button>
+          <button
+            onClick={() => setActiveTab('checklist')}
+            className={cn(
+              'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+              activeTab === 'checklist'
+                ? 'bg-brand-500 text-white'
+                : 'bg-warmGray-100 dark:bg-warmGray-800 text-warmGray-600 dark:text-warmGray-400'
+            )}
+          >
+            Checklist
+          </button>
+        </div>
+
+        {activeTab === 'overview' ? (
+          <LegacyTracker
+            challenge={currentChallenge}
+            sims={memoizedSims}
+            goals={memoizedGoals}
+            progress={memoizedProgress}
+            onAddSim={handleAddSim}
+            onToggleGoal={handleToggleGoal}
+            onUpdateGoalValue={updateGoalValue}
+            onCompleteGoalWithDetails={completeGoalWithDetails}
+            calculatePoints={calculatePoints}
+            calculateCategoryPoints={calculateCategoryPoints}
+            onSelectHeir={updateSimAsHeir}
+          />
+        ) : (
+          <div className="space-y-4">
+            <ChecklistCategoryTabs
+              activeCategory={checklistCategory}
+              completions={completions}
+              onCategoryChange={setChecklistCategory}
+            />
+            <ChecklistPanel
+              items={CATALOG_BY_TYPE[checklistCategory]}
+              completions={completions}
+              onToggle={toggleCompletion}
+            />
+          </div>
+        )}
 
         {/* Modals */}
         <Modal
@@ -141,8 +194,8 @@ function ChallengePageContent() {
         >
           <SimForm
             onSubmit={async (data) => {
-              await addSim({ 
-                ...data, 
+              await addSim({
+                ...data,
                 challenge_id: challengeId,
                 career: data.career ? String(data.career) : null
               })
@@ -171,69 +224,112 @@ function ChallengePageContent() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">{currentChallenge.name}</h1>
+        <h1 className="text-3xl font-display font-bold text-warmGray-900 dark:text-warmGray-100">
+          {currentChallenge.name}
+        </h1>
         {currentChallenge.description && (
-          <p className="text-gray-600 mt-2">{currentChallenge.description}</p>
+          <p className="text-warmGray-600 dark:text-warmGray-400 mt-2">{currentChallenge.description}</p>
         )}
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-8">
-        {/* Main Content */}
-        <div className="lg:col-span-2 space-y-8">
-          {/* Sims Section */}
-          <section>
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-semibold">Sims</h2>
-              <Button onClick={handleAddSim} size="sm">
-                Add Sim
-              </Button>
-            </div>
+      {/* Overview / Checklist tabs */}
+      <div className="flex gap-2 mb-6">
+        <button
+          onClick={() => setActiveTab('overview')}
+          className={cn(
+            'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+            activeTab === 'overview'
+              ? 'bg-brand-500 text-white'
+              : 'bg-warmGray-100 dark:bg-warmGray-800 text-warmGray-600 dark:text-warmGray-400'
+          )}
+        >
+          Overview
+        </button>
+        <button
+          onClick={() => setActiveTab('checklist')}
+          className={cn(
+            'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+            activeTab === 'checklist'
+              ? 'bg-brand-500 text-white'
+              : 'bg-warmGray-100 dark:bg-warmGray-800 text-warmGray-600 dark:text-warmGray-400'
+          )}
+        >
+          Checklist
+        </button>
+      </div>
 
-            {sims.length === 0 ? (
-              <p className="text-gray-500">No Sims added yet</p>
-            ) : (
-              <div className="grid md:grid-cols-2 gap-4">
-                {sims.map((sim) => (
-                  <SimCard key={sim.id} sim={sim} traitCatalog={Traits} />
-                ))}
+      {activeTab === 'overview' ? (
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Sims Section */}
+            <section>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-semibold">Sims</h2>
+                <Button onClick={handleAddSim} size="sm">
+                  Add Sim
+                </Button>
               </div>
-            )}
-          </section>
 
-          {/* Goals Section */}
-          <section>
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-semibold">Goals</h2>
-              <Button onClick={handleAddGoal} size="sm">
-                Add Goal
-              </Button>
-            </div>
+              {sims.length === 0 ? (
+                <p className="text-sm text-warmGray-500 dark:text-warmGray-400">No Sims added yet</p>
+              ) : (
+                <div className="grid md:grid-cols-2 gap-4">
+                  {sims.map((sim) => (
+                    <SimCard key={sim.id} sim={sim} traitCatalog={Traits} />
+                  ))}
+                </div>
+              )}
+            </section>
 
-            {goals.length === 0 ? (
-              <p className="text-gray-500">No goals added yet</p>
-            ) : (
-              <div className="space-y-4">
-                {goals.map((goal) => (
-                  <GoalCard
-                    key={goal.id}
-                    goal={goal}
-                    isCompleted={progress.some(p => p.goal_id === goal.id)}
-                    onToggle={() => handleToggleGoal(goal.id)}
-                  />
-                ))}
+            {/* Goals Section */}
+            <section>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-semibold">Goals</h2>
+                <Button onClick={handleAddGoal} size="sm">
+                  Add Goal
+                </Button>
               </div>
-            )}
-          </section>
+
+              {goals.length === 0 ? (
+                <p className="text-sm text-warmGray-500 dark:text-warmGray-400">No goals added yet</p>
+              ) : (
+                <div className="space-y-4">
+                  {goals.map((goal) => (
+                    <GoalCard
+                      key={goal.id}
+                      goal={goal}
+                      isCompleted={progress.some(p => p.goal_id === goal.id)}
+                      onToggle={() => handleToggleGoal(goal.id)}
+                    />
+                  ))}
+                </div>
+              )}
+            </section>
+          </div>
+
+          {/* Sidebar */}
+          <div className="lg:col-span-1">
+            <PointTracker
+              totalPoints={calculatePoints()}
+              possiblePoints={goals.reduce((sum, g) => sum + (g.point_value || 0), 0)}
+            />
+          </div>
         </div>
-
-        {/* Sidebar */}
-        <div className="lg:col-span-1">
-          <PointTracker
-            totalPoints={calculatePoints()}
-            possiblePoints={goals.reduce((sum, g) => sum + (g.point_value || 0), 0)}
+      ) : (
+        <div className="space-y-4">
+          <ChecklistCategoryTabs
+            activeCategory={checklistCategory}
+            completions={completions}
+            onCategoryChange={setChecklistCategory}
+          />
+          <ChecklistPanel
+            items={CATALOG_BY_TYPE[checklistCategory]}
+            completions={completions}
+            onToggle={toggleCompletion}
           />
         </div>
-      </div>
+      )}
 
       {/* Modals */}
       <Modal
@@ -243,8 +339,8 @@ function ChallengePageContent() {
       >
         <SimForm
           onSubmit={async (data) => {
-            await addSim({ 
-              ...data, 
+            await addSim({
+              ...data,
               challenge_id: challengeId,
               career: data.career ? String(data.career) : null
             })

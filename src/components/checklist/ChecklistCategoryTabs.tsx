@@ -22,14 +22,14 @@ export function ChecklistCategoryTabs({
 }: ChecklistCategoryTabsProps) {
   const counts = useMemo(() => {
     const result: Record<string, number> = {}
-    for (const cat of CHECKLIST_CATEGORIES) {
+    CHECKLIST_CATEGORIES.forEach(cat => {
       const prefix = `${cat}:`
       let count = 0
-      for (const key of completions) {
+      completions.forEach(key => {
         if (key.startsWith(prefix)) count++
-      }
+      })
       result[cat] = count
-    }
+    })
     return result
   }, [completions])
 
