@@ -77,7 +77,12 @@ interface ChallengeState {
   error: string | null
   challengesLoading: boolean // Separate loading state for challenges
   lastChallengesFetch: number | null // Timestamp of last fetch
-  
+  completions: Set<string>
+
+  // Checklist methods
+  fetchCompletions: (challengeId: string) => Promise<void>
+  toggleCompletion: (challengeId: string, itemKey: string) => Promise<void>
+
   // Challenge methods
   fetchChallenges: (forceRefresh?: boolean) => Promise<void>
   fetchChallenge: (id: string) => Promise<void>
@@ -130,6 +135,7 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
   error: null,
   challengesLoading: false,  // Separate loading state for challenges
   lastChallengesFetch: null, // Track when we last fetched challenges
+  completions: new Set<string>(),
 
   fetchChallenges: async (forceRefresh = false) => {
     // Check if we have challenges and if the cache is still valid
@@ -203,9 +209,88 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
         loading: false,
         error: null,
       });
+
+      // Load checklist completions (non-blocking)
+      get().fetchCompletions(id)
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to load challenge';
       set({ loading: false, error: message });
+    }
+  },
+
+  fetchCompletions: async (challengeId: string) => {
+    try {
+      const supabase = createSupabaseBrowserClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data, error } = await supabase
+        .from('challenge_completions')
+        .select('item_key')
+        .eq('challenge_id', challengeId)
+        .eq('user_id', user.id)
+
+      if (error) throw error
+
+      set({ completions: new Set((data || []).map((row: { item_key: string }) => row.item_key)) })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to load completions'
+      set({ error: message })
+    }
+  },
+
+  toggleCompletion: async (challengeId: string, itemKey: string) => {
+    const supabase = createSupabaseBrowserClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error('User not authenticated')
+
+    const prev = new Set(get().completions)
+    const wasCompleted = prev.has(itemKey)
+
+    // Optimistic update
+    const next = new Set(prev)
+    if (wasCompleted) {
+      next.delete(itemKey)
+    } else {
+      next.add(itemKey)
+    }
+    set({ completions: next })
+
+    try {
+      const { data, error } = await supabase.rpc('toggle_completion', {
+        p_challenge_id: challengeId,
+        p_item_key: itemKey,
+        p_user_id: user.id,
+      })
+
+      if (error) throw new Error(error.message)
+
+      // Sync goal counter locally
+      const catalogType = itemKey.split(':')[0]
+      const goalTypeMap: Record<string, string> = {
+        skills: 'skills_completed',
+        aspirations: 'aspirations_completed',
+        careers: 'careers_completed',
+        parties: 'parties_hosted',
+        deaths: 'deaths_collected',
+        traits: 'traits_collected',
+        collections: 'collections_completed',
+      }
+      const goalType = goalTypeMap[catalogType]
+      if (goalType) {
+        const delta = data?.action === 'completed' ? 1 : -1
+        set({
+          goals: get().goals.map(g =>
+            g.goal_type === goalType
+              ? { ...g, current_value: Math.max(0, (g.current_value || 0) + delta) }
+              : g
+          ),
+        })
+      }
+    } catch (error) {
+      // Revert optimistic update
+      set({ completions: prev })
+      throw error
     }
   },
 

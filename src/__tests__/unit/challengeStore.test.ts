@@ -82,6 +82,7 @@ const initialState = {
     loading: false,
     challengesLoading: false,
     lastChallengesFetch: null,
+    completions: new Set<string>(),
 }
 
 describe('challengeStore', () => {
@@ -262,6 +263,91 @@ describe('challengeStore', () => {
             await expect(useChallengeStore.getState().deleteChallenge('c1')).rejects.toMatchObject({
                 message: 'Delete failed',
             })
+        })
+    })
+
+    // ---- completions ----
+
+    describe('completions', () => {
+        test('fetchCompletions populates completions set from DB data', async () => {
+            mockSupabase.from.mockReturnValueOnce({
+                select: jest.fn().mockReturnValue({
+                    eq: jest.fn().mockReturnValue({
+                        eq: jest.fn().mockResolvedValue({
+                            data: [
+                                { item_key: 'skills:Cooking' },
+                                { item_key: 'deaths:Fire' },
+                            ],
+                            error: null,
+                        }),
+                    }),
+                }),
+            })
+
+            await useChallengeStore.getState().fetchCompletions('challenge-1')
+
+            const completions = useChallengeStore.getState().completions
+            expect(completions.has('skills:Cooking')).toBe(true)
+            expect(completions.has('deaths:Fire')).toBe(true)
+            expect(completions.size).toBe(2)
+        })
+
+        test('toggleCompletion adds item key optimistically and calls RPC', async () => {
+            useChallengeStore.setState({
+                completions: new Set<string>(),
+                currentChallenge: { id: 'challenge-1' } as any,
+                goals: [makeGoal({ goal_type: 'counter', current_value: 0 })],
+            })
+
+            mockSupabase.rpc.mockResolvedValueOnce({
+                data: { action: 'completed' },
+                error: null,
+            })
+
+            await useChallengeStore.getState().toggleCompletion('challenge-1', 'skills:Cooking')
+
+            expect(useChallengeStore.getState().completions.has('skills:Cooking')).toBe(true)
+            expect(mockSupabase.rpc).toHaveBeenCalledWith('toggle_completion', {
+                p_challenge_id: 'challenge-1',
+                p_item_key: 'skills:Cooking',
+                p_user_id: 'user-123',
+            })
+        })
+
+        test('toggleCompletion removes item key when already completed', async () => {
+            useChallengeStore.setState({
+                completions: new Set<string>(['skills:Cooking']),
+                currentChallenge: { id: 'challenge-1' } as any,
+                goals: [],
+            })
+
+            mockSupabase.rpc.mockResolvedValueOnce({
+                data: { action: 'uncompleted' },
+                error: null,
+            })
+
+            await useChallengeStore.getState().toggleCompletion('challenge-1', 'skills:Cooking')
+
+            expect(useChallengeStore.getState().completions.has('skills:Cooking')).toBe(false)
+        })
+
+        test('toggleCompletion reverts optimistic update on RPC error', async () => {
+            useChallengeStore.setState({
+                completions: new Set<string>(),
+                currentChallenge: { id: 'challenge-1' } as any,
+                goals: [],
+            })
+
+            mockSupabase.rpc.mockResolvedValueOnce({
+                data: null,
+                error: { message: 'RPC failed' },
+            })
+
+            await expect(
+                useChallengeStore.getState().toggleCompletion('challenge-1', 'skills:Cooking')
+            ).rejects.toThrow('RPC failed')
+
+            expect(useChallengeStore.getState().completions.has('skills:Cooking')).toBe(false)
         })
     })
 })
