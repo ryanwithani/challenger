@@ -298,10 +298,8 @@ export default function SimsClient({ initialSims }: SimsClientProps) {
   }, [])
 
   // ---------------------------------------------------------------------------
-  // Bulk operation handlers (placeholders for BulkActionBar, Task 8)
+  // Bulk operation handlers
   // ---------------------------------------------------------------------------
-  const { assignToChallenge, unassignFromChallenge, deleteSim } = useSimStore()
-
   const handleBulkAssign = useCallback(
     async (challengeId: string) => {
       const ids = Object.keys(selectedSimIds)
