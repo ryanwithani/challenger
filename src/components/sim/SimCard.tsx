@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { memo, useMemo } from 'react'
 import clsx from 'clsx'
+import { cn } from '@/src/lib/utils/cn'
 import { Database } from '@/src/types/database.types'
 import { PackIcon } from '@/src/components/sim/PackIcon'
 import { TraitIcon } from '@/src/components/sim/TraitIcon'
@@ -125,7 +126,7 @@ export const SimCard = memo(function SimCard({
         )}
 
         {/* Heir / Generation badges */}
-        <div className="absolute top-2 left-2 flex items-center gap-2 z-10">
+        <div className={cn('absolute top-2 left-2 flex items-center gap-2 z-10', onSelect && 'pl-6')}>
           {isHeir && (
             <span className="inline-flex items-center gap-1 rounded-full bg-amber-100/90 px-2 py-0.5 text-xs font-semibold text-amber-900 ring-1 ring-amber-200">
               <TbCrown className="w-3 h-3" /> Heir

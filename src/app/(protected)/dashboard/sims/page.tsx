@@ -11,7 +11,6 @@ import { Traits } from '@/src/components/sim/TraitsCatalog'
 
 type Sim = Database['public']['Tables']['sims']['Row']
 type Challenge = Database['public']['Tables']['challenges']['Row']
-type ChallengeSim = Database['public']['Tables']['challenge_sims']['Row']
 
 type ViewTab = 'all' | 'by_challenge'
 
@@ -30,40 +29,22 @@ export default function SimsPage() {
 
   const [sims, setSims] = useState<Sim[]>([])
   const [challenges, setChallenges] = useState<Challenge[]>([])
-  const [challengeSims, setChallengeSims] = useState<ChallengeSim[]>([])
 
-  // Map: simId -> most recent challenge_sims row (if multiple, prefer latest updated)
-  const challengeSimBySimId = useMemo(() => {
-    const map = new Map<string, ChallengeSim>()
-    for (const cs of challengeSims) {
-      const prev = map.get(cs.sim_id)
-      if (!prev) { map.set(cs.sim_id, cs); continue }
-      // prefer newest
-      const csTime = cs.updated_at ?? cs.created_at ?? ''
-      const prevTime = prev.updated_at ?? prev.created_at ?? ''
-      if (csTime > prevTime) {
-        map.set(cs.sim_id, cs)
-      }
-    }
-    return map
-  }, [challengeSims])
-
-  // Group sims by challenge_id via the selected challenge_sims row
+  // Group sims by challenge_id directly
   const simsByChallenge = useMemo(() => {
     const groups = new Map<string, Sim[]>()
     for (const sim of sims) {
-      const cs = challengeSimBySimId.get(sim.id)
-      if (!cs) continue
-      const arr = groups.get(cs.challenge_id) ?? []
+      if (!sim.challenge_id) continue
+      const arr = groups.get(sim.challenge_id) ?? []
       arr.push(sim)
-      groups.set(cs.challenge_id, arr)
+      groups.set(sim.challenge_id, arr)
     }
     return groups
-  }, [sims, challengeSimBySimId])
+  }, [sims])
 
   const unassignedSims = useMemo(
-    () => sims.filter(s => !challengeSimBySimId.has(s.id)),
-    [sims, challengeSimBySimId]
+    () => sims.filter(s => !s.challenge_id),
+    [sims]
   )
 
   const challengeById = useMemo(() => {
@@ -92,25 +73,12 @@ export default function SimsPage() {
             .order('created_at', { ascending: false })
           if (chErr) throw chErr
 
-          // pull join rows for all sims shown
-          const simIds = (simsData ?? []).map(s => s.id)
-          let csData: ChallengeSim[] = []
-          if (simIds.length) {
-            const { data, error } = await supabase
-              .from('challenge_sims')
-              .select('*')
-              .in('sim_id', simIds)
-            if (error) throw error
-            csData = data as ChallengeSim[]
-          }
-
           if (!mounted) return
           setSims(simsData ?? [])
           setChallenges(chData ?? [])
-          setChallengeSims(csData ?? [])
-        } catch (e: any) {
+        } catch (e: unknown) {
           if (!mounted) return
-          setError(e.message ?? 'Failed to load Sims')
+          setError(e instanceof Error ? e.message : 'Failed to load Sims')
         } finally {
           if (!mounted) return
           setLoading(false)
@@ -128,8 +96,7 @@ export default function SimsPage() {
   }
   function passesHeir(sim: Sim) {
     if (!heirsOnly) return true
-    const cs = challengeSimBySimId.get(sim.id)
-    return !!cs?.is_heir
+    return !!sim.is_heir
   }
   function passesTraits(sim: Sim) {
     if (!hasTraitsOnly) return true
@@ -157,27 +124,22 @@ export default function SimsPage() {
   // ---------- Actions: link/unlink (lightweight) ----------
   async function linkToChallenge(sim: Sim, challengeId: string) {
     const { data, error } = await supabase
-      .from('challenge_sims')
-      .upsert({ sim_id: sim.id, challenge_id: challengeId }, { onConflict: 'challenge_id,sim_id' })
-      .select('*')
+      .from('sims')
+      .update({ challenge_id: challengeId })
+      .eq('id', sim.id)
+      .select()
       .single()
     if (error) { console.error(error); return }
-    setChallengeSims(prev => {
-      // drop any previous rows for this sim (rare) and add/replace
-      const next = prev.filter(cs => !(cs.sim_id === sim.id && cs.challenge_id === challengeId))
-      return [...next, data as ChallengeSim]
-    })
+    setSims(prev => prev.map(s => s.id === sim.id ? data : s))
   }
 
   async function unlinkFromChallenge(sim: Sim) {
-    const cs = challengeSimBySimId.get(sim.id)
-    if (!cs) return
     const { error } = await supabase
-      .from('challenge_sims')
-      .delete()
-      .eq('id', cs.id)
+      .from('sims')
+      .update({ challenge_id: null })
+      .eq('id', sim.id)
     if (error) { console.error(error); return }
-    setChallengeSims(prev => prev.filter(row => row.id !== cs.id))
+    setSims(prev => prev.map(s => s.id === sim.id ? { ...s, challenge_id: null } : s))
   }
 
   // ---------- Render ----------
@@ -271,7 +233,6 @@ export default function SimsPage() {
           <Section title="All Sims">
             <SimGrid
               sims={sims.filter(s => passesSearch(s) && passesHeir(s) && passesTraits(s))}
-              challengeSimBySimId={challengeSimBySimId}
               challengesMap={challengeById}
               onLinkToChallenge={(sim) => {
                 // Quick link: choose the most recent challenge (or pop a dialog in your real app)
@@ -288,7 +249,6 @@ export default function SimsPage() {
               <Section title="Unassigned Sims" subtitle="Not linked to any challenge">
                 <SimGrid
                   sims={filteredUnassigned}
-                  challengeSimBySimId={challengeSimBySimId}
                   challengesMap={challengeById}
                   onLinkToChallenge={(sim) => {
                     const latest = challenges[0]
@@ -310,7 +270,6 @@ export default function SimsPage() {
                 <SimGrid
                   sims={sims}
                   challenge={challenge}
-                  challengeSimBySimId={challengeSimBySimId}
                   challengesMap={challengeById}
                   onLinkToChallenge={(sim) => linkToChallenge(sim, challenge.id)}
                   onUnlinkFromChallenge={unlinkFromChallenge}
@@ -368,14 +327,12 @@ function EmptyState() {
 function SimGrid({
   sims,
   challenge,
-  challengeSimBySimId,
   challengesMap,
   onLinkToChallenge,
   onUnlinkFromChallenge,
 }: {
   sims: Sim[]
   challenge?: Challenge | null
-  challengeSimBySimId: Map<string, ChallengeSim>
   challengesMap: Map<string, Challenge>
   onLinkToChallenge: (sim: Sim) => void
   onUnlinkFromChallenge: (sim: Sim) => void
@@ -387,15 +344,8 @@ function SimGrid({
           key={sim.id}
           sim={sim}
           challenge={challenge ?? null}
-          challengeSim={challengeSimBySimId.get(sim.id) ?? null}
           traitCatalog={Traits}
           onEdit={(s) => { window.location.href = `/sim/${s.id}` }}
-          onToggleFavorite={async (id, next) => {
-            // quick optimistic favorite toggle
-            const supabase = createSupabaseBrowserClient()
-            const { error } = await supabase.from('sims').update({ is_favorite: next }).eq('id', id)
-            if (error) console.error(error)
-          }}
           onLinkToChallenge={onLinkToChallenge}
           onUnlinkFromChallenge={onUnlinkFromChallenge}
           compact={false}
