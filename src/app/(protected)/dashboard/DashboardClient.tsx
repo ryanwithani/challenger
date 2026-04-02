@@ -236,7 +236,7 @@ export function DashboardClient({ initialChallenges, initialSims }: DashboardCli
                   </h2>
                   {allSims.length > 0 && (
                     <Link
-                      href="/dashboard/sims"
+                      href="/sims"
                       className="text-sm font-medium text-brand-500 hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300 flex items-center gap-1"
                     >
                       View All
@@ -296,19 +296,23 @@ export function DashboardClient({ initialChallenges, initialSims }: DashboardCli
           <div role="tabpanel" className="card !p-0 overflow-hidden">
             <div className="flex items-center justify-between px-6 py-4 border-b border-warmGray-100 dark:border-warmGray-800">
               <h2 className="font-display text-lg font-semibold text-warmGray-950 dark:text-warmGray-100">
-                All Sims
+                Sims
               </h2>
-              <span className="text-sm text-warmGray-400 dark:text-warmGray-500">
-                {allSims.length} total
-              </span>
+              {allSims.length > 0 && (
+                <Link
+                  href="/sims"
+                  className="text-sm font-medium text-brand-500 hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300 flex items-center gap-1"
+                >
+                  View all sims
+                  <TbChevronRight className="w-4 h-4" />
+                </Link>
+              )}
             </div>
             <div className="p-6">
               {allSims.length > 0 ? (
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {allSims.map((sim) => (
-                    <div key={sim.id} onClick={() => navigateToSim(sim.id)} className="cursor-pointer">
-                      <SimCard sim={sim} traitCatalog={Traits} />
-                    </div>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  {allSims.slice(0, 8).map((sim) => (
+                    <SimCard key={sim.id} sim={sim} compact traitCatalog={Traits} />
                   ))}
                 </div>
               ) : (
