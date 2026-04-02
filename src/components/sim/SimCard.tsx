@@ -88,109 +88,91 @@ export const SimCard = memo(function SimCard({
       )}
       aria-label={`${sim.name} card`}
     >
-      {/* Top media */}
-      <div className={clsx('relative w-full', compact ? 'h-28' : 'h-36', 'bg-cozy-sand dark:bg-surface-dark')}>
-        {/* Panel open button — full cover, sits at z-0 below badges/actions */}
-        {onOpenPanel && (
-          <button
-            type="button"
-            onClick={onOpenPanel}
-            className="absolute inset-0 z-0 w-full h-full focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-inset"
-            aria-label={`View details for ${sim.name}`}
-          />
-        )}
-
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={sim.avatar_url || '/images/avatars/default_sim.png'}
-          alt={`${sim.name} avatar`}
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        {/* Overlay gradient */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(0,0,0,0.35),transparent_60%)]" />
-
-        {/* Selection checkbox */}
+      {/* Card body */}
+      <div className={clsx('p-4 relative', compact && 'p-3')}>
+        {/* Selection checkbox — top left */}
         {onSelect && (
-          <div className="absolute top-2 left-2 z-20">
+          <div className="absolute top-2 left-2 z-10">
             <input
               type="checkbox"
               checked={!!isSelected}
               onChange={() => onSelect(sim.id)}
               onClick={(e) => e.stopPropagation()}
               aria-label={`Select ${sim.name}`}
-              className="h-4 w-4 rounded border-white/60 bg-white/20 text-brand-500 focus:ring-brand-400"
+              className="h-4 w-4 rounded border-warmGray-300 dark:border-warmGray-600 text-brand-500 focus:ring-brand-400"
             />
           </div>
         )}
 
-        {/* Heir / Generation badges */}
-        <div className={cn('absolute top-2 left-2 flex items-center gap-2 z-10', onSelect && 'pl-6')}>
-          {isHeir && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100/90 px-2 py-0.5 text-xs font-semibold text-amber-900 ring-1 ring-amber-200">
-              <TbCrown className="w-3 h-3" /> Heir
-            </span>
-          )}
-          {typeof generation === 'number' && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-indigo-100/90 px-2 py-0.5 text-xs font-medium text-indigo-900 ring-1 ring-indigo-200">
-              Gen {generation}
-            </span>
-          )}
-          {!isLinked && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-gray-100/90 px-2 py-0.5 text-xs font-medium text-gray-800 ring-1 ring-gray-200">
-              Unassigned
-            </span>
-          )}
-        </div>
-
-        {/* Quick actions */}
-        <div className="absolute top-2 right-2 flex items-center gap-1 z-10">
+        {/* Edit button — top right */}
+        {onEdit && (
           <button
             type="button"
-            onClick={() => onEdit?.(sim)}
-            className="rounded-full p-1.5 text-white/90 bg-black/30 hover:bg-black/40 backdrop-blur ring-1 ring-white/40 focus:outline-none focus:ring-2 focus:ring-white/60"
+            onClick={(e) => { e.stopPropagation(); onEdit(sim) }}
+            className="absolute top-2 right-2 z-10 rounded-full p-1.5 text-warmGray-400 hover:text-warmGray-600 dark:text-warmGray-500 dark:hover:text-warmGray-300 hover:bg-warmGray-100 dark:hover:bg-warmGray-800 transition-colors"
             title="Edit"
+            aria-label={`Edit ${sim.name}`}
           >
             <TbPencil className="w-3.5 h-3.5" />
           </button>
-        </div>
-      </div>
+        )}
 
-      {/* Body */}
-      <div className={clsx('p-4', compact && 'p-3')}>
-        {/* Name & nav */}
-        <div className="flex items-start justify-between gap-2">
-          <div>
-            <Link href={`/sim/${sim.id}`} className="block text-base font-semibold text-gray-900 dark:text-warmGray-100 hover:underline">
-              <SafeText>{sim.name}</SafeText>
-            </Link>
-            <div className="mt-0.5 text-xs text-gray-600 dark:text-warmGray-300">
-              {titleCaseAge(sim.age_stage)}{sim.career ? ` • ${sim.career}` : ''}{sim.aspiration ? ` • ${sim.aspiration}` : ''}
-            </div>
+        {/* Avatar + Name row — clickable for panel */}
+        <div
+          className={clsx('flex items-center gap-3', onOpenPanel && 'cursor-pointer')}
+          onClick={onOpenPanel}
+          role={onOpenPanel ? 'button' : undefined}
+          tabIndex={onOpenPanel ? 0 : undefined}
+          onKeyDown={onOpenPanel ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onOpenPanel() } } : undefined}
+          aria-label={onOpenPanel ? `View details for ${sim.name}` : undefined}
+        >
+          {/* Round avatar */}
+          <div className="w-12 h-12 rounded-full overflow-hidden bg-brand-100 dark:bg-brand-900/40 flex-shrink-0 flex items-center justify-center">
+            {sim.avatar_url ? (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img src={sim.avatar_url} alt={`${sim.name} avatar`} className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-brand-500 dark:text-brand-300 text-lg font-bold font-display">
+                {sim.name?.charAt(0)?.toUpperCase() ?? 'S'}
+              </span>
+            )}
           </div>
 
-          {/* Link / Unlink to challenge */}
-          {challenge ? (
-            isLinked ? (
-              <button
-                type="button"
-                onClick={() => onUnlinkFromChallenge?.(sim)}
-                className="rounded-md border border-gray-300 dark:border-warmGray-700 bg-white dark:bg-warmGray-850 px-2 py-1 text-xs text-gray-700 dark:text-warmGray-200 hover:bg-gray-50 dark:hover:bg-warmGray-700"
-                title="Unlink from challenge"
-              >
-                Unlink
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => onLinkToChallenge?.(sim)}
-                className="rounded-md bg-brand-500 px-2 py-1 text-xs font-medium text-white hover:bg-brand-600"
-                title="Link to this challenge"
-              >
-                Link
-              </button>
-            )
-          ) : null}
+          {/* Name + subtitle */}
+          <div className="min-w-0 flex-1">
+            <Link
+              href={`/sim/${sim.id}`}
+              className="block text-base font-semibold text-gray-900 dark:text-warmGray-100 hover:underline truncate"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <SafeText>{sim.name}</SafeText>
+            </Link>
+            <div className="mt-0.5 text-xs text-gray-600 dark:text-warmGray-300 truncate">
+              {titleCaseAge(sim.age_stage)}{sim.career ? ` \u2022 ${sim.career}` : ''}{sim.aspiration ? ` \u2022 ${sim.aspiration}` : ''}
+            </div>
+          </div>
         </div>
+
+        {/* Badges */}
+        {(isHeir || typeof generation === 'number' || !isLinked) && (
+          <div className="flex flex-wrap items-center gap-1.5 mt-3">
+            {isHeir && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 dark:bg-amber-900/30 px-2 py-0.5 text-xs font-semibold text-amber-900 dark:text-amber-300">
+                <TbCrown className="w-3 h-3" /> Heir
+              </span>
+            )}
+            {typeof generation === 'number' && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-indigo-100 dark:bg-indigo-900/30 px-2 py-0.5 text-xs font-medium text-indigo-900 dark:text-indigo-300">
+                Gen {generation}
+              </span>
+            )}
+            {!isLinked && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-warmGray-100 dark:bg-warmGray-800 px-2 py-0.5 text-xs font-medium text-warmGray-600 dark:text-warmGray-400">
+                Unassigned
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Traits */}
         <div className="mt-3">
@@ -206,7 +188,7 @@ export const SimCard = memo(function SimCard({
                     <PackIcon
                       name={t.expansionPack!}
                       size={12}
-                      owned={true /* or compute ownership */}
+                      owned={true}
                       className="ml-0.5"
                     />
                   )}
@@ -220,6 +202,31 @@ export const SimCard = memo(function SimCard({
             </ul>
           )}
         </div>
+
+        {/* Link / Unlink */}
+        {challenge ? (
+          <div className="mt-3 flex justify-end">
+            {isLinked ? (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); onUnlinkFromChallenge?.(sim) }}
+                className="rounded-md border border-gray-300 dark:border-warmGray-700 bg-white dark:bg-warmGray-850 px-2 py-1 text-xs text-gray-700 dark:text-warmGray-200 hover:bg-gray-50 dark:hover:bg-warmGray-700"
+                title="Unlink from challenge"
+              >
+                Unlink
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); onLinkToChallenge?.(sim) }}
+                className="rounded-md bg-brand-500 px-2 py-1 text-xs font-medium text-white hover:bg-brand-600"
+                title="Link to this challenge"
+              >
+                Link
+              </button>
+            )}
+          </div>
+        ) : null}
       </div>
     </article>
   )

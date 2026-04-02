@@ -99,7 +99,7 @@ export default function SimsToolbar({
 
   return (
     <div
-      className="sticky top-0 z-10 flex items-center gap-3 py-3 bg-white/90 dark:bg-warmGray-900/90 backdrop-blur border-b border-warmGray-100 dark:border-warmGray-800 flex-wrap"
+      className="sticky top-0 z-10 flex items-center gap-3 px-4 py-3 rounded-xl bg-white/90 dark:bg-warmGray-900/90 backdrop-blur border border-warmGray-100 dark:border-warmGray-800 flex-wrap"
     >
       {/* Search */}
       <input
