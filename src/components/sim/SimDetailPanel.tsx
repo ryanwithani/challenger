@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { useSimStore } from '@/src/lib/store/simStore'
 import { useChallengeStore } from '@/src/lib/store/challengeStore'
 import { useFocusManagement } from '@/src/hooks/useFocusManagement'
@@ -189,11 +188,10 @@ export default function SimDetailPanel({
         <div className="px-4 py-3 flex items-center gap-3">
           <div className="w-14 h-14 rounded-full overflow-hidden bg-brand-500 flex-shrink-0 flex items-center justify-center">
             {sim.avatar_url ? (
-              <Image
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img
                 src={sim.avatar_url}
                 alt={sim.name}
-                width={56}
-                height={56}
                 className="object-cover w-full h-full"
               />
             ) : (

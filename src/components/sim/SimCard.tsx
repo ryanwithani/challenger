@@ -2,7 +2,6 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { memo, useMemo } from 'react'
 import clsx from 'clsx'
 import { cn } from '@/src/lib/utils/cn'
@@ -101,12 +100,11 @@ export const SimCard = memo(function SimCard({
           />
         )}
 
-        <Image
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
           src={sim.avatar_url || '/images/avatars/default_sim.png'}
           alt={`${sim.name} avatar`}
-          fill
-          sizes="(max-width: 640px) 100vw, 33vw"
-          className="object-cover"
+          className="absolute inset-0 w-full h-full object-cover"
         />
         {/* Overlay gradient */}
         <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(0,0,0,0.35),transparent_60%)]" />
