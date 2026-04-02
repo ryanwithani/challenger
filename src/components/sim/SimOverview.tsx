@@ -1,16 +1,17 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import Image from 'next/image'
 import { InlineEditable } from '@/src/components/forms/InlineEditable'
 import { useSimStore } from '@/src/lib/store/simStore'
+import { useChallengeStore } from '@/src/lib/store/challengeStore'
 import { Button } from '@/src/components/ui/Button'
-import { ChallengeSim } from '@/src/types/database.types'
 import TraitPickerModal, { CatalogTrait as Trait } from '@/src/components/sim/TraitPickerModal'
 import { Traits } from '@/src/components/sim/TraitsCatalog'
 import { SafeText } from '../ui/SafeText'
+import { Database } from '@/src/types/database.types'
 
-// ---------- Types (align with your models; adjust if you already export these) ----------
+// ---------- Types ----------
 export type AgeStage =
   | 'infant'
   | 'toddler'
@@ -20,27 +21,8 @@ export type AgeStage =
   | 'adult'
   | 'elder'
 
-export interface Sim {
-  id: string
-  name: string
-  avatar_url?: string | null
-  generation?: number | null
-  is_heir?: boolean | null
-  relationship_to_heir?: string | null
-  age_stage?: AgeStage | null
-  career?: string | null
-  aspiration?: string | null
-  traits?: string[] | null
-  // add other fields you already have on Sim
-}
-
-export interface Challenge {
-  id: string
-  title: string
-  rules_url?: string | null
-  generation_goal?: string | null
-  // add other fields you already have on Challenge
-}
+type Sim = Database['public']['Tables']['sims']['Row']
+type Challenge = Database['public']['Tables']['challenges']['Row']
 
 export interface SimOverviewProps {
   sim: Sim
@@ -117,53 +99,18 @@ function normalizeSelectedToIds(
 
 // ---------- Component ----------
 export default function SimOverview({ sim, challenge }: SimOverviewProps) {
-  const {                // you already use this for Sim-only fields
-    fetchChallengeSim,
-    linkSimToChallenge,
-    updateChallengeSim,
-    fetchLatestChallengeSimForSim,
-    fetchChallengeById,
-  } = useSimStore()
-
+  const { assignToChallenge } = useSimStore()
   const updateSim = useSimStore(s => s.updateSim)
+  const storeChallenge = useChallengeStore(s => s.challenges.find(c => c.id === sim.challenge_id) ?? null)
 
-  const [challengeSim, setChallengeSim] = useState<ChallengeSim | null>(null)
-  const [challengeState, setChallengeState] = useState<Challenge | null>(challenge || null)
   const [traitModalOpen, setTraitModalOpen] = useState(false)
-  const isLinked = Boolean(challengeState?.id && challengeSim?.id)
-
-  useEffect(() => {
-    let cancelled = false
-    async function load() {
-      if (challenge?.id) {
-        const row = await fetchChallengeSim(sim.id, challenge.id)
-        if (!cancelled) { setChallengeSim(row as ChallengeSim | null); setChallengeState(challenge) }
-      } else {
-        // Not in a challenge route: derive the latest link for this sim
-        const row = await fetchLatestChallengeSimForSim(sim.id)
-        if (!cancelled) {
-          setChallengeSim(row as ChallengeSim)
-          if (row) {
-            try {
-              const ch = await fetchChallengeById(row.challenge_id)
-              if (!cancelled) setChallengeState(ch as unknown as Challenge)
-            } catch { /* ignore */ }
-          } else {
-            setChallengeState(null)
-          }
-        }
-      }
-    }
-    load()
-    return () => { cancelled = true }
-  }, [sim.id, challenge?.id, fetchChallengeSim, fetchLatestChallengeSimForSim, fetchChallengeById])
-
+  const isLinked = Boolean(sim.challenge_id)
+  const challengeState = challenge ?? storeChallenge
 
   // Helper: create the link (used by the CTA button when not linked)
   async function handleLink() {
-    if (!challenge?.id) return
-    const row = await linkSimToChallenge(sim.id, challenge.id)
-    setChallengeSim(row as ChallengeSim)
+    if (!challengeState?.id) return
+    await assignToChallenge(sim.id, challengeState.id)
   }
 
   // Save helpers
@@ -174,9 +121,7 @@ export default function SimOverview({ sim, challenge }: SimOverviewProps) {
   const saveChallengeField =
     (key: 'generation' | 'is_heir' | 'relationship_to_heir') =>
       async (value: any) => {
-        if (!challengeSim) return
-        const saved = await updateChallengeSim(challengeSim.id, { [key]: value } as any)
-        setChallengeSim(saved as ChallengeSim) // keep local in sync
+        await updateSim(sim.id, { [key]: value } as any)
       }
 
   const initialIds = normalizeSelectedToIds(sim.traits as any, Traits)
@@ -231,7 +176,7 @@ export default function SimOverview({ sim, challenge }: SimOverviewProps) {
                   </span>
                 )
               }}
-              onSave={(v) => saveSimField('age_stage')(v as AgeStage)}
+              onSave={(v) => saveSimField('age_stage')(v as string | null)}
             />
 
             {/* Career */}
@@ -268,11 +213,11 @@ export default function SimOverview({ sim, challenge }: SimOverviewProps) {
               </button>
             </div>
 
-            {(!sim.traits || sim.traits.length === 0) ? (
+            {(!sim.traits || (sim.traits as string[]).length === 0) ? (
               <p className="text-sm text-gray-500">No traits selected.</p>
             ) : (
               <div className="flex flex-wrap gap-2">
-                {sim.traits.map((traitId: string) => {
+                {(sim.traits as string[]).map((traitId: string) => {
                   const t = (Traits as unknown as Trait[]).find(tt => tt.id === traitId)
                   return (
                     <span key={traitId} className="inline-flex items-center rounded-full border border-gray-300 px-2 py-0.5 text-xs text-gray-700">
@@ -292,7 +237,7 @@ export default function SimOverview({ sim, challenge }: SimOverviewProps) {
             onClose={() => setTraitModalOpen(false)}
             initialSelected={initialIds}                // ✅ now guaranteed IDs
             catalog={Traits}
-            simAgeStage={sim.age_stage ?? 'young_adult'}
+            simAgeStage={(sim.age_stage ?? 'young_adult') as AgeStage}
             // ownedPacks={undefined} // omit if you don't want pack gating
             maxSelectable={3}                           // or remove if you don't want a cap
             onSave={async (nextIds) => {
@@ -310,7 +255,7 @@ export default function SimOverview({ sim, challenge }: SimOverviewProps) {
             <p className="text-gray-500">This Sim is not in a challenge context.</p>
           ) : !isLinked ? (
             <div className="space-y-3">
-              <p className="text-gray-500">This Sim isn't linked to "<SafeText>{challengeState.title}</SafeText>".</p>
+              <p className="text-gray-500">This Sim isn't linked to "<SafeText>{challengeState.name}</SafeText>".</p>
               <button
                 type="button"
                 onClick={handleLink}
@@ -326,7 +271,7 @@ export default function SimOverview({ sim, challenge }: SimOverviewProps) {
                 id="cs-generation"
                 label="Generation"
                 type="number"
-                value={challengeSim?.generation ?? 1}
+                value={sim.generation ?? 1}
                 min={1}
                 max={50}
                 validate={(n) =>
@@ -340,18 +285,18 @@ export default function SimOverview({ sim, challenge }: SimOverviewProps) {
                 id="cs-is-heir"
                 label="Heir"
                 type="checkbox"
-                value={!!challengeSim?.is_heir}
+                value={!!sim.is_heir}
                 format={(v) => (v ? '👑 Current Heir' : '—')}
                 onSave={(v) => saveChallengeField('is_heir')(v as boolean)}
               />
 
               {/* Relationship to Heir (only if not heir) */}
-              {!challengeSim?.is_heir && (
+              {!sim.is_heir && (
                 <InlineEditable
                   id="cs-rel-to-heir"
                   label="Relationship to Heir"
                   type="select"
-                  value={challengeSim?.relationship_to_heir ?? ''}
+                  value={sim.relationship_to_heir ?? ''}
                   options={[
                     { value: '', label: 'Family Member' },
                     { value: 'spouse', label: 'Spouse' },
@@ -366,28 +311,12 @@ export default function SimOverview({ sim, challenge }: SimOverviewProps) {
                 />
               )}
 
-              {/* Optional: challenge info */}
-              <div className="pt-2 border-t border-gray-100 space-y-2">
+              {/* Challenge title */}
+              <div className="pt-2 border-t border-gray-100">
                 <div className="flex items-center gap-2">
                   <span className="text-gray-500">Challenge:</span>
-                  <span className="font-medium"><SafeText>{challengeState.title}</SafeText></span>
+                  <span className="font-medium"><SafeText>{challengeState.name}</SafeText></span>
                 </div>
-                {challengeState.generation_goal && (
-                  <div className="flex items-start gap-2">
-                    <span className="text-gray-500 mt-0.5">Generation goal:</span>
-                    <span>{challengeState.generation_goal}</span>
-                  </div>
-                )}
-                {challengeState.rules_url && (
-                  <a
-                    href={challengeState.rules_url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-indigo-600 hover:underline"
-                  >
-                    View rules
-                  </a>
-                )}
               </div>
             </div>
           )}
