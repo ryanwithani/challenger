@@ -89,5 +89,5 @@ export const SKILLS: readonly ChecklistItem[] = [
   { key: 'skills:Imagination', name: 'Imagination', category: 'Toddler', pack: 'TS4' },
   { key: 'skills:Movement', name: 'Movement', category: 'Toddler', pack: 'TS4' },
   { key: 'skills:Potty', name: 'Potty', category: 'Toddler', pack: 'TS4' },
-  { key: 'skills:Thinking', name: 'Thinking', category: 'Toddler', pack: 'TS4' },
+  { key: 'skills:Thinking', name: 'Thinking', category: 'Toddler', pack: 'TS' },
 ] as const
