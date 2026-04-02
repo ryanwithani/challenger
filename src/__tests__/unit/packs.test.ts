@@ -31,8 +31,8 @@ describe('packs data', () => {
       expect(baseGame[0].acronym).toBe('TS4')
     })
 
-    test('has 19 expansion packs', () => {
-      expect(getPacksByCategory('expansion_pack')).toHaveLength(19)
+    test('has 20 expansion packs', () => {
+      expect(getPacksByCategory('expansion_pack')).toHaveLength(20)
     })
 
     test('has 12 game packs (including Vampires)', () => {
@@ -70,6 +70,10 @@ describe('packs data', () => {
       PACKS.forEach((p) => {
         expect(PACK_ACRONYMS).toContain(p.acronym)
       })
+    })
+
+    test('contains AA pack acronym', () => {
+      expect(PACK_ACRONYMS).toContain('AA')
     })
   })
 

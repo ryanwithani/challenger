@@ -48,6 +48,7 @@ export const PACKS: readonly PackDef[] = [
   { acronym: 'L&D', name: 'Life & Death', category: 'expansion_pack' },
   { acronym: 'B&H', name: 'Business & Hobbies', category: 'expansion_pack' },
   { acronym: 'EBN', name: 'Enchanted by Nature', category: 'expansion_pack' },
+  { acronym: 'AA', name: 'Adventures Aplenty', category: 'expansion_pack' },
 
   // Game Packs
   { acronym: 'OR', name: 'Outdoor Retreat', category: 'game_pack' },
