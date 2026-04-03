@@ -8,14 +8,18 @@ import { Textarea } from '@/src/components/ui/Textarea'
 import { FormField } from '@/src/components/ui/FormField'
 import { basicInfoSchema, type BasicInfoData } from '@/src/lib/validations/challenge'
 import { CHALLENGE_TEMPLATES } from '@/src/data/challenge-templates'
+import { InlineConfirm } from '@/src/components/ui/InlineConfirm'
 
 interface BasicInfoStepProps {
     data: BasicInfoData | undefined
     onNext: (data: BasicInfoData) => void
     onCancel: () => void
+    showCancelConfirm?: boolean
+    onConfirmCancel?: () => void
+    onDismissCancelConfirm?: () => void
 }
 
-export function BasicInfoStep({ data, onNext, onCancel }: BasicInfoStepProps) {
+export function BasicInfoStep({ data, onNext, onCancel, showCancelConfirm = false, onConfirmCancel, onDismissCancelConfirm }: BasicInfoStepProps) {
     const {
         register,
         handleSubmit,
@@ -48,7 +52,7 @@ export function BasicInfoStep({ data, onNext, onCancel }: BasicInfoStepProps) {
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-6">Choose Your Challenge</h2>
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-warmGray-100 mb-6">Choose Your Challenge</h2>
 
                 {/* Show form-level errors */}
                 {Object.keys(errors).length > 0 && (
@@ -105,13 +109,13 @@ export function BasicInfoStep({ data, onNext, onCancel }: BasicInfoStepProps) {
                                     />
                                     <div className="flex items-start space-x-4 w-full">
                                         <div className="flex-1 min-w-0">
-                                            <div className={`font-semibold mb-1 ${isDisabled ? 'text-gray-500' : 'text-gray-900'}`}>
+                                            <div className={`font-semibold mb-1 ${isDisabled ? 'text-gray-500 dark:text-warmGray-500' : 'text-gray-900 dark:text-warmGray-100'}`}>
                                                 <div className="flex items-start gap-2">
                                                     <span className="flex-1 leading-tight">{template.label}</span>
                                                     {isDisabled && <span className="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-full whitespace-nowrap flex-shrink-0 mt-0.5">Coming Soon</span>}
                                                 </div>
                                             </div>
-                                            <div className={`text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-600'}`}>
+                                            <div className={`text-sm ${isDisabled ? 'text-gray-400 dark:text-warmGray-600' : 'text-gray-600 dark:text-warmGray-300'}`}>
                                                 {template.description}
                                             </div>
                                         </div>
@@ -179,14 +183,22 @@ export function BasicInfoStep({ data, onNext, onCancel }: BasicInfoStepProps) {
 
             {/* Navigation */}
             <div className="flex justify-between pt-6">
-                <Button 
-                    variant="outline" 
-                    onClick={onCancel}
-                    type="button"
-                    disabled={isSubmitting}
-                >
-                    Cancel
-                </Button>
+                {showCancelConfirm ? (
+                    <InlineConfirm
+                        message="Discard your progress?"
+                        onConfirm={onConfirmCancel!}
+                        onCancel={onDismissCancelConfirm!}
+                    />
+                ) : (
+                    <Button
+                        variant="outline"
+                        onClick={onCancel}
+                        type="button"
+                        disabled={isSubmitting}
+                    >
+                        Cancel
+                    </Button>
+                )}
                 <Button 
                     variant="primary"
                     type="submit"
