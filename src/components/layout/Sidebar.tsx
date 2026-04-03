@@ -85,6 +85,7 @@ export function Sidebar() {
             {/* Settings Icon */}
             <Link
               href="/profile"
+              aria-label="Settings"
               className="ml-2 p-2 rounded-lg text-warmGray-500 hover:text-warmGray-200 hover:bg-warmGray-800 transition-colors"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
