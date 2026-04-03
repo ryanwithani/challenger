@@ -5,7 +5,6 @@ import { useRouter, usePathname } from 'next/navigation'
 import { useAuthStore } from '@/src/lib/store/authStore'
 import { Sidebar } from '@/src/components/layout/Sidebar'
 import { Navbar } from '@/src/components/layout/Navbar'
-import { Footer } from '@/src/components/layout/Footer'
 
 export default function ProtectedLayout({
   children,
