@@ -64,12 +64,11 @@ export default function ProtectedLayout({
   }
 
   return (
-    <div className="flex min-h-screen bg-cozy-cream dark:bg-surface-dark">
-      <Sidebar />
-      <div className="flex-1 flex flex-col"> {/* REMOVE: overflow-hidden */}
-        <Navbar />
-        {/* REMOVE: flex-1 and overflow classes. Let it be a simple container. */}
-        <main className="p-6">
+    <div className="flex flex-col min-h-screen bg-cozy-cream dark:bg-surface-dark">
+      <Navbar />
+      <div className="flex flex-1">
+        <Sidebar />
+        <main className="flex-1 p-4 lg:p-6 pb-24 lg:pb-6">
           {children}
         </main>
       </div>
