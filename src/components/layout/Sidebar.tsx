@@ -29,9 +29,9 @@ export function Sidebar() {
   return (
     <>
       {/* Desktop sidebar */}
-      <div className="hidden lg:flex w-64 bg-surface-muted dark:bg-warmGray-900 border-r border-brand-100 dark:border-warmGray-700 flex-col transition-colors">
-        <div className="flex-1 flex flex-col pt-6 pb-4 overflow-y-auto">
-          <nav className="mt-4 flex-1 px-4 space-y-1">
+      <div className="hidden lg:flex w-64 bg-warmGray-900 border-r border-warmGray-800 flex-col transition-colors">
+        <div className="flex-1 flex flex-col pt-4 pb-4 overflow-y-auto">
+          <nav className="flex-1 px-4 space-y-1">
             <div className="space-y-1">
               {navigation.map((item) => {
                 const isActive = isActiveLink(item.href)
@@ -43,8 +43,8 @@ export function Sidebar() {
                     className={clsx(
                       'group flex items-center px-4 py-3 text-base font-medium rounded-lg transition-colors',
                       {
-                        'bg-brand-50 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300': isActive,
-                        'text-warmGray-600 hover:bg-warmGray-50 hover:text-warmGray-950 dark:text-warmGray-200 dark:hover:bg-warmGray-800': !isActive,
+                        'bg-brand-900/40 text-brand-300': isActive,
+                        'text-warmGray-400 hover:bg-warmGray-800 hover:text-warmGray-100': !isActive,
                       }
                     )}
                   >
@@ -52,8 +52,8 @@ export function Sidebar() {
                       className={clsx(
                         'mr-3 h-6 w-6 flex-shrink-0',
                         {
-                          'text-brand-600 dark:text-brand-400': isActive,
-                          'text-warmGray-400 group-hover:text-warmGray-500 dark:text-warmGray-300 dark:group-hover:text-warmGray-200': !isActive,
+                          'text-brand-400': isActive,
+                          'text-warmGray-500 group-hover:text-warmGray-300': !isActive,
                         }
                       )}
                       aria-hidden="true"
@@ -69,7 +69,7 @@ export function Sidebar() {
         </div>
 
         {/* User Section */}
-        <div className="flex-shrink-0 flex border-t border-brand-100 dark:border-warmGray-700 p-5">
+        <div className="flex-shrink-0 flex border-t border-warmGray-800 p-5">
           <div className="flex items-center w-full">
             <div className="flex-shrink-0">
               <div className="w-10 h-10 bg-brand-500 rounded-full flex items-center justify-center">
@@ -77,7 +77,7 @@ export function Sidebar() {
               </div>
             </div>
             <div className="ml-3 flex-1 min-w-0">
-              <p className="text-base font-medium text-warmGray-600 dark:text-warmGray-200 truncate">
+              <p className="text-base font-medium text-warmGray-300 truncate">
                 {displayName}
               </p>
             </div>
@@ -85,7 +85,7 @@ export function Sidebar() {
             {/* Settings Icon */}
             <Link
               href="/profile"
-              className="ml-2 p-2 rounded-lg text-warmGray-400 hover:text-warmGray-600 dark:text-warmGray-500 dark:hover:text-warmGray-200 hover:bg-warmGray-100 dark:hover:bg-warmGray-800 transition-colors"
+              className="ml-2 p-2 rounded-lg text-warmGray-500 hover:text-warmGray-200 hover:bg-warmGray-800 transition-colors"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -96,7 +96,7 @@ export function Sidebar() {
         </div>
       </div>
 
-      {/* Mobile bottom navigation */}
+      {/* Mobile bottom navigation — unchanged */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-surface-muted dark:bg-warmGray-900 border-t border-brand-100 dark:border-warmGray-700">
         <div className="flex justify-around items-center h-[72px]">
           {navigation.map((item) => {
