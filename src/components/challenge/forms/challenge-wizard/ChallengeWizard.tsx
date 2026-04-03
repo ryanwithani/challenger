@@ -7,6 +7,7 @@ import { BasicInfoStep } from './BasicInfoStep'
 import { ConfigurationStep } from './ConfigurationStep'
 import { SummaryStep } from './SummaryStep'
 import { CHALLENGE_TEMPLATES } from '@/src/data/challenge-templates'
+import { FadeTransition } from '@/src/components/ui/FadeTransition'
 import type { BasicInfoData, LegacyConfigData } from '@/src/lib/validations/challenge'
 import type { Database } from '@/src/types/database.types'
 
@@ -30,6 +31,7 @@ const CONFIG_STORAGE_KEY = 'challenge_wizard_config'
 export function ChallengeWizard({ onSubmit, onCancel, loading }: ChallengeWizardProps) {
   const [currentStep, setCurrentStep] = useState(1)
   const [wizardData, setWizardData] = useState<WizardData>({})
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false)
   const [isClient, setIsClient] = useState(false)
   const { preferences, fetchPreferences } = useUserPreferencesStore()
   const { user } = useAuthStore()
@@ -189,6 +191,23 @@ export function ChallengeWizard({ onSubmit, onCancel, loading }: ChallengeWizard
     onCancel()
   }, [isClient, onCancel])
 
+  const handleCancelClick = useCallback(() => {
+    if (wizardData.basicInfo) {
+      setShowCancelConfirm(true)
+    } else {
+      handleCancel()
+    }
+  }, [wizardData.basicInfo, handleCancel])
+
+  const handleConfirmCancel = useCallback(() => {
+    setShowCancelConfirm(false)
+    handleCancel()
+  }, [handleCancel])
+
+  const dismissCancelConfirm = useCallback(() => {
+    setShowCancelConfirm(false)
+  }, [])
+
   return (
     <div className="space-y-8">
       {/* Progress Steps */}
@@ -202,10 +221,10 @@ export function ChallengeWizard({ onSubmit, onCancel, loading }: ChallengeWizard
             return (
               <li key={step.name} className="relative flex-1">
                 {stepIdx !== steps.length - 1 && (
-                  <div className="absolute top-4 left-1/2 w-full h-0.5 bg-gray-200">
+                  <div className="absolute top-4 left-1/2 w-full h-0.5 bg-gray-200 dark:bg-warmGray-700">
                     <div
-                      className={`h-full transition-all duration-300 ${
-                        isComplete ? 'bg-brand-500 w-full' : 'bg-gray-200 w-0'
+                      className={`h-full transition-all duration-300 ease-out ${
+                        isComplete ? 'bg-brand-500 w-full' : 'bg-gray-200 dark:bg-warmGray-700 w-0'
                       }`}
                     />
                   </div>
@@ -227,14 +246,14 @@ export function ChallengeWizard({ onSubmit, onCancel, loading }: ChallengeWizard
                       </svg>
                     ) : (
                       <span className={`text-sm font-medium ${
-                        isCurrent ? 'text-brand-500' : 'text-gray-500'
+                        isCurrent ? 'text-brand-500' : 'text-gray-500 dark:text-warmGray-400'
                       }`}>
                         {step.number}
                       </span>
                     )}
                   </div>
                   <span className={`mt-2 text-xs font-medium text-center ${
-                    isCurrent ? 'text-brand-500' : isComplete ? 'text-gray-700' : 'text-gray-500'
+                    isCurrent ? 'text-brand-500' : isComplete ? 'text-gray-700 dark:text-warmGray-300' : 'text-gray-500 dark:text-warmGray-400'
                   }`}>
                     {step.name}
                   </span>
@@ -246,34 +265,39 @@ export function ChallengeWizard({ onSubmit, onCancel, loading }: ChallengeWizard
       </nav>
 
       {/* Step Content */}
-      <div className="mt-8">
-        {currentStep === 1 && (
-          <BasicInfoStep
-            data={wizardData.basicInfo}
-            onNext={handleBasicInfoNext}
-            onCancel={handleCancel}
-          />
-        )}
+      <FadeTransition stepKey={currentStep}>
+        <div className="mt-8">
+          {currentStep === 1 && (
+            <BasicInfoStep
+              data={wizardData.basicInfo}
+              onNext={handleBasicInfoNext}
+              onCancel={handleCancelClick}
+              showCancelConfirm={showCancelConfirm}
+              onConfirmCancel={handleConfirmCancel}
+              onDismissCancelConfirm={dismissCancelConfirm}
+            />
+          )}
 
-        {currentStep === 2 && wizardData.basicInfo?.challenge_type === 'legacy' && (
-          <ConfigurationStep
-            challengeType={wizardData.basicInfo.challenge_type}
-            data={wizardData.configuration}
-            onNext={handleConfigurationNext}
-            onBack={goBack}
-          />
-        )}
+          {currentStep === 2 && wizardData.basicInfo?.challenge_type === 'legacy' && (
+            <ConfigurationStep
+              challengeType={wizardData.basicInfo.challenge_type}
+              data={wizardData.configuration}
+              onNext={handleConfigurationNext}
+              onBack={goBack}
+            />
+          )}
 
-        {((currentStep === 2 && wizardData.basicInfo?.challenge_type !== 'legacy') ||
-          (currentStep === 3 && wizardData.basicInfo?.challenge_type === 'legacy')) && (
-          <SummaryStep
-            data={wizardData}
-            onSubmit={handleFinalSubmit}
-            onBack={goBack}
-            loading={loading}
-          />
-        )}
-      </div>
+          {((currentStep === 2 && wizardData.basicInfo?.challenge_type !== 'legacy') ||
+            (currentStep === 3 && wizardData.basicInfo?.challenge_type === 'legacy')) && (
+            <SummaryStep
+              data={wizardData}
+              onSubmit={handleFinalSubmit}
+              onBack={goBack}
+              loading={loading}
+            />
+          )}
+        </div>
+      </FadeTransition>
     </div>
   )
 }
