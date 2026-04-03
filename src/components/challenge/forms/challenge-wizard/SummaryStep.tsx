@@ -36,7 +36,7 @@ export function SummaryStep({ data, onSubmit, onBack, loading }: SummaryStepProp
 
     return (
         <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Review Your Challenge</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-warmGray-100 mb-6">Review Your Challenge</h2>
 
             {/* Challenge Details */}
             <Card>
@@ -48,17 +48,17 @@ export function SummaryStep({ data, onSubmit, onBack, loading }: SummaryStepProp
                 <CardContent>
                     <dl className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <dt className="text-sm font-medium text-gray-500">Template</dt>
-                            <dd className="text-gray-900">{template?.label}</dd>
+                            <dt className="text-sm font-medium text-gray-500 dark:text-warmGray-400">Template</dt>
+                            <dd className="text-gray-900 dark:text-warmGray-50">{template?.label}</dd>
                         </div>
                         <div>
-                            <dt className="text-sm font-medium text-gray-500">Name</dt>
-                            <dd className="text-gray-900">{data.basicInfo?.name}</dd>
+                            <dt className="text-sm font-medium text-gray-500 dark:text-warmGray-400">Name</dt>
+                            <dd className="text-gray-900 dark:text-warmGray-50">{data.basicInfo?.name}</dd>
                         </div>
                         {data.basicInfo?.description && (
                             <div className="md:col-span-2">
-                                <dt className="text-sm font-medium text-gray-500">Description</dt>
-                                <dd className="text-gray-900 mt-1">{data.basicInfo.description}</dd>
+                                <dt className="text-sm font-medium text-gray-500 dark:text-warmGray-400">Description</dt>
+                                <dd className="text-gray-900 dark:text-warmGray-50 mt-1">{data.basicInfo.description}</dd>
                             </div>
                         )}
                     </dl>
@@ -77,7 +77,7 @@ export function SummaryStep({ data, onSubmit, onBack, loading }: SummaryStepProp
                     <CardContent>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <dt className="text-sm font-medium text-gray-500 mb-2">Starting Difficulty</dt>
+                                <dt className="text-sm font-medium text-gray-500 dark:text-warmGray-400 mb-2">Starting Difficulty</dt>
                                 <dd className="flex items-center gap-2">
                                     <span className={`px-3 py-1 rounded-full text-sm font-medium ${getDifficultyColor((data.configuration as any).start_type || 'regular')
                                         }`}>
@@ -93,28 +93,28 @@ export function SummaryStep({ data, onSubmit, onBack, loading }: SummaryStepProp
                             </div>
 
                             <div>
-                                <dt className="text-sm font-medium text-gray-500">Gender Law</dt>
-                                <dd className="text-gray-900">{formatConfigValue((data.configuration as any).gender_law || '')}</dd>
+                                <dt className="text-sm font-medium text-gray-500 dark:text-warmGray-400">Gender Law</dt>
+                                <dd className="text-gray-900 dark:text-warmGray-50">{formatConfigValue((data.configuration as any).gender_law || '')}</dd>
                             </div>
 
                             <div>
-                                <dt className="text-sm font-medium text-gray-500">Bloodline Law</dt>
-                                <dd className="text-gray-900">{formatConfigValue((data.configuration as any).bloodline_law || '')}</dd>
+                                <dt className="text-sm font-medium text-gray-500 dark:text-warmGray-400">Bloodline Law</dt>
+                                <dd className="text-gray-900 dark:text-warmGray-50">{formatConfigValue((data.configuration as any).bloodline_law || '')}</dd>
                             </div>
 
                             <div>
-                                <dt className="text-sm font-medium text-gray-500">Heir Selection</dt>
-                                <dd className="text-gray-900">{formatConfigValue((data.configuration as any).heir_selection || '')}</dd>
+                                <dt className="text-sm font-medium text-gray-500 dark:text-warmGray-400">Heir Selection</dt>
+                                <dd className="text-gray-900 dark:text-warmGray-50">{formatConfigValue((data.configuration as any).heir_selection || '')}</dd>
                             </div>
 
                             <div>
-                                <dt className="text-sm font-medium text-gray-500">Species Rule</dt>
-                                <dd className="text-gray-900">{formatConfigValue((data.configuration as any).species_rule || '')}</dd>
+                                <dt className="text-sm font-medium text-gray-500 dark:text-warmGray-400">Species Rule</dt>
+                                <dd className="text-gray-900 dark:text-warmGray-50">{formatConfigValue((data.configuration as any).species_rule || '')}</dd>
                             </div>
 
                             <div>
-                                <dt className="text-sm font-medium text-gray-500">Lifespan</dt>
-                                <dd className="text-gray-900">{formatConfigValue((data.configuration as any).lifespan || '')}</dd>
+                                <dt className="text-sm font-medium text-gray-500 dark:text-warmGray-400">Lifespan</dt>
+                                <dd className="text-gray-900 dark:text-warmGray-50">{formatConfigValue((data.configuration as any).lifespan || '')}</dd>
                             </div>
                         </div>
                     </CardContent>
@@ -122,18 +122,23 @@ export function SummaryStep({ data, onSubmit, onBack, loading }: SummaryStepProp
             )}             
 
             {/* Navigation */}
-            <div className="flex justify-between pt-6">
-                <Button variant="outline" onClick={onBack}>
-                    Back
-                </Button>
-                <Button
-                    onClick={handleSubmit}
-                    loading={loading}
-                    loadingText="Creating Challenge..."
-                    variant="primary"
-                >
-                    Create Challenge
-                </Button>
+            <div className="flex flex-col gap-2 pt-6">
+                <div className="flex justify-between">
+                    <Button variant="outline" onClick={onBack} disabled={loading}>
+                        Back
+                    </Button>
+                    <Button
+                        onClick={handleSubmit}
+                        loading={loading}
+                        loadingText="Creating Challenge..."
+                        variant="primary"
+                    >
+                        Create Challenge
+                    </Button>
+                </div>
+                {loading && (
+                    <p className="text-sm text-brand-500 text-right">Creating your challenge...</p>
+                )}
             </div>
         </div>
     )
