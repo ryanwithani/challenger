@@ -52,19 +52,6 @@ function LegacyConfigurationStep({
         mode: 'onBlur',
     })
 
-    if (Object.keys(errors).length > 0) {
-        <div className="mb-6 p-4 bg-amber-50 border-2 border-amber-200 rounded-xl">
-            <div className="flex items-start gap-3">
-                <span className="text-xl">⚠️</span>
-                <div>
-                    <p className="text-amber-800 font-semibold">
-                        Please review your selections
-                    </p>
-                </div>
-            </div>
-        </div>
-    }
-
     const watchedValues = watch()
 
     const onSubmit = (formData: LegacyConfigData) => {
@@ -75,6 +62,19 @@ function LegacyConfigurationStep({
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div>
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-warmGray-100 mb-6">Legacy Challenge Configuration</h2>
+
+                {Object.keys(errors).length > 0 && (
+                    <div className="mb-6 p-4 bg-amber-50 border-2 border-amber-200 rounded-xl dark:bg-amber-900/20 dark:border-amber-700">
+                        <div className="flex items-start gap-3">
+                            <span className="text-xl">⚠️</span>
+                            <div>
+                                <p className="text-amber-800 dark:text-amber-200 font-semibold">
+                                    Please review your selections
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* Starting Difficulty */}
                 <Card className="mb-6">

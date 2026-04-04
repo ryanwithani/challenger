@@ -46,7 +46,7 @@ export default function WelcomeStep({ onComplete, userName = 'there', loading = 
           </svg>
         </div>
 
-        <h1 className="text-4xl font-bold text-gray-900 dark:text-warmGray-100 mb-3">
+        <h1 className="font-display text-4xl font-bold text-gray-900 dark:text-warmGray-100 mb-3">
           You're all set, {userName}!
         </h1>
         <p className="text-lg text-gray-600 dark:text-warmGray-200 max-w-2xl mx-auto">
@@ -56,16 +56,16 @@ export default function WelcomeStep({ onComplete, userName = 'there', loading = 
 
       {/* Quick Start Options */}
       <div className="max-w-2xl mx-auto space-y-4 mb-12">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-warmGray-100 mb-4 text-center">
+        <h2 className="font-display text-xl font-semibold text-gray-900 dark:text-warmGray-100 mb-4 text-center">
           What would you like to do first?
         </h2>
 
         <div ref={optionsRef} className="grid md:grid-cols-2 gap-4">
           {/* Start a Challenge */}
           <div
-            className={`group border-2 rounded-xl p-6 hover:shadow-lg transition-all cursor-pointer bg-white dark:bg-surface-dark ${selectedOption === 'challenge'
+            className={`group border-2 rounded-lg p-6 hover:shadow-lg transition-all cursor-pointer bg-white dark:bg-warmGray-900 ${selectedOption === 'challenge'
               ? 'border-brand-500 shadow-lg'
-              : 'border-gray-200 dark:border-warmGray-700 hover:border-brand-400'
+              : 'border-brand-100 dark:border-warmGray-700 hover:border-brand-400'
               }`}
             onClick={() => handleOptionSelect('challenge')}
           >
@@ -82,9 +82,9 @@ export default function WelcomeStep({ onComplete, userName = 'there', loading = 
 
           {/* Create a Sim */}
           <div
-            className={`group border-2 rounded-xl p-6 hover:shadow-lg transition-all cursor-pointer bg-white dark:bg-surface-dark ${selectedOption === 'sim'
+            className={`group border-2 rounded-lg p-6 hover:shadow-lg transition-all cursor-pointer bg-white dark:bg-warmGray-900 ${selectedOption === 'sim'
               ? 'border-brand-500 dark:border-brand-400 shadow-lg'
-              : 'border-gray-200 dark:border-warmGray-700 hover:border-brand-400 dark:hover:border-brand-500'
+              : 'border-brand-100 dark:border-warmGray-700 hover:border-brand-400 dark:hover:border-brand-500'
               }`}
             onClick={() => handleOptionSelect('sim')}
           >
@@ -101,7 +101,7 @@ export default function WelcomeStep({ onComplete, userName = 'there', loading = 
         </div>
 
         {/* Or explore dashboard */}
-        <div className="border-2 border-dashed border-gray-200 dark:border-warmGray-700 rounded-xl p-6 text-center">
+        <div className="border-2 border-dashed border-brand-100 dark:border-warmGray-700 rounded-lg p-6 text-center">
           <svg className="w-8 h-8 text-gray-400 dark:text-warmGray-500 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -114,7 +114,7 @@ export default function WelcomeStep({ onComplete, userName = 'there', loading = 
 
       {/* Features Preview */}
       <div className="max-w-2xl mx-auto mb-12">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-warmGray-100 mb-4 text-center">
+        <h3 className="font-display text-lg font-semibold text-gray-900 dark:text-warmGray-100 mb-4 text-center">
           What you can do with Challenger
         </h3>
         <div className="grid sm:grid-cols-3 gap-4 text-center">

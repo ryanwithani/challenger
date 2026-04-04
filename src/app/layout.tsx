@@ -1,11 +1,11 @@
 import type { Metadata } from 'next'
-import { Source_Serif_4, Fraunces, Playfair_Display } from 'next/font/google'
+import { Nunito_Sans, Fraunces } from 'next/font/google'
 import { ThemeProvider } from '@/src/context/ThemeProvider'
+import { ToastContainer } from '@/src/components/ui/Toast'
 import './globals.css'
 
-const sourceSerif4 = Source_Serif_4({
+const nunitoSans = Nunito_Sans({
   subsets: ['latin'],
-  axes: ['opsz'],
   variable: '--font-body',
   display: 'swap',
 })
@@ -14,14 +14,6 @@ const fraunces = Fraunces({
   subsets: ['latin'],
   axes: ['SOFT', 'opsz'],
   variable: '--font-display',
-  display: 'swap',
-})
-
-const playfairDisplay = Playfair_Display({
-  subsets: ['latin'],
-  weight: ['400', '700'],
-  style: ['normal', 'italic'],
-  variable: '--font-brand',
   display: 'swap',
 })
 
@@ -42,10 +34,11 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${sourceSerif4.variable} ${fraunces.variable} ${playfairDisplay.variable}`}>
+    <html lang="en" suppressHydrationWarning className={`${nunitoSans.variable} ${fraunces.variable}`}>
       <body>
         <ThemeProvider>
           {children}
+          <ToastContainer />
         </ThemeProvider>
       </body>
     </html>

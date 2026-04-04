@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { createSupabaseBrowserClient } from '@/src/lib/supabase/client'
 import { SimWizard } from '@/src/components/sim/form/SimWizard'
-import { Toast } from '@/src/components/ui/Toast'
+import { toast } from '@/src/lib/store/toastStore'
 import type { Database } from '@/src/types/database.types'
 
 type SimInsert = Database['public']['Tables']['sims']['Insert']
@@ -13,7 +13,6 @@ export default function NewSimClient() {
   const router = useRouter()
 
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
 
   async function handleFinalSubmit(simData: SimInsert) {
     setIsSubmitting(true)
@@ -33,17 +32,14 @@ export default function NewSimClient() {
 
       if (error) throw error;
 
-      setToast({
-        message: `${simData.name} has been created successfully!`,
-        type: 'success'
-      });
+      toast.success(`${simData.name} has been created successfully!`)
 
       setTimeout(() => {
         router.push(`/sim/${data.id}`);
       }, 1500);
 
     } catch (err: any) {
-      setToast({ message: err.message || 'Failed to create sim.', type: 'error' });
+      toast.error(err.message || 'Failed to create sim.')
       setIsSubmitting(false);
     }
   }
@@ -77,11 +73,6 @@ export default function NewSimClient() {
           />
         </div>
 
-        {toast && (
-          <div className="fixed top-5 right-5 z-50">
-              <Toast message={toast.message} type={toast.type} />
-          </div>
-        )}
       </div>
     </div>
   )

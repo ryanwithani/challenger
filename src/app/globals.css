@@ -4,39 +4,39 @@
 
 @layer base {
   :root {
-    /* Light mode colors - Warm Sunset Theme */
-    --background: 30 90% 98%;
-    --foreground: 18 60% 15%;
-    /* warm dark brown for text */
-    --background-dark: 20 25% 8%;
-    /* warm dark brown instead of cool black */
-    --foreground-dark: 30 15% 95%;
-    /* warm cream white for dark mode text */
+    /* Light mode colors - Deep Violet Theme */
+    --background: 270 25% 98%;
+    --foreground: 260 30% 12%;
+    /* deep violet-dark for text */
+    --background-dark: 270 30% 7%;
+    /* deep purple instead of warm brown */
+    --foreground-dark: 270 20% 95%;
+    /* light lavender white for dark mode text */
 
-    /* Semantic colors - Warm tones */
-    --border: 30 40% 90%;
-    /* warm cream border */
-    --border-dark: 20 20% 20%;
-    /* warm dark border */
+    /* Semantic colors - Violet tones */
+    --border: 265 20% 88%;
+    /* lavender-tinted border */
+    --border-dark: 265 20% 22%;
+    /* dark purple border */
 
-    --card: 34 100% 98%;
-    --card-dark: 20 20% 12%;
-    /* warm dark card background */
+    --card: 270 40% 99%;
+    --card-dark: 270 25% 11%;
+    /* dark purple card background */
 
-    --muted: 30 50% 96%;
-    /* warm cream muted */
-    --muted-dark: 20 15% 18%;
-    /* warm dark muted */
+    --muted: 265 20% 96%;
+    /* light muted purple */
+    --muted-dark: 265 15% 17%;
+    /* dark purple muted */
 
-    --primary: 16 100% 60%;
-    /* warm coral - #ff6b35 */
-    --primary-dark: 16 95% 65%;
-    /* lighter coral for dark mode */
+    --primary: 258 90% 66%;
+    /* violet - #8b5cf6 */
+    --primary-dark: 258 80% 72%;
+    /* lighter violet for dark mode */
 
-    --secondary: 30 50% 96%;
-    /* warm cream */
-    --secondary-dark: 20 15% 18%;
-    /* warm dark secondary */
+    --secondary: 265 20% 96%;
+    /* light lavender */
+    --secondary-dark: 265 15% 17%;
+    /* dark purple secondary */
   }
 
   .dark {
@@ -56,18 +56,18 @@
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
-    font-family: var(--font-body), Georgia, serif;
+    font-family: var(--font-body), system-ui, sans-serif;
     font-optical-sizing: auto;
     line-height: 1.6;
     transition: background-color 0.3s ease, color 0.3s ease;
   }
 
   .dark body {
-    color: #f0ebe3;
+    color: #eceaf6;
   }
 
   .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
-    color: #f5e6d3;
+    color: #f5f4fb;
   }
 
   /* Ensure SVG logos have transparent backgrounds */
@@ -86,9 +86,19 @@
   }
 
   .card {
-    @apply rounded-lg p-6 transition-colors;
+    @apply rounded-2xl p-6 shadow-sm transition-colors;
     background-color: hsl(var(--card));
     border: 1px solid hsl(var(--border));
+  }
+
+  .card--completed {
+    background-color: rgb(245 243 255 / 0.5);
+    border-color: rgb(221 214 254);
+  }
+
+  .dark .card--completed {
+    background-color: rgb(76 29 149 / 0.15);
+    border-color: rgb(91 33 182);
   }
 
   /* Dark mode variants for components */
@@ -101,22 +111,41 @@
   }
 }
 
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
 @layer utilities {
+
+  .animate-slide-in-right {
+    animation: slide-in-right 0.2s ease-out;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-slide-in-right {
+      animation: none;
+    }
+  }
 
   /* Brand color utilities for dark mode */
   .bg-brand-50 {
-    background-color: rgb(255 245 240);
+    background-color: rgb(245 243 255);
   }
 
   .dark .bg-brand-50 {
-    background-color: rgb(122 33 16);
+    background-color: rgb(76 29 149);
   }
 
   .bg-brand-100 {
-    background-color: rgb(255 232 219);
+    background-color: rgb(237 233 254);
   }
 
   .dark .bg-brand-100 {
-    background-color: rgb(162 43 17);
+    background-color: rgb(91 33 182);
   }
 }

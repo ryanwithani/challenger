@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useState } from 'react'
 import { Button } from '@/src/components/ui/Button'
+import { Input } from '@/src/components/ui/Input'
 import { Database } from '@/src/types/database.types'
 import { LEGACY_CATEGORIES } from '@/src/components/challenge/GoalsSeeder'
 import { SafeText } from '../ui/SafeText'
@@ -88,19 +89,19 @@ interface GenerationCardProps {
 
 function GenerationCard({ generation, heir, spouse, children, isActive, onSelectHeir }: GenerationCardProps) {
   return (
-    <div className={`relative rounded-xl p-6 border transition-colors ${isActive
-      ? 'border-l-[3px] border-l-green-500 bg-green-50/50'
-      : 'border-gray-200 bg-white hover:border-gray-300'
+    <div className={`relative rounded-2xl p-6 border transition-colors ${isActive
+      ? 'border-l-[3px] border-l-green-500 bg-green-50/50 dark:bg-green-900/20 dark:border-warmGray-700'
+      : 'border-warmGray-100 bg-white dark:bg-warmGray-900 dark:border-warmGray-700 hover:border-warmGray-200 dark:hover:border-warmGray-600'
       }`}>
       {/* Generation Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-3">
-          <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-lg ${isActive ? 'bg-green-500' : 'bg-gray-500'
+          <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-lg ${isActive ? 'bg-green-500' : 'bg-warmGray-500'
             }`}>
             {generation}
           </div>
           <div>
-            <h3 className="text-xl font-bold text-gray-900">Generation {generation}</h3>
+            <h3 className="text-xl font-bold text-warmGray-900 dark:text-warmGray-100">Generation {generation}</h3>
             {isActive && (
               <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
                 Current
@@ -114,21 +115,21 @@ function GenerationCard({ generation, heir, spouse, children, isActive, onSelect
       <div className="mb-6">
         <div className="flex items-center mb-3">
 
-          <span className="text-sm font-semibold text-gray-700">Heir</span>
+          <span className="text-sm font-semibold text-warmGray-700 dark:text-warmGray-200">Heir</span>
         </div>
         {heir ? (
-          <div className="flex items-center space-x-3 p-3 bg-white rounded-xl border border-amber-200">
+          <div className="flex items-center space-x-3 p-3 bg-white dark:bg-warmGray-800 rounded-xl border border-amber-200 dark:border-amber-800">
             <div className="w-12 h-12 bg-accent-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
               <SafeText>{heir?.name?.charAt(0) ?? ''}</SafeText>
             </div>
             <div>
-              <div className="font-semibold text-gray-900"><SafeText>{heir.name}</SafeText></div>
-              <div className="text-sm text-gray-500">Age: {heir.age_stage}</div>
+              <div className="font-semibold text-warmGray-900 dark:text-warmGray-100"><SafeText>{heir.name}</SafeText></div>
+              <div className="text-sm text-warmGray-500 dark:text-warmGray-400">Age: {heir.age_stage}</div>
             </div>
           </div>
         ) : (
-          <div className="flex items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-xl">
-            <span className="text-sm text-gray-500">No heir selected</span>
+          <div className="flex items-center justify-center p-4 border-2 border-dashed border-warmGray-200 dark:border-warmGray-600 rounded-xl">
+            <span className="text-sm text-warmGray-500 dark:text-warmGray-400">No heir selected</span>
           </div>
         )}
       </div>
@@ -136,21 +137,21 @@ function GenerationCard({ generation, heir, spouse, children, isActive, onSelect
       {/* Spouse Section */}
       <div className="mb-6">
         <div className="flex items-center mb-3">
-          <span className="text-sm font-semibold text-gray-700">Primary Spouse</span>
+          <span className="text-sm font-semibold text-warmGray-700 dark:text-warmGray-200">Primary Spouse</span>
         </div>
         {spouse ? (
-          <div className="flex items-center space-x-3 p-3 bg-white rounded-xl border border-pink-200">
+          <div className="flex items-center space-x-3 p-3 bg-white dark:bg-warmGray-800 rounded-xl border border-pink-200 dark:border-pink-800">
             <div className="w-12 h-12 bg-brand-500 dark:bg-brand-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
               {spouse?.name?.charAt(0) ?? ''}
             </div>
             <div>
-              <div className="font-semibold text-gray-900"><SafeText>{spouse.name}</SafeText></div>
-              <div className="text-sm text-gray-500">Age: {spouse.age_stage}</div>
+              <div className="font-semibold text-warmGray-900 dark:text-warmGray-100"><SafeText>{spouse.name}</SafeText></div>
+              <div className="text-sm text-warmGray-500 dark:text-warmGray-400">Age: {spouse.age_stage}</div>
             </div>
           </div>
         ) : (
-          <div className="flex items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-xl">
-            <span className="text-sm text-gray-500">No spouse</span>
+          <div className="flex items-center justify-center p-4 border-2 border-dashed border-warmGray-200 dark:border-warmGray-600 rounded-xl">
+            <span className="text-sm text-warmGray-500 dark:text-warmGray-400">No spouse</span>
           </div>
         )}
       </div>
@@ -159,23 +160,23 @@ function GenerationCard({ generation, heir, spouse, children, isActive, onSelect
       <div>
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center">
-            <span className="text-sm font-semibold text-gray-700">Children</span>
+            <span className="text-sm font-semibold text-warmGray-700 dark:text-warmGray-200">Children</span>
           </div>
-          <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+          <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-full text-xs font-medium">
             {children.length}
           </span>
         </div>
         {children.length > 0 ? (
           <div className="space-y-2">
             {children.slice(0, 3).map((child) => (
-              <div key={child.id} className="flex items-center justify-between p-3 bg-white rounded-xl border border-blue-200">
+              <div key={child.id} className="flex items-center justify-between p-3 bg-white dark:bg-warmGray-800 rounded-xl border border-blue-200 dark:border-blue-800">
                 <div className="flex items-center space-x-3">
                   <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
                     <SafeText>{child?.name?.charAt(0) ?? ''}</SafeText>
                   </div>
                   <div>
-                    <div className="font-medium text-gray-900"><SafeText>{child.name}</SafeText></div>
-                    <div className="text-xs text-gray-500">Age: {child.age_stage}</div>
+                    <div className="font-medium text-warmGray-900 dark:text-warmGray-100"><SafeText>{child.name}</SafeText></div>
+                    <div className="text-xs text-warmGray-500 dark:text-warmGray-400">Age: {child.age_stage}</div>
                   </div>
                 </div>
                 {!heir && isActive && (
@@ -191,14 +192,14 @@ function GenerationCard({ generation, heir, spouse, children, isActive, onSelect
               </div>
             ))}
             {children.length > 3 && (
-              <div className="text-center text-sm text-gray-500 py-2">
+              <div className="text-center text-sm text-warmGray-500 dark:text-warmGray-400 py-2">
                 +{children.length - 3} more children
               </div>
             )}
           </div>
         ) : (
-          <div className="flex items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-xl">
-            <span className="text-sm text-gray-500">No children yet</span>
+          <div className="flex items-center justify-center p-4 border-2 border-dashed border-warmGray-300 dark:border-warmGray-600 rounded-xl">
+            <span className="text-sm text-warmGray-500 dark:text-warmGray-400">No children yet</span>
           </div>
         )}
       </div>
@@ -261,10 +262,8 @@ function GoalComponent({
         return (
           <Button
             size="sm"
-            onClick={() => {
-              onOpenCompletionModal(goal)
-            }}
-            className="px-3 py-1 text-xs bg-green-500 hover:bg-green-600 text-white border-none"
+            variant="accent"
+            onClick={() => onOpenCompletionModal(goal)}
           >
             Complete
           </Button>
@@ -304,7 +303,7 @@ function GoalComponent({
           }}
           className={`w-8 h-8 rounded-xl border-2 flex items-center justify-center transition-all duration-300 ${isCompleted
             ? 'bg-green-500 border-green-500 text-white'
-            : 'border-gray-300 hover:border-green-400 hover:bg-green-50'
+            : 'border-warmGray-300 dark:border-warmGray-600 hover:border-green-400 hover:bg-green-50 dark:hover:bg-green-900/20'
             }`}
           title={isCompleted ? "Click to mark as incomplete" : "Click to mark as complete"}
         >
@@ -322,34 +321,35 @@ function GoalComponent({
       return (
         <div className="flex items-center space-x-2">
           {/* Show current value */}
-          <span className="px-3 py-2 bg-blue-100 text-blue-800 rounded-lg font-bold">
+          <span className="px-3 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-lg font-bold">
             {goal.current_value || 0}
           </span>
 
           {/* Add completion button */}
           <Button
             size="sm"
-            onClick={() => {
-              onOpenCompletionModal(goal)
-            }}
-            className="px-2 py-1 text-xs bg-green-500 hover:bg-green-600 text-white border-none"
+            variant="accent"
+            onClick={() => onOpenCompletionModal(goal)}
+            title="Add completion"
           >
             +
           </Button>
 
           {/* Edit value button */}
-          <button
+          <Button
+            size="sm"
+            variant="ghost"
             onClick={() => {
               setTempValue(goal.current_value || 0)
               setEditingValue(true)
             }}
-            className="p-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
             title="Edit value manually"
+            aria-label="Edit goal value"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
-          </button>
+          </Button>
         </div>
       )
     }
@@ -359,37 +359,33 @@ function GoalComponent({
       return (
         <div className="flex items-center space-x-2">
           {editingValue ? (
-            <div className="flex items-center space-x-2">
-              <input
+            <div className="flex items-center gap-2">
+              <Input
                 type="number"
                 value={tempValue}
                 onChange={(e) => setTempValue(parseInt(e.target.value) || 0)}
-                className="w-16 px-2 py-1 text-sm border-2 border-blue-200 rounded-lg focus:border-blue-400 focus:outline-none"
-                min="0"
+                min={0}
+                className="w-20 h-8 text-sm"
               />
-              <button
-                onClick={handleSaveValue}
-                className="p-1 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-              >
+              <Button size="sm" variant="primary" onClick={handleSaveValue}>
                 Save
-              </button>
-              <button
-                onClick={() => setEditingValue(false)}
-                className="p-1 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
-              >
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => setEditingValue(false)}>
                 Cancel
-              </button>
+              </Button>
             </div>
           ) : (
-            <div
-              className="flex items-center space-x-1 cursor-pointer hover:bg-gray-100 px-3 py-2 rounded-lg transition-colors"
+            <button
+              type="button"
+              className="px-3 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-lg font-bold hover:bg-blue-200 dark:hover:bg-blue-800/40 transition-colors focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-1"
               onClick={() => {
                 setTempValue(goal.current_value || 0)
                 setEditingValue(true)
               }}
+              title="Click to edit value"
             >
-              <span className="px-3 py-2 bg-blue-100 text-blue-800 rounded-lg font-bold">{goal.current_value || 0}</span>
-            </div>
+              {goal.current_value || 0}
+            </button>
           )}
         </div>
       )
@@ -407,7 +403,7 @@ function GoalComponent({
         }}
         className={`w-8 h-8 rounded-xl border-2 flex items-center justify-center transition-all duration-300 ${isCompleted
           ? 'bg-green-500 border-green-500 text-white'
-          : 'border-gray-300 hover:border-green-400 hover:bg-green-50'
+          : 'border-warmGray-300 dark:border-warmGray-600 hover:border-green-400 hover:bg-green-50 dark:hover:bg-green-900/20'
           }`}
         title={isCompleted ? "Click to mark as incomplete" : "Click to mark as complete"}
       >
@@ -464,18 +460,18 @@ function GoalComponent({
   const completionProgress = progress.find(p => p.goal_id === goal.id)
 
   return (
-    <div className={`relative rounded-xl p-5 border transition-colors ${isCompleted
-      ? 'border-green-200 bg-green-50/50'
-      : 'border-gray-200 bg-white hover:border-gray-300'
+    <div className={`relative rounded-2xl p-5 border transition-colors ${isCompleted
+      ? 'border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-900/20'
+      : 'border-warmGray-200 dark:border-warmGray-700 bg-white dark:bg-warmGray-900 hover:border-warmGray-300 dark:hover:border-warmGray-600'
       }`}>
       {/* Goal Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
-          <h4 className={`font-bold text-lg ${isCompleted && goal.goal_type === 'milestone' ? 'line-through text-gray-500' : 'text-gray-900'}`}>
+          <h4 className={`font-bold text-lg ${isCompleted && goal.goal_type === 'milestone' ? 'line-through text-warmGray-500 dark:text-warmGray-400' : 'text-warmGray-900 dark:text-warmGray-100'}`}>
             {goal.title}
           </h4>
           {goal.description && (
-            <p className="text-gray-600 mt-1">{goal.description}</p>
+            <p className="text-warmGray-600 dark:text-warmGray-400 mt-1">{goal.description}</p>
           )}
         </div>
 
@@ -521,7 +517,7 @@ function GoalComponent({
           const nextThreshold = thresholds.find(t => currentValue < t.value)
 
           return (
-            <div className="text-xs text-gray-500">
+            <div className="text-xs text-warmGray-500 dark:text-warmGray-400">
               Next: {nextThreshold?.value || 'Max reached'}
             </div>
           )
@@ -560,7 +556,7 @@ function ScoringCategory({
   const progressPercentage = category.maxPoints > 0 ? Math.min((currentPoints / category.maxPoints) * 100, 100) : 0
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-6 transition-colors">
+    <div className="bg-white dark:bg-warmGray-900 rounded-2xl border border-warmGray-100 dark:border-warmGray-800 p-6 transition-colors">
       {/* Category Header */}
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center space-x-3">
@@ -568,20 +564,20 @@ function ScoringCategory({
             <img src={category.icon} alt={category.name} width={40} height={40} />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">{category.name}</h3>
-            <p className="text-sm text-gray-600">{category.description}</p>
+            <h3 className="text-lg font-semibold text-warmGray-900 dark:text-warmGray-100">{category.name}</h3>
+            <p className="text-sm text-warmGray-600 dark:text-warmGray-400">{category.description}</p>
           </div>
         </div>
         <div className="text-right">
-          <div className="text-xl font-semibold text-gray-900">{currentPoints}</div>
-          <div className="text-sm text-gray-500">/ {category.maxPoints}</div>
-          <div className="text-xs text-gray-400">{Math.round(progressPercentage)}%</div>
+          <div className="text-xl font-semibold text-warmGray-900 dark:text-warmGray-100">{currentPoints}</div>
+          <div className="text-sm text-warmGray-500 dark:text-warmGray-400">/ {category.maxPoints}</div>
+          <div className="text-xs text-warmGray-400 dark:text-warmGray-500">{Math.round(progressPercentage)}%</div>
         </div>
       </div>
 
       {/* Progress Bar */}
       <div className="mb-6">
-        <div className="w-full bg-gray-200 rounded-full h-2">
+        <div className="w-full bg-warmGray-200 dark:bg-warmGray-700 rounded-full h-2">
           <div
             className={`h-2 rounded-full transition-all duration-500 ${category.color}`}
             style={{ width: `${Math.min(progressPercentage, 100)}%` }}
@@ -605,8 +601,8 @@ function ScoringCategory({
           ))}
         </div>
       ) : (
-        <div className="flex items-center justify-center p-6 border border-dashed border-gray-300 rounded-lg">
-          <span className="text-sm text-gray-500">No goals in this category</span>
+        <div className="flex items-center justify-center p-6 border border-dashed border-warmGray-300 dark:border-warmGray-600 rounded-xl">
+          <span className="text-sm text-warmGray-500 dark:text-warmGray-400">No goals in this category</span>
         </div>
       )}
     </div>
@@ -688,37 +684,34 @@ export function LegacyTracker({
   ]
 
   return (
-    <div className="min-h-screen bg-cozy-cream dark:bg-surface-dark p-6">
-      <div className="max-w-[1400px] mx-auto space-y-8">
-        {/* Header */}
-        <div className="bg-white dark:bg-surface-dark rounded-xl p-6 border border-gray-200 dark:border-warmGray-700">          {/* Row 1: Challenge Identity + Actions */}
-          <div className="flex items-start justify-between gap-6 mb-6">
-            <div className="flex-1 min-w-0">
-              <h1 className="text-2xl font-semibold text-brand-600 dark:text-brand-400 mb-3">
-                <SafeText>{challenge.name}</SafeText>
-              </h1>
-
-              {/* Metadata Bar */}
-              <div className="flex flex-wrap items-center gap-4 text-base text-gray-600 dark:text-warmGray-200">
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold text-gray-900 dark:text-warmGray-100">Generation {currentGeneration}</span>
-                </div>
-
-                <div className="w-px h-5 bg-gray-300" aria-hidden="true" />
-
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold text-gray-900 dark:text-warmGray-100">{totalPoints}</span>
-                  <span className="text-gray-400">/</span>
-                  <span>100 pts</span>
-                </div>
-
-                <div className="w-px h-5 bg-gray-300" aria-hidden="true" />
-
-                <DifficultyBadge startType={config.start_type || 'regular'} />
-              </div>
+    <div>
+      {/* Sub-header card — fused to the banner above */}
+      <div className="bg-white dark:bg-warmGray-900 rounded-b-2xl border border-t-0 border-warmGray-100 dark:border-warmGray-800 shadow-sm px-5 py-3 mb-6">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-3 text-sm text-warmGray-600 dark:text-warmGray-400">
+            <span className="font-medium text-warmGray-900 dark:text-warmGray-100">Gen {currentGeneration}</span>
+            <span className="text-warmGray-300 dark:text-warmGray-600" aria-hidden="true">·</span>
+            <span>
+              <span className="font-medium text-warmGray-900 dark:text-warmGray-100">{totalPoints}</span>
+              /100 pts
+            </span>
+            <span className="text-warmGray-300 dark:text-warmGray-600" aria-hidden="true">·</span>
+            <DifficultyBadge startType={config.start_type || 'regular'} />
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="hidden sm:flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-warmGray-500 dark:text-warmGray-400">
+              {[
+                { label: 'Gender', value: config.gender_law },
+                { label: 'Bloodline', value: config.bloodline_law },
+                { label: 'Heir', value: config.heir_selection },
+                { label: 'Species', value: config.species_rule },
+              ].map((rule) => rule.value ? (
+                <span key={rule.label}>
+                  <span className="text-warmGray-400 dark:text-warmGray-500">{rule.label}: </span>
+                  <span className="font-medium text-warmGray-700 dark:text-warmGray-200">{formatRuleName(rule.value)}</span>
+                </span>
+              ) : null)}
             </div>
-
-            {/* Actions */}
             <Button
               onClick={onAddSim}
               size="sm"
@@ -728,59 +721,34 @@ export function LegacyTracker({
               Add Sim
             </Button>
           </div>
-
-          {/* Row 2: Challenge Rules (Compact Reference) */}
-          <div className="pt-6 border-t border-gray-200 dark:border-brand-800">
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
-              Challenge Rules
-            </h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[
-                { label: 'Gender Law', value: config.gender_law, type: 'genderLaw' as const },
-                { label: 'Bloodline', value: config.bloodline_law, type: 'bloodlineLaw' as const },
-                { label: 'Heir Selection', value: config.heir_selection, type: 'heirSelection' as const },
-                { label: 'Species', value: config.species_rule, type: 'speciesRule' as const }
-              ].map((rule, index) => (
-                <div key={index} className="flex flex-col space-y-1">
-                  <span className="text-xs font-medium text-gray-500 dark:text-warmGray-300 uppercase tracking-wide">
-                    {rule.label}
-                  </span>
-                  <span className="text-sm font-semibold text-gray-900 dark:text-warmGray-100">
-                    {formatRuleName(rule.value)}
-                  </span>
-                  <span className="text-xs text-gray-600 dark:text-warmGray-200 leading-tight">
-                    {getRuleDescription(rule.type, rule.value ?? '')}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
+      </div>
 
-        {/* Tabs */}
-        <div className="border-b border-gray-200 dark:border-warmGray-700">
-          <nav className="flex gap-6" role="tablist" aria-label="Challenge sections">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                role="tab"
-                aria-selected={activeTab === tab.id}
-                aria-controls={`${tab.id}-panel`}
-                id={`${tab.id}-tab`}
-                className={`pb-3 text-sm font-medium transition-colors border-b-2 focus:outline-none ${activeTab === tab.id
-                  ? 'border-brand-500 text-brand-600 dark:text-brand-400'
-                  : 'border-transparent text-gray-500 dark:text-warmGray-400 hover:text-gray-700 dark:hover:text-warmGray-200'
-                  }`}
-              >
-                {tab.name}
-              </button>
-            ))}
-          </nav>
-        </div>
+      <div className="space-y-6">
+      {/* Tabs */}
+      <div className="border-b border-gray-200 dark:border-warmGray-700">
+        <nav className="flex gap-6" role="tablist" aria-label="Challenge sections">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              role="tab"
+              aria-selected={activeTab === tab.id}
+              aria-controls={`${tab.id}-panel`}
+              id={`${tab.id}-tab`}
+              className={`pb-3 text-sm font-medium transition-colors border-b-2 focus:outline-none ${activeTab === tab.id
+                ? 'border-brand-500 text-brand-600 dark:text-brand-400'
+                : 'border-transparent text-gray-500 dark:text-warmGray-400 hover:text-gray-700 dark:hover:text-warmGray-200'
+                }`}
+            >
+              {tab.name}
+            </button>
+          ))}
+        </nav>
+      </div>
 
-        {/* Tab Content */}
-        <div className="space-y-8">
+      {/* Tab Content */}
+      <div className="space-y-8">
           {activeTab === 'overview' && (
             <div className="space-y-8" role="tabpanel" id="overview-panel" aria-labelledby="overview-tab">
               {/* Quick Stats */}
@@ -801,8 +769,8 @@ export function LegacyTracker({
               </div>
 
               {/* Category Score Summary */}
-              <div className="bg-white dark:bg-warmGray-900 rounded-xl p-6 border border-gray-200 dark:border-warmGray-700">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-warmGray-100 mb-5">Category Progress</h3>
+              <div className="bg-white dark:bg-warmGray-900 rounded-2xl p-6 border border-warmGray-100 dark:border-warmGray-800">
+                <h3 className="text-lg font-semibold text-warmGray-900 dark:text-warmGray-100 mb-5">Category Progress</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {Object.entries(LEGACY_CATEGORIES).map(([categoryId, categoryRaw]) => {
                     const category = categoryRaw as {
@@ -813,18 +781,18 @@ export function LegacyTracker({
                     const points = calculateCategoryPoints(categoryId)
                     const percentage = (points / category.maxPoints) * 100
                     return (
-                      <div key={categoryId} className="p-4 rounded-lg bg-gray-50 dark:bg-warmGray-800 border border-gray-200 dark:border-warmGray-700">
+                      <div key={categoryId} className="p-4 rounded-xl bg-warmGray-50 dark:bg-warmGray-800 border border-warmGray-100 dark:border-warmGray-700">
                         <div className="flex items-center justify-between mb-3">
-                          <span className="font-semibold text-gray-900">{category.name}</span>
-                          <span className="font-bold text-lg">{points}/{category.maxPoints}</span>
+                          <span className="font-semibold text-warmGray-900 dark:text-warmGray-100">{category.name}</span>
+                          <span className="font-bold text-lg text-warmGray-900 dark:text-warmGray-100">{points}/{category.maxPoints}</span>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-3 mb-2">
+                        <div className="w-full bg-warmGray-200 dark:bg-warmGray-700 rounded-full h-3 mb-2">
                           <div
                             className={`h-3 rounded-full transition-all duration-500 ${category.color}`}
                             style={{ width: `${percentage}%` }}
                           />
                         </div>
-                        <div className="text-sm text-gray-500">{Math.round(percentage)}% complete</div>
+                        <div className="text-sm text-warmGray-500 dark:text-warmGray-400">{Math.round(percentage)}% complete</div>
                       </div>
                     )
                   })}
@@ -886,25 +854,25 @@ export function LegacyTracker({
         </div>
 
         {/* Footer */}
-        <div className="mt-12 py-6 border-t border-gray-200">
-          <div className="flex items-center justify-between text-sm text-gray-600">
+        <div className="mt-12 py-6 border-t border-warmGray-200 dark:border-warmGray-800">
+          <div className="flex items-center justify-between text-sm text-warmGray-600 dark:text-warmGray-400">
             <div>© 2025 Sims Challenge Tracker. All rights reserved.</div>
             <div className="flex gap-6">
-              <a href="#" className="hover:text-gray-900">Privacy Policy</a>
-              <a href="#" className="hover:text-gray-900">Terms of Service</a>
-              <a href="#" className="hover:text-gray-900">Support</a>
+              <a href="#" className="hover:text-warmGray-900 dark:hover:text-warmGray-100">Privacy Policy</a>
+              <a href="#" className="hover:text-warmGray-900 dark:hover:text-warmGray-100">Terms of Service</a>
+              <a href="#" className="hover:text-warmGray-900 dark:hover:text-warmGray-100">Support</a>
             </div>
           </div>
-        </div>
-
-        <GoalCompletionModal
-          isOpen={goalCompletionModal.isOpen}
-          onClose={handleCloseCompletionModal}
-          goal={goalCompletionModal.goal}
-          sims={sims}
-          onComplete={handleGoalCompletion}
-        />
       </div>
+      </div>
+
+      <GoalCompletionModal
+        isOpen={goalCompletionModal.isOpen}
+        onClose={handleCloseCompletionModal}
+        goal={goalCompletionModal.goal}
+        sims={sims}
+        onComplete={handleGoalCompletion}
+      />
     </div>
   )
 }

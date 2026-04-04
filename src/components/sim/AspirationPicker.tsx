@@ -4,6 +4,7 @@ import clsx from 'clsx'
 import { Modal } from '@/src/components/sim/Modal'
 import { Aspirations, type Aspiration } from '@/src/components/sim/AspirationsCatalog'
 import { PackIcon } from '@/src/components/sim/PackIcon'
+import { Input } from '@/src/components/ui/Input'
 
 export function AspirationPicker({
   ageStage, value, onChange, ownedPacks = ['Base Game'],
@@ -42,23 +43,28 @@ export function AspirationPicker({
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm hover:bg-gray-50 disabled:opacity-50"
+          className="rounded-xl border border-warmGray-300 dark:border-warmGray-600 bg-white dark:bg-warmGray-800 px-3 py-2 text-sm text-warmGray-900 dark:text-warmGray-100 hover:bg-warmGray-50 dark:hover:bg-warmGray-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 disabled:opacity-50"
         >
           {value ?? 'Choose aspiration'}
         </button>
         {value && (
-          <button type="button" onClick={() => onChange(null)} className="text-xs text-gray-500 hover:underline">
+          <button
+            type="button"
+            onClick={() => onChange(null)}
+            className="text-xs text-warmGray-500 dark:text-warmGray-400 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 rounded"
+          >
             Clear
           </button>
         )}
       </div>
 
       <Modal open={open} onClose={() => setOpen(false)} title="Pick an Aspiration">
-        <div className="mb-3 flex items-center justify-between gap-3">
-          <input
-            value={q} onChange={e => setQ(e.target.value)}
+        <div className="mb-3">
+          <Input
+            value={q}
+            onChange={e => setQ(e.target.value)}
             placeholder="Search aspirations…"
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500"
+            type="text"
           />
         </div>
 
@@ -69,8 +75,10 @@ export function AspirationPicker({
               type="button"
               onClick={() => setTab(c)}
               className={clsx(
-                'rounded-full px-3 py-1 text-xs',
-                tab === c ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                'rounded-full px-3 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-1',
+                tab === c
+                  ? 'bg-brand-500 dark:bg-brand-600 text-white'
+                  : 'bg-warmGray-100 dark:bg-warmGray-800 text-warmGray-700 dark:text-warmGray-300 hover:bg-warmGray-200 dark:hover:bg-warmGray-700'
               )}
             >
               {c}
@@ -78,7 +86,7 @@ export function AspirationPicker({
           ))}
         </div>
 
-        <ul className="grid max-h-[60vh] grid-cols-1 gap-2 overflow-auto rounded-md border p-2 sm:grid-cols-2">
+        <ul className="grid max-h-[60vh] grid-cols-1 gap-2 overflow-auto rounded-xl border border-warmGray-200 dark:border-warmGray-700 bg-white dark:bg-warmGray-800 p-2 sm:grid-cols-2">
           {list.map(a => {
             const pack = a.pack ?? null
             const selected = a.label === value
@@ -89,7 +97,8 @@ export function AspirationPicker({
                   type="button"
                   onClick={() => owned && choose(a)}
                   className={clsx(
-                    'flex w-full items-center justify-between rounded-md px-2 py-2 text-left text-sm hover:bg-gray-100',
+                    'flex w-full items-center justify-between rounded-xl px-2 py-2 text-left text-sm text-warmGray-900 dark:text-warmGray-100 hover:bg-warmGray-100 dark:hover:bg-warmGray-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400',
+                    selected && 'bg-brand-50 dark:bg-brand-900/20 ring-1 ring-brand-500 dark:ring-brand-400',
                     !owned && 'opacity-60 grayscale cursor-not-allowed'
                   )}
                   title={!owned && pack ? `Requires: ${pack}` : undefined}
@@ -97,9 +106,11 @@ export function AspirationPicker({
                   <div className="flex items-center gap-2">
                     <span className="truncate">{a.label}</span>
                     {pack && pack !== 'Base Game' && <PackIcon name={pack} size={14} owned={owned} />}
-                    <span className={clsx('h-2 w-2 rounded-full', selected ? 'bg-indigo-600' : 'bg-gray-300')} />
                   </div>
-                  <span className={clsx('h-2 w-2 rounded-full', selected ? 'bg-indigo-600' : 'bg-gray-300')} />
+                  <span className={clsx(
+                    'h-2 w-2 shrink-0 rounded-full',
+                    selected ? 'bg-brand-500 dark:bg-brand-400' : 'bg-warmGray-300 dark:bg-warmGray-600'
+                  )} />
                 </button>
               </li>
             )

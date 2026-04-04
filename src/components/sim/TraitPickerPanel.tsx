@@ -5,6 +5,7 @@ import clsx from 'clsx'
 import { Traits, type TraitDefinition } from '@/src/components/sim/TraitsCatalog'
 import { traitPngPath } from '@/src/components/sim/TraitAssets'
 import { PackIcon } from '@/src/components/sim/PackIcon'
+import { Input } from '@/src/components/ui/Input'
 
 const CATEGORY_ORDER = ['Emotional','Lifestyle','Hobby','Social','Bonus'] as const
 
@@ -64,13 +65,13 @@ export function TraitPickerPanel({
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-3">
-        <input
+        <Input
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Search traits…"
-          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500"
+          type="text"
         />
-        <div className="shrink-0 text-xs text-gray-500">{value.length}/{max} selected</div>
+        <div className="shrink-0 text-xs text-warmGray-500 dark:text-warmGray-400">{value.length}/{max} selected</div>
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -80,8 +81,10 @@ export function TraitPickerPanel({
             type="button"
             onClick={() => setTab(c)}
             className={clsx(
-              'rounded-full px-3 py-1 text-xs',
-              tab === c ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              'rounded-full px-3 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-1',
+              tab === c
+                ? 'bg-brand-500 dark:bg-brand-600 text-white'
+                : 'bg-warmGray-100 dark:bg-warmGray-800 text-warmGray-700 dark:text-warmGray-300 hover:bg-warmGray-200 dark:hover:bg-warmGray-700'
             )}
           >
             {c}
@@ -97,7 +100,9 @@ export function TraitPickerPanel({
           const showPack = !!pack && pack !== 'Base Game'
           const owned = !pack || pack === 'Base Game' || ownedPacks.includes(pack)
           const disabledTrait = (!owned) || (atCapacity && !selected)
-          const focusRing = selected ? 'focus-visible:ring-2 focus-visible:ring-indigo-500' : 'focus-visible:ring-2 focus-visible:ring-gray-300'
+          const focusRing = selected
+            ? 'focus-visible:ring-2 focus-visible:ring-brand-400'
+            : 'focus-visible:ring-2 focus-visible:ring-warmGray-300 dark:focus-visible:ring-warmGray-600'
           return (
             <li key={t.id}>
               <button
@@ -108,10 +113,12 @@ export function TraitPickerPanel({
                 aria-checked={selected}
                 aria-label={t.label}
                 className={clsx(
-                  'w-full rounded-xl border bg-white p-3 text-left shadow-sm transition hover:shadow focus:outline-none',
+                  'w-full rounded-xl border-2 bg-white dark:bg-warmGray-800 p-3 text-left shadow-sm transition hover:shadow focus:outline-none text-warmGray-900 dark:text-warmGray-100',
                   focusRing,
-                  selected ? 'border-indigo-600 ring-1 ring-indigo-600' : 'border-gray-200',
-                  !owned && 'opacity-60 grayscale cursor-not-allowed', // show warning if not owned
+                  selected
+                    ? 'border-brand-500 dark:border-brand-400 ring-1 ring-brand-500 dark:ring-brand-400'
+                    : 'border-warmGray-200 dark:border-warmGray-700',
+                  !owned && 'opacity-60 grayscale cursor-not-allowed',
                   disabledTrait && 'opacity-50 cursor-not-allowed'
                 )}
                 title={!owned && pack ? `Requires: ${pack}` : disabledTrait ? `Max ${max} traits` : undefined}
@@ -121,15 +128,18 @@ export function TraitPickerPanel({
                   {img ? (
                     <Image src={traitPngPath(t)} alt={t.label} width={28} height={28} className="rounded-sm" />
                   ) : (
-                    <div className="h-7 w-7 rounded-sm bg-gray-100" />
+                    <div className="h-7 w-7 rounded-sm bg-warmGray-100 dark:bg-warmGray-700" />
                   )}
                   <div className="min-w-0">
                     <div className="truncate text-sm font-medium">{t.label}</div>
-                    {t.category && <div className="text-xs text-gray-500">{t.category}</div>}
+                    {t.category && <div className="text-xs text-warmGray-500 dark:text-warmGray-400">{t.category}</div>}
                   </div>
                   <div className="ml-auto flex items-center gap-2">
                     {showPack && <PackIcon name={pack!} size={14} owned={owned} />}
-                    <span className={clsx('h-2 w-2 rounded-full', selected ? 'bg-indigo-600' : 'bg-gray-300')} />
+                    <span className={clsx(
+                      'h-2 w-2 rounded-full',
+                      selected ? 'bg-brand-500 dark:bg-brand-400' : 'bg-warmGray-300 dark:bg-warmGray-600'
+                    )} />
                   </div>
                 </div>
               </button>

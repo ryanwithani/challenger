@@ -29,9 +29,9 @@ export default function LandingPage() {
     try {
       await signIn(email, password)
       router.push('/dashboard')
-    } catch (err: any) {
-      setError(err.message || 'Failed to sign in')
-    } finally {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to sign in'
+      setError(message)
       setLoading(false)
     }
   }
@@ -48,7 +48,7 @@ export default function LandingPage() {
         <div className="flex flex-col items-center justify-center mb-12">
           <div className="flex items-center space-x-3 mb-4">
             <CrownIcon size={64} className="w-16 h-16" />
-            <h1 className="text-5xl font-bold text-brand-500 font-exo2 leading-normal">
+            <h1 className="text-5xl font-bold text-brand-500 font-display leading-normal">
               Challenger
             </h1>
           </div>

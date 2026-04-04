@@ -67,7 +67,7 @@ export default function ProtectedLayout({
       <Navbar />
       <div className="flex flex-1">
         <Sidebar />
-        <main className="flex-1 p-4 lg:p-6 pb-24 lg:pb-6">
+        <main className="flex-1 px-4 pt-8 lg:px-8 lg:pt-10 pb-24 lg:pb-6 border-l border-warmGray-200 dark:border-warmGray-700">
           {children}
         </main>
       </div>

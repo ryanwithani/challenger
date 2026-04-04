@@ -32,13 +32,13 @@ export class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return this.props.fallback || (
-        <div className="min-h-[400px] flex items-center justify-center p-8">
+        <div className="min-h-[400px] flex items-center justify-center p-8 bg-white dark:bg-warmGray-950">
           <div className="text-center max-w-md">
             <div className="text-6xl mb-4">⚠️</div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            <h2 className="text-2xl font-bold text-warmGray-900 dark:text-warmGray-50 mb-2">
               Something went wrong
             </h2>
-            <p className="text-gray-600 mb-6">
+            <p className="text-warmGray-600 dark:text-warmGray-400 mb-6">
               {this.state.error?.message || 'An unexpected error occurred'}
             </p>
             <Button

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { clsx } from 'clsx'
 import { Input } from '@/src/components/ui/Input'
 import { Select } from '@/src/components/ui/Select'
+import { toast } from '@/src/lib/store/toastStore'
 
 // Tiny local button to avoid styling conflicts with your global <Button>
 function InlineButton({
@@ -26,8 +27,8 @@ function InlineButton({
   const sizing = size === 'sm' ? 'px-3 py-1.5 text-sm' : 'px-4 py-2 text-base'
 
   // Use your brand color if available; fall back to indigo
-  const primary = 'bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed'
-  const outline = 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:ring-gray-400 disabled:opacity-50 disabled:cursor-not-allowed'
+  const primary = 'bg-brand-500 dark:bg-brand-600 text-white hover:bg-brand-600 dark:hover:bg-brand-700 focus:ring-brand-400 disabled:opacity-50 disabled:cursor-not-allowed'
+  const outline = 'border border-warmGray-300 dark:border-warmGray-600 bg-white dark:bg-warmGray-800 text-warmGray-700 dark:text-warmGray-200 hover:bg-warmGray-50 dark:hover:bg-warmGray-700 focus:ring-warmGray-400 disabled:opacity-50 disabled:cursor-not-allowed'
 
   return (
     <button
@@ -155,8 +156,11 @@ export function InlineEditable(props: InlineEditableProps) {
     try {
       await onSave(v)
       setEditing(false)
+      toast.success('Saved')
     } catch (e: any) {
-      setError(e?.message || 'Failed to save. Please try again.')
+      const msg = e?.message || 'Failed to save. Please try again.'
+      setError(msg)
+      toast.error(msg)
     } finally {
       setSaving(false)
     }
@@ -170,7 +174,7 @@ export function InlineEditable(props: InlineEditableProps) {
   }
 
   const commonLabel = label ? (
-    <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
+    <label htmlFor={id} className="block text-sm font-medium text-warmGray-700 dark:text-warmGray-300 mb-1">
       {label}
     </label>
   ) : null
@@ -184,18 +188,18 @@ export function InlineEditable(props: InlineEditableProps) {
           type="button"
           onClick={beginEdit}
           className={clsx(
-            'group w-full text-left rounded-md transition-colors',
-            editable ? 'hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/40' : ''
+            'group w-full text-left rounded-md transition-colors px-3 py-2',
+            editable ? 'hover:bg-warmGray-50 dark:hover:bg-warmGray-800 focus:bg-warmGray-50 dark:focus:bg-warmGray-800 focus:outline-none focus:ring-2 focus:ring-brand-500/40' : ''
           )}
           aria-label={label ? `Edit ${label}` : 'Edit'}
         >
-          <div className="flex items-center gap-2">
-            <div className={clsx('text-lg', typeof value === 'string' ? 'font-medium text-gray-900' : 'text-gray-900')}>
-              {display || <span className="text-gray-400">{placeholder ?? '—'}</span>}
+          <div className="flex items-center gap-1.5">
+            <div className={clsx('text-base', typeof value === 'string' ? 'font-medium text-warmGray-900 dark:text-warmGray-100' : 'text-warmGray-900 dark:text-warmGray-100')}>
+              {display || <span className="text-warmGray-400 dark:text-warmGray-500">{placeholder ?? '—'}</span>}
             </div>
             {editable && (
               <svg
-                className="opacity-0 group-hover:opacity-100 w-4 h-4 text-gray-400 transition-opacity"
+                className="opacity-0 group-hover:opacity-100 w-4 h-4 text-warmGray-400 dark:text-warmGray-500 transition-opacity"
                 fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"
               >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -210,7 +214,7 @@ export function InlineEditable(props: InlineEditableProps) {
             <textarea
               id={id}
               ref={textareaRef}
-              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-warmGray-300 dark:border-warmGray-600 rounded bg-white dark:bg-warmGray-800 text-base text-warmGray-900 dark:text-warmGray-100 placeholder:text-warmGray-400 dark:placeholder:text-warmGray-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
               rows={3}
               maxLength={(props as any).maxLength}
               placeholder={placeholder}
@@ -231,6 +235,7 @@ export function InlineEditable(props: InlineEditableProps) {
               value={local ?? ''}
               maxLength={(props as any).maxLength}
               inputMode={(props as any).inputMode}
+              className="text-base"
               onChange={(e) => setLocal(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') { e.preventDefault(); commit((e.target as HTMLInputElement).value) }
@@ -248,6 +253,7 @@ export function InlineEditable(props: InlineEditableProps) {
               min={(props as any).min}
               max={(props as any).max}
               step={(props as any).step ?? 1}
+              className="text-base"
               onChange={(e) => setLocal(Number(e.target.value))}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') { e.preventDefault(); commit(Number((e.target as HTMLInputElement).value)) }
@@ -260,7 +266,7 @@ export function InlineEditable(props: InlineEditableProps) {
             <Select
               id={id}
               ref={selectRef}
-              className="w-full"
+              className="w-full text-base"
               value={local ?? ''}
               onChange={(e) => setLocal(e.target.value)}
               onKeyDown={(e) => {
@@ -277,7 +283,7 @@ export function InlineEditable(props: InlineEditableProps) {
                 id={id}
                 ref={inputRef}
                 type="checkbox"
-                className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                className="h-4 w-4 rounded border-warmGray-300 dark:border-warmGray-600 text-brand-500 focus:ring-brand-400"
                 checked={!!local}
                 onChange={(e) => setLocal(e.target.checked)}
                 onKeyDown={(e) => {
@@ -285,7 +291,7 @@ export function InlineEditable(props: InlineEditableProps) {
                   if (e.key === 'Escape') { e.preventDefault(); handleCancel() }
                 }}
               />
-              <span className="text-sm text-gray-700">Toggle</span>
+              <span className="text-sm text-warmGray-700 dark:text-warmGray-300">Toggle</span>
             </div>
           )}
 

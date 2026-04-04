@@ -191,13 +191,13 @@ export function ChallengeWizard({ onSubmit, onCancel, loading }: ChallengeWizard
     onCancel()
   }, [isClient, onCancel])
 
-  const handleCancelClick = useCallback(() => {
-    if (wizardData.basicInfo) {
+  const handleCancelClick = useCallback((isDirty: boolean) => {
+    if (isDirty) {
       setShowCancelConfirm(true)
     } else {
       handleCancel()
     }
-  }, [wizardData.basicInfo, handleCancel])
+  }, [handleCancel])
 
   const handleConfirmCancel = useCallback(() => {
     setShowCancelConfirm(false)

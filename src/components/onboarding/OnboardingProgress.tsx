@@ -30,8 +30,8 @@ export default function OnboardingProgress({ steps, currentStep }: OnboardingPro
                 isCompleted
                   ? 'bg-green-500 border-green-500'
                   : isActive
-                    ? 'bg-white border-brand-500 shadow-lg'
-                    : 'bg-gray-100 border-gray-300'
+                    ? 'bg-white dark:bg-warmGray-900 border-brand-500 shadow-lg'
+                    : 'bg-gray-100 dark:bg-warmGray-800 border-gray-300 dark:border-warmGray-600'
               }`}>
                 {isCompleted ? (
                   <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -39,7 +39,7 @@ export default function OnboardingProgress({ steps, currentStep }: OnboardingPro
                   </svg>
                 ) : (
                   <span className={`text-lg font-bold ${
-                    isActive ? 'text-brand-600' : 'text-gray-400'
+                    isActive ? 'text-brand-600 dark:text-brand-400' : 'text-gray-400 dark:text-warmGray-500'
                   }`}>
                     {index + 1}
                   </span>
@@ -49,7 +49,7 @@ export default function OnboardingProgress({ steps, currentStep }: OnboardingPro
               {/* Step Label */}
               <div className="ml-3 hidden sm:block">
                 <div className={`text-sm font-semibold ${
-                  isActive ? 'text-brand-600' : isCompleted ? 'text-green-600' : 'text-gray-400'
+                  isActive ? 'text-brand-600 dark:text-brand-400' : isCompleted ? 'text-green-600 dark:text-green-400' : 'text-gray-400 dark:text-warmGray-500'
                 }`}>
                   {step.label}
                 </div>
@@ -58,7 +58,7 @@ export default function OnboardingProgress({ steps, currentStep }: OnboardingPro
               {/* Connector Line */}
               {index < steps.length - 1 && (
                 <div className={`mx-4 sm:mx-6 h-1 w-12 sm:w-16 rounded-full transition-all duration-300 ${
-                  step.completed ? 'bg-green-500' : 'bg-gray-200'
+                  step.completed ? 'bg-green-500' : 'bg-gray-200 dark:bg-warmGray-700'
                 }`} />
               )}
             </div>
@@ -68,13 +68,13 @@ export default function OnboardingProgress({ steps, currentStep }: OnboardingPro
 
       {/* Progress Bar */}
       <div className="max-w-2xl mx-auto">
-        <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+        <div className="w-full bg-gray-200 dark:bg-warmGray-700 rounded-full h-2 overflow-hidden">
           <div
             className="h-full bg-brand-500 rounded-full transition-all duration-500 ease-out"
             style={{ width: `${progress}%` }}
           />
         </div>
-        <div className="mt-2 text-center text-sm text-gray-500">
+        <div className="mt-2 text-center text-sm text-gray-500 dark:text-warmGray-400">
           Step {currentIndex + 1} of {steps.length}
         </div>
       </div>

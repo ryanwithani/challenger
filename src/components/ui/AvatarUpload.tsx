@@ -1,11 +1,11 @@
 'use client'
 import { useState } from 'react'
 import Image from 'next/image'
+import { cn } from '@/src/lib/utils/cn'
 
 interface AvatarUploaderProps {
   value: string | null;
   onChange: (url: string | null) => void;
-  // This new prop lets us pass in ANY upload function
   uploadFunction: (file: File) => Promise<string>;
 }
 
@@ -20,7 +20,6 @@ export function AvatarUploader({ value, onChange, uploadFunction }: AvatarUpload
     setBusy(true);
     setErr(null);
     try {
-      // Call the provided upload function instead of the hardcoded one
       const newUrl = await uploadFunction(file);
       onChange(newUrl);
     } catch (e: any) {
@@ -31,8 +30,6 @@ export function AvatarUploader({ value, onChange, uploadFunction }: AvatarUpload
   }
 
   return (
-    // ... Your existing JSX for this component is good and does not need to change ...
-    // I've included it here for completeness.
     <div className="space-y-3">
       {value ? (
         <div className="flex items-center gap-4">
@@ -42,7 +39,7 @@ export function AvatarUploader({ value, onChange, uploadFunction }: AvatarUpload
               alt="Avatar"
               width={64}
               height={64}
-              className="h-16 w-16 rounded-xl object-cover border-2 border-gray-200"
+              className="h-16 w-16 rounded-xl object-cover border-2 border-warmGray-200 dark:border-warmGray-700"
             />
             {busy && (
               <div className="absolute inset-0 bg-black/50 rounded-xl flex items-center justify-center">
@@ -53,7 +50,7 @@ export function AvatarUploader({ value, onChange, uploadFunction }: AvatarUpload
           <button
             type="button"
             onClick={() => onChange(null)}
-            className="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-xl hover:bg-red-100 transition-colors"
+            className="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
           >
             Remove
           </button>
@@ -65,13 +62,25 @@ export function AvatarUploader({ value, onChange, uploadFunction }: AvatarUpload
             accept="image/jpeg,image/jpg,image/png,image/webp"
             onChange={onFile}
             disabled={busy}
-            className="block w-full text-sm text-gray-700 file:mr-4 file:rounded-xl file:border-2 file:border-gray-300 file:bg-white file:px-4 file:py-2 file:text-sm file:font-medium hover:file:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-200 rounded-xl border-2 border-dashed border-gray-300 p-4 text-center"
+            className={cn(
+              'block w-full text-sm text-warmGray-700 dark:text-warmGray-300',
+              'file:mr-4 file:rounded-xl file:border-2 file:border-warmGray-300 dark:file:border-warmGray-600',
+              'file:bg-white dark:file:bg-warmGray-800 file:px-4 file:py-2 file:text-sm file:font-medium',
+              'hover:file:bg-warmGray-50 dark:hover:file:bg-warmGray-700',
+              'focus:outline-none focus:ring-2 focus:ring-brand-200 dark:focus:ring-brand-800',
+              'rounded-xl border-2 border-dashed border-warmGray-300 dark:border-warmGray-600 p-4 text-center'
+            )}
           />
-          <p className="text-xs text-gray-500">JPEG, PNG, or WebP • Max 5MB</p>
+          <p className="text-xs text-warmGray-500 dark:text-warmGray-400">JPEG, PNG, or WebP • Max 5MB</p>
         </div>
       )}
-      {busy && <p className="text-sm text-gray-600 flex items-center gap-2"><div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>Uploading…</p>}
-      {err && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl p-3">{err}</p>}
+      {busy && (
+        <p className="text-sm text-warmGray-600 dark:text-warmGray-400 flex items-center gap-2">
+          <span className="inline-block w-4 h-4 border-2 border-warmGray-400 dark:border-warmGray-500 border-t-transparent rounded-full animate-spin" />
+          Uploading…
+        </p>
+      )}
+      {err && <p className="text-sm text-red-600 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-3">{err}</p>}
     </div>
   )
 }

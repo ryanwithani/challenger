@@ -94,25 +94,8 @@ async function signupHandler(request: NextRequest) {
       throw signUpError
     }
 
-    // Create user profile — required, not optional
-    if (data.user) {
-      const { error: profileError } = await supabase
-        .from('users')
-        .insert({
-          id: data.user.id,
-          email: data.user.email!,
-          username: usernameTrimmed,
-          display_name: usernameTrimmed,
-          created_at: new Date().toISOString(),
-        })
-
-      if (profileError) {
-        return NextResponse.json(
-          { error: `Profile creation failed: ${profileError.message}` },
-          { status: 500 }
-        )
-      }
-    }
+    // Profile row is created automatically by the handle_new_user() trigger
+    // on auth.users, using the username from raw_user_meta_data.
 
     return NextResponse.json({
       success: true,
@@ -121,9 +104,9 @@ async function signupHandler(request: NextRequest) {
     })
 
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error)
+    console.error('Signup error:', error instanceof Error ? error.message : error)
     return NextResponse.json(
-      { error: `Signup failed: ${message}` },
+      { error: 'Failed to create account. Please try again.' },
       { status: 500 }
     )
   }

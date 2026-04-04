@@ -13,7 +13,7 @@ import { InlineConfirm } from '@/src/components/ui/InlineConfirm'
 interface BasicInfoStepProps {
     data: BasicInfoData | undefined
     onNext: (data: BasicInfoData) => void
-    onCancel: () => void
+    onCancel: (isDirty: boolean) => void
     showCancelConfirm?: boolean
     onConfirmCancel?: () => void
     onDismissCancelConfirm?: () => void
@@ -53,27 +53,6 @@ export function BasicInfoStep({ data, onNext, onCancel, showCancelConfirm = fals
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div>
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-warmGray-100 mb-6">Choose Your Challenge</h2>
-
-                {/* Show form-level errors */}
-                {Object.keys(errors).length > 0 && (
-                    <div className="mb-6 p-4 bg-amber-50 border-2 border-amber-200 rounded-xl">
-                        <div className="flex items-start gap-3">
-                            <span className="text-xl">⚠️</span>
-                            <div>
-                                <p className="text-amber-800 font-semibold mb-2">
-                                    Please fix the following errors:
-                                </p>
-                                <ul className="text-sm text-amber-700 space-y-1 list-disc list-inside">
-                                    {errors.challenge_type && (
-                                        <li>{errors.challenge_type.message}</li>
-                                    )}
-                                    {errors.name && <li>{errors.name.message}</li>}
-                                    {errors.description && <li>{errors.description.message}</li>}
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                )}
 
                 {/* Template Selection */}
                 <FormField 
@@ -192,7 +171,15 @@ export function BasicInfoStep({ data, onNext, onCancel, showCancelConfirm = fals
                 ) : (
                     <Button
                         variant="outline"
-                        onClick={onCancel}
+                        onClick={(e) => {
+                            const form = (e.currentTarget as HTMLButtonElement).form
+                            const nameEl = form?.elements.namedItem('name') as HTMLInputElement | null
+                            const descEl = form?.elements.namedItem('description') as HTMLTextAreaElement | null
+                            onCancel(
+                                (nameEl?.value ?? '').trim().length > 0 ||
+                                (descEl?.value ?? '').trim().length > 0
+                            )
+                        }}
                         type="button"
                         disabled={isSubmitting}
                     >

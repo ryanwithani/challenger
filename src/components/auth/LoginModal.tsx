@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useAuthStore } from '@/src/lib/store/authStore'
 import { Input } from '@/src/components/ui/Input'
 import { Button } from '@/src/components/ui/Button'
+import { ErrorMessage } from '@/src/components/ui/ErrorMessage'
 import { PasswordInput } from '@/src/components/auth/PasswordInput'
 import { PasswordResetModal } from '@/src/components/auth/PasswordResetModal'
 
@@ -30,7 +31,6 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
     try {
       await signIn(email, password);
-      onClose();
       router.push('/dashboard');
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to sign in'
@@ -99,9 +99,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
               </button>
             </div>
 
-            {error && (
-              <p className="text-red-500 text-sm">{error}</p>
-            )}
+            {error && <ErrorMessage error={error} />}
 
             <Button
               type="submit"

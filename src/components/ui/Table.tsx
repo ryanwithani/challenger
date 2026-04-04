@@ -1,5 +1,6 @@
 // components/ui/table.tsx
 import * as React from 'react'
+import { cn } from '@/src/lib/utils/cn'
 
 
 export type Column<T> = { key: keyof T; label: string; sortable?: boolean; render?: (row: T) => React.ReactNode }
@@ -13,14 +14,14 @@ sortKey?: keyof T
 sortDir?: 'asc' | 'desc'
 }) {
 return (
-<div className="overflow-hidden rounded-2xl border border-gray-200">
+<div className="overflow-hidden rounded-2xl border border-warmGray-200 dark:border-warmGray-800">
 <table className="w-full text-left text-sm">
-<thead className="bg-surface-muted">
+<thead className="bg-surface-muted dark:bg-warmGray-900">
 <tr>
 {columns.map((c) => (
-<th key={String(c.key)} className="px-4 py-2 font-medium text-gray-700">
+<th key={String(c.key)} className="px-4 py-2 font-medium text-warmGray-700 dark:text-warmGray-300">
 <button
-className="inline-flex items-center gap-1"
+className={cn('inline-flex items-center gap-1', c.sortable && 'cursor-pointer')}
 onClick={() => c.sortable && onSort?.(c.key)}
 >
 {c.label}
@@ -32,9 +33,9 @@ onClick={() => c.sortable && onSort?.(c.key)}
 </thead>
 <tbody>
 {rows.map((r) => (
-<tr key={r.id} className="border-t hover:bg-surface-muted/60">
+<tr key={r.id} className="border-t border-warmGray-200 dark:border-warmGray-800 hover:bg-surface-muted/60 dark:hover:bg-warmGray-800/60">
 {columns.map((c) => (
-<td key={String(c.key)} className="px-4 py-2 text-gray-800">{c.render ? c.render(r) : (r[c.key] as any)}</td>
+<td key={String(c.key)} className="px-4 py-2 text-warmGray-800 dark:text-warmGray-200">{c.render ? c.render(r) : (r[c.key] as any)}</td>
 ))}
 </tr>
 ))}

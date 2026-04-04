@@ -12,7 +12,7 @@ return (
 <div className="space-y-1">
 <input
 className={cn(
-'h-10 w-full rounded-xl border border-gray-300 bg-white px-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-200',
+'h-10 w-full rounded-xl border border-warmGray-300 dark:border-warmGray-600 bg-white dark:bg-warmGray-800 px-3 text-sm text-warmGray-900 dark:text-warmGray-100 placeholder:text-warmGray-400 dark:placeholder:text-warmGray-500 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 dark:focus:ring-brand-800',
 error && 'border-red-500 focus:ring-red-200',
 className
 )}

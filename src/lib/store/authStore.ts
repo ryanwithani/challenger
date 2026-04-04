@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { createSupabaseBrowserClient } from '@/src/lib/supabase/client'
 import { signIn as signInAPI } from '@/src/lib/api/auth'
-import { User } from '@supabase/supabase-js'
+import { User, AuthChangeEvent, Session } from '@supabase/supabase-js'
 
 
 interface UserProfile {
@@ -19,6 +19,7 @@ interface AuthState {
   isFetchingProfile: boolean
   profileFetched: boolean
   initialized: boolean
+  navigating: boolean
   showPasswordUpdateModal: boolean
   signIn: (email: string, password: string) => Promise<void>
   signUp: (email: string, password: string) => Promise<void>
@@ -36,6 +37,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   userProfile: null,
   loading: true,
   initialized: false,
+  navigating: false,
   isFetchingProfile: false,
   profileFetched: false,
   showPasswordUpdateModal: false,
@@ -47,7 +49,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     const supabase = createSupabaseBrowserClient();
 
-    supabase.auth.onAuthStateChange((event, session) => {
+    supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
+      if (get().navigating) return;
+
       set({ user: session?.user ?? null, loading: false });
 
       if (session?.user) {
@@ -133,10 +137,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     // API route signs in server-side and sets session cookies.
     const result = await signInAPI(email, password)
 
+    // Set navigating to freeze UI state during page transition.
     // Set user from the API response directly — the browser client
     // won't see the httpOnly session cookies via getSession().
     if (result?.user) {
-      set({ user: result.user })
+      set({ user: result.user, navigating: true })
     }
   },
 
@@ -154,14 +159,21 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   signOut: async () => {
     const supabase = createSupabaseBrowserClient();
 
+    // Freeze UI state so onAuthStateChange doesn't flash the navbar
+    set({ navigating: true });
+
     const { error } = await supabase.auth.signOut();
-    if (error) throw error;
+    if (error) {
+      set({ navigating: false });
+      throw error;
+    }
 
     set({
       user: null,
       userProfile: null,
       profileFetched: false,
-      isFetchingProfile: false
+      isFetchingProfile: false,
+      navigating: false
     });
 
     if (typeof window !== 'undefined') {

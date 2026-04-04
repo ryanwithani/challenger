@@ -1,4 +1,5 @@
 import { Database } from '@/src/types/database.types'
+import { cn } from '@/src/lib/utils/cn'
 import { Button } from '../ui/Button'
 
 type Goal = Database['public']['Tables']['goals']['Row']
@@ -11,22 +12,22 @@ interface GoalCardProps {
 
 export function GoalCard({ goal, isCompleted, onToggle }: GoalCardProps) {
   return (
-    <div className={`card ${isCompleted ? 'bg-green-50 border-green-200' : ''}`}>
+    <div className={cn('card', isCompleted && 'card--completed')}>
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <h4 className="font-semibold text-lg mb-1">{goal.title}</h4>
+          <h4 className="font-semibold text-lg mb-1 text-warmGray-900 dark:text-warmGray-50">{goal.title}</h4>
           {goal.description && (
-            <p className="text-gray-600 text-sm mb-2">{goal.description}</p>
+            <p className="text-warmGray-600 dark:text-warmGray-400 text-sm mb-2">{goal.description}</p>
           )}
           <div className="flex items-center gap-4 text-sm">
-            <span className="text-gray-500">
+            <span className="text-warmGray-500 dark:text-warmGray-400">
               {goal.point_value} {goal.point_value === 1 ? 'point' : 'points'}
             </span>
             {goal.category && (
-              <span className="text-gray-500 capitalize">{goal.category}</span>
+              <span className="text-warmGray-500 dark:text-warmGray-400 capitalize">{goal.category}</span>
             )}
             {goal.is_required && (
-              <span className="text-red-500 font-medium">Required</span>
+              <span className="text-red-500 dark:text-red-400 font-medium">Required</span>
             )}
           </div>
         </div>

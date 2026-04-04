@@ -119,7 +119,7 @@ All API routes in `src/app/api/auth/` follow: validate input with Zod → rate l
 
 ### Styling conventions
 - Dark mode: Tailwind `class` strategy (not `media`)
-- Brand palette: warm peach/coral (`brand-50`–`brand-900`, primary at `brand-500` = #ff6b35). Accent is golden/amber.
+- Brand palette: violet/purple (`brand-50`–`brand-900`, primary at `brand-500` = #8b5cf6). Accent is teal.
 - Font: `font-display` (Fraunces) for all headings and brand text. `font-body` (Nunito Sans) for body — warm sans-serif with rounded terminals.
 - Utility: `cn()` from `src/lib/utils/cn.ts` merges clsx + twMerge. Always use this instead of raw template literals for conditional classes.
 

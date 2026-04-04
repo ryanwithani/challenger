@@ -49,7 +49,6 @@ describe('Integration Tests - Complete Signup Flow', () => {
                 data: { user: mockUser },
                 error: null,
             })
-            mockInsert.mockResolvedValue({ error: null })
 
             const request = createMockRequest({
                 username: 'testuser',
@@ -66,10 +65,10 @@ describe('Integration Tests - Complete Signup Flow', () => {
             expect(data.success).toBe(true)
             expect(data.user).toEqual(mockUser)
 
-            // Verify username check
+            // Verify username check was performed
             expect(mockSupabase.from).toHaveBeenCalledWith('users')
 
-            // Verify auth signup
+            // Verify auth signup with username in metadata
             expect(mockSupabase.auth.signUp).toHaveBeenCalledWith({
                 email: 'test@example.com',
                 password: 'ValidPass123!@#',
@@ -80,14 +79,9 @@ describe('Integration Tests - Complete Signup Flow', () => {
                 },
             })
 
-            // Verify profile creation
-            expect(mockInsert).toHaveBeenCalledWith({
-                id: 'user-123',
-                email: 'test@example.com',
-                username: 'testuser',
-                display_name: 'testuser',
-                created_at: expect.any(String),
-            })
+            // Profile creation is handled by the handle_new_user() DB trigger,
+            // not by the route — so no insert call should be made
+            expect(mockInsert).not.toHaveBeenCalled()
         })
     })
 
@@ -135,14 +129,11 @@ describe('Integration Tests - Complete Signup Flow', () => {
 
     describe('CSRF Token Management Integration', () => {
         test('handles CSRF token refresh', async () => {
-            // Note: CSRF is handled by middleware
-            // This test verifies the endpoint works with CSRF protection enabled
             mockMaybeSingle.mockResolvedValue({ data: null })
             mockSupabase.auth.signUp.mockResolvedValue({
                 data: { user: { id: '123', email: 'test@example.com' } },
                 error: null,
             })
-            mockInsert.mockResolvedValue({ error: null })
 
             const request = createMockRequest({
                 username: 'testuser',
@@ -154,78 +145,11 @@ describe('Integration Tests - Complete Signup Flow', () => {
             const response = await POST(request)
 
             expect(response.status).toBe(200)
-            // In real scenario, CSRF middleware would validate token before reaching handler
         })
     })
 
     describe('Database Integration', () => {
-        test('creates user profile with correct data', async () => {
-            const mockUser = {
-                id: 'user-456',
-                email: 'newuser@example.com',
-            }
-
-            mockMaybeSingle.mockResolvedValue({ data: null })
-            mockSupabase.auth.signUp.mockResolvedValue({
-                data: { user: mockUser },
-                error: null,
-            })
-            mockInsert.mockResolvedValue({ error: null })
-
-            const request = createMockRequest({
-                username: 'newuser',
-                email: 'newuser@example.com',
-                password: 'ValidPass123!@#',
-                website: '',
-            })
-
-            await POST(request)
-
-            expect(mockInsert).toHaveBeenCalledWith({
-                id: 'user-456',
-                email: 'newuser@example.com',
-                username: 'newuser',
-                display_name: 'newuser',
-                created_at: expect.any(String),
-            })
-
-            // Verify created_at is a valid ISO string
-            const insertCall = mockInsert.mock.calls[0][0]
-            const createdAt = new Date(insertCall.created_at)
-            expect(createdAt.getTime()).not.toBeNaN()
-        })
-
-        test('continues signup even if profile creation fails', async () => {
-            const mockUser = {
-                id: 'user-789',
-                email: 'test@example.com',
-            }
-
-            mockMaybeSingle.mockResolvedValue({ data: null })
-            mockSupabase.auth.signUp.mockResolvedValue({
-                data: { user: mockUser },
-                error: null,
-            })
-            mockInsert.mockResolvedValue({
-                error: { message: 'Profile creation failed' },
-            })
-
-            const request = createMockRequest({
-                username: 'testuser',
-                email: 'test@example.com',
-                password: 'ValidPass123!@#',
-                website: '',
-            })
-
-            const response = await POST(request)
-            const data = await response.json()
-
-            // Profile creation failure must fail signup
-            expect(response.status).toBe(500)
-            expect(data.error).toBe('Failed to create account. Please try again.')
-        })
-
-        test('username stored in lowercase in database', async () => {
+        test('username is passed to signUp metadata in lowercase', async () => {
             const mockUser = {
                 id: 'user-123',
                 email: 'test@example.com',
@@ -236,7 +160,6 @@ describe('Integration Tests - Complete Signup Flow', () => {
                 data: { user: mockUser },
                 error: null,
             })
-            mockInsert.mockResolvedValue({ error: null })
 
             const request = createMockRequest({
                 username: 'TestUser',
@@ -247,16 +170,22 @@ describe('Integration Tests - Complete Signup Flow', () => {
 
             await POST(request)
 
-            const insertCall = mockInsert.mock.calls[0][0]
-            expect(insertCall.username).toBe('testuser')
-            expect(insertCall.display_name).toBe('testuser')
+            // Username should be lowercased in the metadata passed to signUp
+            // The handle_new_user() trigger reads it from raw_user_meta_data
+            expect(mockSupabase.auth.signUp).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    options: expect.objectContaining({
+                        data: expect.objectContaining({
+                            username: 'testuser',
+                        }),
+                    }),
+                })
+            )
         })
     })
 
     describe('User Preferences Integration', () => {
         test('user preferences can be created after signup', async () => {
-            // This test verifies that after signup, user preferences can be created
-            // The actual preferences creation happens in the onboarding wizard
             const mockUser = {
                 id: 'user-123',
                 email: 'test@example.com',
@@ -267,7 +196,6 @@ describe('Integration Tests - Complete Signup Flow', () => {
                 data: { user: mockUser },
                 error: null,
             })
-            mockInsert.mockResolvedValue({ error: null })
 
             const request = createMockRequest({
                 username: 'testuser',
@@ -282,7 +210,6 @@ describe('Integration Tests - Complete Signup Flow', () => {
             expect(response.status).toBe(200)
             expect(data.success).toBe(true)
             expect(data.user.id).toBe('user-123')
-            // User can now proceed to preferences step
         })
     })
 })

@@ -8,12 +8,12 @@ import { Button } from '@/src/components/ui/Button'
 import { ThemeToggle } from '@/src/components/layout/ThemeToggle'
 import Packs from '@/src/components/profile/Packs'
 import { useUserPreferencesStore } from '@/src/lib/store/userPreferencesStore'
+import { toast } from '@/src/lib/store/toastStore'
 
 export default function ProfilePage() {
   const { user } = useAuthStore()
   const [username, setUsername] = useState('')
   const [loading, setLoading] = useState(false)
-  const [message, setMessage] = useState('')
 
   const { preferences, loading: preferencesLoading, fetchPreferences, updateExpansionPacks } = useUserPreferencesStore();
 
@@ -53,7 +53,6 @@ export default function ProfilePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    setMessage('')
 
     const supabase = createSupabaseBrowserClient()
     const { error } = await supabase
@@ -62,9 +61,9 @@ export default function ProfilePage() {
       .eq('id', user!.id)
 
     if (error) {
-      setMessage('Failed to update profile')
+      toast.error('Failed to update profile')
     } else {
-      setMessage('Profile updated successfully!')
+      toast.success('Profile updated successfully!')
     }
 
     setLoading(false)
@@ -106,15 +105,6 @@ export default function ProfilePage() {
               placeholder="Choose a username"
             />
           </div>
-
-          {message && (
-            <p className={`text-sm ${message.includes('Failed')
-              ? 'text-red-500 dark:text-red-400'
-              : 'text-green-500 dark:text-green-400'
-              }`}>
-              {message}
-            </p>
-          )}
 
           <Button type="submit" disabled={loading}>
             {loading ? 'Saving...' : 'Save Changes'}

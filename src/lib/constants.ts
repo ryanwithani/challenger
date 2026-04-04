@@ -1,9 +1,3 @@
-export const DASHBOARD_TABS: { id: string; name: string }[] = [
-  { id: 'overview', name: 'Overview' },
-  { id: 'challenges', name: 'Challenges' },
-  { id: 'sims', name: 'Sims' }
-] as const;
-
 export const SIMS_TABS = [
   { id: 'all', label: 'All Sims' },
   { id: 'by-challenge', label: 'By Challenge' },

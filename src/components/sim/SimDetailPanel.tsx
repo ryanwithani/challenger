@@ -7,6 +7,7 @@ import { useChallengeStore } from '@/src/lib/store/challengeStore'
 import { useFocusManagement } from '@/src/hooks/useFocusManagement'
 import { Button } from '@/src/components/ui/Button'
 import { Traits } from '@/src/components/sim/TraitsCatalog'
+import { AvatarCircle } from '@/src/components/sim/AvatarCircle'
 import { cn } from '@/src/lib/utils/cn'
 import { Database } from '@/src/types/database.types'
 import { TbChevronLeft, TbChevronRight, TbCrown, TbX } from 'react-icons/tb'
@@ -186,28 +187,15 @@ export default function SimDetailPanel({
 
         {/* Sim identity */}
         <div className="px-4 py-3 flex items-center gap-3">
-          <div className="w-14 h-14 rounded-full overflow-hidden bg-brand-500 flex-shrink-0 flex items-center justify-center">
-            {sim.avatar_url ? (
-              /* eslint-disable-next-line @next/next/no-img-element */
-              <img
-                src={sim.avatar_url}
-                alt={sim.name}
-                className="object-cover w-full h-full"
-              />
-            ) : (
-              <span className="text-white text-xl font-bold">
-                {sim.name?.charAt(0)?.toUpperCase() ?? 'S'}
-              </span>
-            )}
-          </div>
+          <AvatarCircle key={simId} avatarUrl={sim.avatar_url} name={sim.name} size="lg" className="w-14 h-14" />
           <div>
             <h2
               id="sim-panel-title"
-              className="font-display text-xl font-semibold text-warmGray-950 dark:text-warmGray-50"
+              className="font-display text-2xl font-semibold text-warmGray-950 dark:text-warmGray-50"
             >
               {sim.name}
             </h2>
-            <div className="flex items-center gap-2 text-xs text-warmGray-500 dark:text-warmGray-400">
+            <div className="flex items-center gap-2 text-sm text-warmGray-500 dark:text-warmGray-400">
               <span>{titleCaseAge(sim.age_stage)}</span>
               {challenge && (
                 <span className="bg-brand-100 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300 px-2 py-0.5 rounded-full">
@@ -219,17 +207,17 @@ export default function SimDetailPanel({
         </div>
 
         {/* Scrollable body */}
-        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-5">
+        <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-5">
           {/* Quick stats */}
           <div className="flex flex-wrap gap-2">
             {typeof sim.generation === 'number' && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-indigo-100 dark:bg-indigo-900/30 px-2 py-0.5 text-xs font-medium text-indigo-900 dark:text-indigo-300">
+              <span className="inline-flex items-center gap-1 rounded-full bg-indigo-100 dark:bg-indigo-900/30 px-2.5 py-1 text-sm font-medium text-indigo-900 dark:text-indigo-300">
                 Gen {sim.generation}
               </span>
             )}
             {sim.is_heir && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 dark:bg-amber-900/30 px-2 py-0.5 text-xs font-semibold text-amber-900 dark:text-amber-300">
-                <TbCrown className="w-3 h-3" /> Heir
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 dark:bg-amber-900/30 px-2.5 py-1 text-sm font-semibold text-amber-900 dark:text-amber-300">
+                <TbCrown className="w-4 h-4" /> Heir
               </span>
             )}
           </div>
@@ -238,13 +226,13 @@ export default function SimDetailPanel({
           <section>
             <h3 className="text-sm font-medium text-warmGray-500 dark:text-warmGray-400 mb-2">Traits</h3>
             {traitItems.length === 0 ? (
-              <p className="text-xs text-warmGray-400">No traits</p>
+              <p className="text-sm text-warmGray-400">No traits</p>
             ) : (
               <div className="flex flex-wrap gap-2">
                 {traitItems.map(t => (
                   <span
                     key={t!.id}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-warmGray-200 dark:border-warmGray-700 bg-white dark:bg-warmGray-850 px-2 py-0.5 text-[11px] text-warmGray-800 dark:text-warmGray-100"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-warmGray-200 dark:border-warmGray-700 bg-white dark:bg-warmGray-850 px-2.5 py-1 text-xs text-warmGray-800 dark:text-warmGray-100"
                   >
                     {t!.label}
                   </span>

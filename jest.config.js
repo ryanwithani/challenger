@@ -27,6 +27,7 @@ const customJestConfig = {
     '<rootDir>/node_modules/',
     '<rootDir>/.next/',
     '<rootDir>/src/__tests__/utils/',
+    '<rootDir>/e2e/',
   ],
   coverageThreshold: {
     global: {

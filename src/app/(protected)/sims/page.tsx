@@ -1,11 +1,14 @@
 import { createSupabaseServerClient } from '@/src/lib/supabase/server'
+import { Database } from '@/src/types/database.types'
 import SimsClient from './SimsClient'
+
+type SimRow = Database['public']['Tables']['sims']['Row']
 
 export default async function SimsPage() {
   const supabase = await createSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  let initialSims: Awaited<ReturnType<typeof supabase.from<'sims'>>>['data'] = []
+  let initialSims: SimRow[] = []
 
   if (user) {
     const { data } = await supabase

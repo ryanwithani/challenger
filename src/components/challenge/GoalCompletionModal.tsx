@@ -5,6 +5,7 @@ import { Button } from '@/src/components/ui/Button'
 import { Modal } from '@/src/components/sim/SimModal'
 import { Select } from '@/src/components/ui/Select'
 import { Database } from '@/src/types/database.types'
+import { toast } from '@/src/lib/store/toastStore'
 
 type Goal = Database['public']['Tables']['goals']['Row']
 type Sim = Database['public']['Tables']['sims']['Row']
@@ -161,8 +162,8 @@ export function GoalCompletionModal({
             await onComplete(goal.id, selectedSim, selectedMethod, notes || undefined)
             onClose()
         } catch (error) {
-            console.error('Error completing goal:', error)
-            // You might want to show an error message here
+            const message = error instanceof Error ? error.message : 'Failed to complete goal'
+            toast.error(message)
         } finally {
             setLoading(false)
         }
@@ -171,15 +172,15 @@ export function GoalCompletionModal({
     const selectedMethodData = completionMethods.find(m => m.value === selectedMethod)
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Complete Goal">
+        <Modal open={isOpen} onClose={onClose} title="Complete Goal">
             <div className="space-y-6">
                 {/* Goal Information */}
-                <div className="bg-gray-50 rounded-lg p-4">
-                    <h3 className="font-semibold text-gray-900">{goal.title}</h3>
+                <div className="bg-warmGray-50 dark:bg-warmGray-800 rounded-xl p-4">
+                    <h3 className="font-semibold text-warmGray-900 dark:text-warmGray-100">{goal.title}</h3>
                     {goal.description && (
-                        <p className="text-sm text-gray-600 mt-1">{goal.description}</p>
+                        <p className="text-sm text-warmGray-600 dark:text-warmGray-400 mt-1">{goal.description}</p>
                     )}
-                    <div className="text-sm text-brand-600 font-medium mt-2">
+                    <div className="text-sm text-brand-600 dark:text-brand-400 font-medium mt-2">
                         +{goal.point_value} points
                     </div>
                 </div>
@@ -187,7 +188,7 @@ export function GoalCompletionModal({
                 {/* Sim Selection (if needed) */}
                 {needsSimSelection && (
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-warmGray-700 dark:text-warmGray-200 mb-2">
                             Which Sim accomplished this?
                         </label>
                         <Select
@@ -205,7 +206,7 @@ export function GoalCompletionModal({
 
                 {/* Method Selection */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-warmGray-700 dark:text-warmGray-200 mb-2">
                         How was this accomplished?
                     </label>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -213,9 +214,9 @@ export function GoalCompletionModal({
                             <button
                                 key={method.value}
                                 onClick={() => setSelectedMethod(method.value)}
-                                className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all ${selectedMethod === method.value
-                                    ? 'border-brand-500 bg-brand-100 text-brand-700'
-                                    : 'border-gray-200 hover:border-gray-300 text-gray-700'
+                                className={`flex items-center space-x-3 p-3 rounded-xl border-2 transition-all ${selectedMethod === method.value
+                                    ? 'border-brand-500 bg-brand-100 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300'
+                                    : 'border-warmGray-200 dark:border-warmGray-700 hover:border-warmGray-300 dark:hover:border-warmGray-600 text-warmGray-700 dark:text-warmGray-200'
                                     }`}
                             >
                                 <span className="text-lg">{method.icon}</span>
@@ -228,7 +229,7 @@ export function GoalCompletionModal({
                 {/* Custom input for "Other" option */}
                 {selectedMethod === 'other' && (
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-warmGray-700 dark:text-warmGray-200 mb-2">
                             Please specify:
                         </label>
                         <input
@@ -236,7 +237,7 @@ export function GoalCompletionModal({
                             value={notes}
                             onChange={(e) => setNotes(e.target.value)}
                             placeholder="How did you complete this goal?"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-500"
+                            className="w-full px-3 py-2 border border-warmGray-300 dark:border-warmGray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white dark:bg-warmGray-800 text-warmGray-900 dark:text-warmGray-100"
                         />
                     </div>
                 )}
@@ -244,7 +245,7 @@ export function GoalCompletionModal({
                 {/* Optional Notes */}
                 {selectedMethod && selectedMethod !== 'other' && (
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-warmGray-700 dark:text-warmGray-200 mb-2">
                             Additional Notes (Optional)
                         </label>
                         <textarea
@@ -252,28 +253,26 @@ export function GoalCompletionModal({
                             onChange={(e) => setNotes(e.target.value)}
                             placeholder="Any additional details about this achievement..."
                             rows={3}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-500"
+                            className="w-full px-3 py-2 border border-warmGray-300 dark:border-warmGray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white dark:bg-warmGray-800 text-warmGray-900 dark:text-warmGray-100"
                         />
                     </div>
                 )}
 
                 {/* Summary */}
                 {selectedMethod && (
-                    <div className="bg-blue-50 rounded-lg p-4">
-                        <h4 className="font-medium text-blue-900 mb-2">Summary</h4>
-                        <div className="text-sm text-blue-800">
+                    <div className="bg-blue-50 dark:bg-blue-900/30 rounded-xl p-4">
+                        <h4 className="font-medium text-blue-900 dark:text-blue-200 mb-2">Summary</h4>
+                        <div className="text-sm text-blue-800 dark:text-blue-300">
                             {needsSimSelection && selectedSim && (
                                 <div>
-                                    <strong>Sim:</strong> {JSON.parse(completionProgress.completion_details).sim_name}
+                                    <strong>Sim:</strong> {sims.find(s => s.id === selectedSim)?.name ?? selectedSim}
                                 </div>
                             )}
-                            {selectedMethod && (
-                                <div>
-                                    <strong>Method:</strong> {JSON.parse(completionProgress.completion_details).method} {selectedMethodData?.icon} {selectedMethodData?.label}
-                                </div>
-                            )}
+                            <div>
+                                <strong>Method:</strong> {selectedMethodData?.icon} {selectedMethodData?.label}
+                            </div>
                             {notes && (
-                                <div><strong>Notes:</strong> {JSON.parse(completionProgress.completion_details).notes}</div>
+                                <div><strong>Notes:</strong> {notes}</div>
                             )}
                         </div>
                     </div>

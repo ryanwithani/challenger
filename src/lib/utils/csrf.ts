@@ -1,5 +1,4 @@
 import { NextRequest } from 'next/server'
-import crypto from 'crypto'
 
 // CSRF token configuration
 const CSRF_TOKEN_NAME = 'csrf-token'
@@ -7,10 +6,13 @@ const CSRF_TOKEN_LENGTH = 32
 const CSRF_TOKEN_EXPIRY = 60 * 60 * 1000 // 1 hour
 
 /**
- * Generate a cryptographically secure CSRF token
+ * Generate a cryptographically secure CSRF token using Web Crypto API
+ * (compatible with Edge Runtime, Node.js, and browsers)
  */
 export function generateCSRFToken(): string {
-    return crypto.randomBytes(CSRF_TOKEN_LENGTH).toString('hex')
+    const bytes = new Uint8Array(CSRF_TOKEN_LENGTH)
+    globalThis.crypto.getRandomValues(bytes)
+    return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('')
 }
 
 /**

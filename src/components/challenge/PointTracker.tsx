@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { clsx } from 'clsx'
+import { cn } from '@/src/lib/utils/cn'
 
 interface PointTrackerProps {
   totalPoints: number
@@ -30,41 +30,41 @@ export function PointTracker({
   }, [possiblePoints, showMilestones])
 
   return (
-    <div className={clsx('card sticky top-6', className)}>
-      <h3 className="text-lg font-semibold mb-4">Progress Tracker</h3>
-      
+    <div className={cn('card sticky top-6', className)}>
+      <h3 className="text-lg font-semibold mb-4 text-warmGray-900 dark:text-warmGray-100">Progress Tracker</h3>
+
       {/* Points Display */}
       <div className="text-center mb-6">
-        <div className="text-5xl font-bold text-gray-900 mb-1">
+        <div className="text-5xl font-bold text-warmGray-900 dark:text-warmGray-100 mb-1">
           {totalPoints}
         </div>
-        <div className="text-gray-600">
+        <div className="text-warmGray-600 dark:text-warmGray-400">
           of {possiblePoints} points
         </div>
-        <div className="text-sm text-gray-500 mt-1">
+        <div className="text-sm text-warmGray-500 dark:text-warmGray-400 mt-1">
           {percentage.toFixed(1)}% Complete
         </div>
       </div>
-      
+
       {/* Progress Bar */}
       <div className="relative">
-        <div className="w-full bg-gray-200 rounded-full h-6 overflow-hidden">
+        <div className="w-full bg-warmGray-200 dark:bg-warmGray-700 rounded-full h-6 overflow-hidden">
           <div
-            className={clsx(
+            className={cn(
               'h-full rounded-full transition-all duration-500 ease-out bg-brand-accent'
             )}
             style={{ width: `${Math.min(percentage, 100)}%` }}
           />
         </div>
-        
+
         {/* Milestone Markers */}
         {showMilestones && milestones.map((milestone) => (
           <div
             key={milestone.percent}
-            className="absolute top-0 h-6 w-0.5 bg-gray-400"
+            className="absolute top-0 h-6 w-0.5 bg-warmGray-400 dark:bg-warmGray-500"
             style={{ left: `${milestone.percent}%` }}
           >
-            <span className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500 whitespace-nowrap">
+            <span className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-warmGray-500 dark:text-warmGray-400 whitespace-nowrap">
               {milestone.label}
             </span>
           </div>
@@ -84,15 +84,15 @@ export function PointTracker({
       {/* Milestone List */}
       {showMilestones && possiblePoints > 0 && (
         <div className="mt-6 space-y-2">
-          <h4 className="text-sm font-medium text-gray-700">Milestones</h4>
+          <h4 className="text-sm font-medium text-warmGray-700 dark:text-warmGray-200">Milestones</h4>
           {milestones.map((milestone) => {
             const isReached = totalPoints >= milestone.points
             return (
               <div
                 key={milestone.percent}
-                className={clsx(
+                className={cn(
                   'flex items-center justify-between text-sm',
-                  isReached ? 'text-green-600' : 'text-gray-400'
+                  isReached ? 'text-green-600 dark:text-green-400' : 'text-warmGray-400 dark:text-warmGray-500'
                 )}
               >
                 <span className="flex items-center">
@@ -116,7 +116,7 @@ export function PointTracker({
       
       {/* Encouragement Message */}
       {percentage > 0 && percentage < 100 && (
-        <div className="mt-4 text-center text-sm text-slate-600">
+        <div className="mt-4 text-center text-sm text-warmGray-600 dark:text-warmGray-400">
         {percentage < 25 && "Great start—keep logging progress."}
         {percentage >= 25 && percentage < 50 && "Nice momentum. Aim for the next milestone."}
         {percentage >= 50 && percentage < 75 && "Halfway there. You’ve got this."}

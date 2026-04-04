@@ -22,12 +22,12 @@ export default function TraitTile({ trait, selected, disabled, onToggle }: Props
             aria-label={trait.label}
             className={[
                 // size & layout
-                'relative h-24 w-full rounded-xl',
+                'relative h-24 w-full rounded-2xl',
                 'grid place-items-center text-center',
                 'px-2',
-                // base skin (subtle Sims card)
-                'bg-sky-50',
-                'border border-sky-200',
+                // base skin
+                'bg-warmGray-50',
+                'border border-warmGray-200',
                 'shadow-[inset_0_1px_0_rgba(255,255,255,.7)]',
                 // interactions
                 'transition-transform duration-150',
@@ -35,7 +35,7 @@ export default function TraitTile({ trait, selected, disabled, onToggle }: Props
                 selected ? 'ring-0 border-brand-600' : 'hover:border-brand-400/60',
                 disabled && !selected ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
                 // dark
-                'dark:bg-zinc-900 dark:border-zinc-700',
+                'dark:bg-warmGray-900 dark:border-warmGray-700',
             ].join(' ')}
         >
             {/* check badge */}

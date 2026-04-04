@@ -16,7 +16,7 @@ export type SelectableCardProps = {
 export function SelectableCard({
     id, selected, disabled, title, subtitle, tooltip, onToggle, compact = true,
   }: SelectableCardProps) {
-    const base = compact ? 'h-22 px-2 py-2 rounded-xl' : 'h-28 p-3 rounded-2xl'
+    const base = compact ? 'h-22 px-2 py-2 rounded-2xl' : 'h-28 p-3 rounded-2xl'
     const iconPath = packIconPath(title as string)
     const content = (
       <button
@@ -29,15 +29,15 @@ export function SelectableCard({
         className={cn(
           'relative flex w-full flex-col items-center justify-center gap-1 border text-center text-sm transition focus-visible:ring-2 focus-visible:ring-brand-400',
           base,
-          selected ? 'border-brand-500 ring-2 ring-brand-200 bg-brand-50' : 'border-gray-200 hover:border-brand-300 bg-white',
+          selected ? 'border-brand-500 ring-2 ring-brand-200 bg-brand-50' : 'border-warmGray-100 dark:border-warmGray-800 hover:border-brand-300 dark:hover:border-brand-500 bg-white dark:bg-warmGray-900',
           disabled && 'opacity-60 cursor-not-allowed'
         )}
       >
         <div className={cn(compact ? 'text-xl' : 'text-2xl', 'leading-none')}>
         <img src={iconPath} alt={title} aria-hidden className={cn(compact ? 'h-6 w-6' : 'h-7 w-7')} />
         </div>
-        <div className="font-medium text-gray-900 text-[13px] leading-tight line-clamp-2">{title}</div>
-        {subtitle && <div className="text-[11px] text-gray-500 line-clamp-1">{subtitle}</div>}
+        <div className="font-medium text-warmGray-900 dark:text-warmGray-50 text-[13px] leading-tight line-clamp-2">{title}</div>
+        {subtitle && <div className="text-[11px] text-warmGray-500 dark:text-warmGray-400 line-clamp-1">{subtitle}</div>}
         {selected && (
           <span className="absolute right-2 top-2 grid h-5 w-5 place-items-center rounded-full bg-brand-500 text-[10px] font-bold text-white">✓</span>
         )}

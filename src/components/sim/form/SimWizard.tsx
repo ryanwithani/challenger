@@ -1,11 +1,13 @@
 'use client'
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
+import { TbAlertCircle } from 'react-icons/tb'
 import { createSupabaseBrowserClient } from '@/src/lib/supabase/client'
 import { useAuthStore } from '@/src/lib/store/authStore'
 import { type SimWizardData } from '@/src/lib/validations/sim'
 import { BasicInfoStep, TraitsStep, PersonalityStep, ReviewStep } from './steps'
 import { Button } from '@/src/components/ui/Button'
+import { FadeTransition } from '@/src/components/ui/FadeTransition'
 
 type SimInsert = any; // Import your SimInsert type from the store
 
@@ -325,7 +327,7 @@ export function SimWizard({ onSubmit, onCancel, loading }: SimWizardProps) {
         <div className="flex items-center justify-center py-12">
           <div className="flex items-center space-x-3">
             <div className="w-6 h-6 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
-            <span className="text-gray-600">Loading Sim Creator...</span>
+            <span className="text-warmGray-600 dark:text-warmGray-400">Loading Sim Creator...</span>
           </div>
         </div>
       </div>
@@ -337,14 +339,14 @@ export function SimWizard({ onSubmit, onCancel, loading }: SimWizardProps) {
     if (!errorState.hasError) return null;
 
     return (
-      <div className="mb-6 p-4 bg-red-50 border-2 border-red-200 rounded-xl">
+      <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/10 border-2 border-red-200 dark:border-red-800 rounded-xl">
         <div className="flex items-start gap-3">
-          <span className="text-xl">🚨</span>
+          <TbAlertCircle className="shrink-0 mt-0.5 text-xl text-red-600 dark:text-red-400" aria-hidden="true" />
           <div className="flex-1">
-            <p className="text-red-800 font-semibold mb-2">
+            <p className="text-red-800 dark:text-red-200 font-semibold mb-2">
               {errorState.errors.length === 1 ? 'An error occurred:' : 'Multiple errors occurred:'}
             </p>
-            <ul className="text-sm text-red-700 space-y-1 list-disc list-inside">
+            <ul className="text-sm text-red-700 dark:text-red-300 space-y-1 list-disc list-inside">
               {errorState.errors.map((error, index) => (
                 <li key={index}>
                   <strong>{error.context}:</strong> {error.message}
@@ -407,10 +409,10 @@ export function SimWizard({ onSubmit, onCancel, loading }: SimWizardProps) {
             return (
               <li key={step.name} className="relative flex-1">
                 {stepIdx !== steps.length - 1 && (
-                  <div className="absolute top-4 left-1/2 w-full h-0.5 bg-gray-200">
+                  <div className="absolute top-4 left-1/2 w-full h-0.5 bg-warmGray-200 dark:bg-warmGray-700">
                     <div
                       className={`h-full transition-all duration-300 ${
-                        isComplete ? 'bg-brand-500 w-full' : 'bg-gray-200 w-0'
+                        isComplete ? 'bg-brand-500 w-full' : 'w-0'
                       }`}
                     />
                   </div>
@@ -423,7 +425,7 @@ export function SimWizard({ onSubmit, onCancel, loading }: SimWizardProps) {
                       ? 'border-brand-500 bg-brand-500'
                       : isCurrent
                         ? 'border-brand-500 bg-white dark:bg-warmGray-900'
-                        : 'border-gray-300 bg-white dark:bg-warmGray-900'
+                        : 'border-warmGray-300 dark:border-warmGray-600 bg-white dark:bg-warmGray-900'
                     }
                   `}>
                     {isComplete ? (
@@ -432,14 +434,14 @@ export function SimWizard({ onSubmit, onCancel, loading }: SimWizardProps) {
                       </svg>
                     ) : (
                       <span className={`text-sm font-medium ${
-                        isCurrent ? 'text-brand-500' : 'text-gray-500'
+                        isCurrent ? 'text-brand-500' : 'text-warmGray-500 dark:text-warmGray-400'
                       }`}>
                         {step.number}
                       </span>
                     )}
                   </div>
                   <span className={`mt-2 text-xs font-medium text-center ${
-                    isCurrent ? 'text-brand-500' : isComplete ? 'text-gray-700' : 'text-gray-500'
+                    isCurrent ? 'text-brand-500' : isComplete ? 'text-warmGray-700 dark:text-warmGray-300' : 'text-warmGray-500 dark:text-warmGray-400'
                   }`}>
                     {step.name}
                   </span>
@@ -451,6 +453,7 @@ export function SimWizard({ onSubmit, onCancel, loading }: SimWizardProps) {
       </nav>
 
       {/* Step Content */}
+      <FadeTransition stepKey={currentStep}>
       <div className="mt-8">
         {currentStep === 1 && (
           <BasicInfoStep
@@ -487,6 +490,7 @@ export function SimWizard({ onSubmit, onCancel, loading }: SimWizardProps) {
           />
         )}
       </div>
+      </FadeTransition>
     </div>
   );
 }

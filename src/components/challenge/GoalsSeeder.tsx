@@ -1,6 +1,8 @@
 // Legacy Challenge Goals Seeder - Creates predefined goals for Legacy challenges
 // Based on Pinstar's official Legacy Challenge scoring rules
 
+export type AutomationType = 'generation_ya' | 'ten_children_per_gen' | 'unique_spouse_traits' | 'challenge_complete_gen10'
+
 export interface LegacyGoalTemplate {
     id: string
     title: string
@@ -12,6 +14,7 @@ export interface LegacyGoalTemplate {
     thresholds?: { value: number; points: number }[]
     requiredPacks?: string[]
     order: number
+    automationType?: AutomationType
 }
 
 // ===== FAMILY CATEGORY (10 points) =====
@@ -24,7 +27,8 @@ const familyGoals: LegacyGoalTemplate[] = [
         goalType: 'counter',
         pointValue: 1,
         maxPoints: 10,
-        order: 1
+        order: 1,
+        automationType: 'generation_ya'
     },
     {
         id: 'family_ten_children',
@@ -33,7 +37,8 @@ const familyGoals: LegacyGoalTemplate[] = [
         category: 'family',
         goalType: 'milestone',
         pointValue: 1,
-        order: 2
+        order: 2,
+        automationType: 'ten_children_per_gen'
     }
 ]
 
@@ -42,35 +47,21 @@ const creativeGoals: LegacyGoalTemplate[] = [
     {
         id: 'creative_memorialize_heirs',
         title: 'Memorialize Heirs and Spouses',
-        description: 'Create paintings, books, or songs memorializing each generation\'s heir and spouse.',
+        description: 'Memorialize each generation\'s heir and spouse (1pt per generation, 9 pts total). Methods: paint portrait (painting 8+), write song (piano/violin/guitar 8+), perform comedy routine at party (comedy 8+), write biography (writing 10), create video game (programming 9+), take photo (photography 5).',
         category: 'creative',
         goalType: 'counter',
         pointValue: 1,
-        maxPoints: 5,
+        maxPoints: 9,
         order: 1
     },
     {
-        id: 'creative_aspirations_completed',
-        title: 'Creative Aspirations Completed',
-        description: 'Complete creative aspirations (2 for 1pt, 3 for 2pts). Includes Painter Extraordinaire, Bestselling Author, Musical Genius.',
+        id: 'creative_aspirations_10th',
+        title: 'Creative Aspirations Completed (10th Point)',
+        description: 'A single family member completes at least 2 of the 3 creative aspirations (Painter Extraordinaire, Bestselling Author, Musical Genius).',
         category: 'creative',
-        goalType: 'threshold',
+        goalType: 'milestone',
         pointValue: 1,
-        thresholds: [
-            { value: 2, points: 1 },
-            { value: 3, points: 2 }
-        ],
         order: 2
-    },
-    {
-        id: 'creative_museum_donations',
-        title: 'Museum Donations',
-        description: 'Donate paintings, books, or other creative works to the museum.',
-        category: 'creative',
-        goalType: 'counter',
-        pointValue: 1,
-        maxPoints: 3,
-        order: 3
     }
 ]
 
@@ -87,12 +78,12 @@ const fortuneGoals: LegacyGoalTemplate[] = [
             { value: 75000, points: 1 },
             { value: 120000, points: 2 },
             { value: 200000, points: 3 },
-            { value: 300000, points: 4 },
-            { value: 500000, points: 5 },
-            { value: 850000, points: 6 },
-            { value: 1400000, points: 7 },
-            { value: 2300000, points: 8 },
-            { value: 3700000, points: 9 },
+            { value: 320000, points: 4 },
+            { value: 510000, points: 5 },
+            { value: 830000, points: 6 },
+            { value: 1300000, points: 7 },
+            { value: 2100000, points: 8 },
+            { value: 3500000, points: 9 },
             { value: 5700000, points: 10 }
         ],
         order: 1
@@ -103,12 +94,34 @@ const fortuneGoals: LegacyGoalTemplate[] = [
 const loveGoals: LegacyGoalTemplate[] = [
     {
         id: 'love_unique_spouse_traits',
-        title: 'Unique Spouse Traits',
-        description: 'Each primary spouse must have completely unique traits (no repeats across generations).',
+        title: 'Unique Spouse Traits Brought In',
+        description: 'Each primary spouse must bring completely unique traits (no repeats across generations). Earn 1pt per every 3 unique traits accumulated across all generations.',
+        category: 'love',
+        goalType: 'threshold',
+        pointValue: 1,
+        thresholds: [
+            { value: 3, points: 1 },
+            { value: 6, points: 2 },
+            { value: 9, points: 3 },
+            { value: 12, points: 4 },
+            { value: 15, points: 5 },
+            { value: 18, points: 6 },
+            { value: 21, points: 7 },
+            { value: 24, points: 8 },
+            { value: 27, points: 9 }
+        ],
+        order: 1,
+        automationType: 'unique_spouse_traits'
+    },
+    {
+        id: 'love_challenge_completion',
+        title: 'Challenge Complete (10th Point)',
+        description: 'The 10th Love point is earned once the 10th generation heir is born, completing the challenge.',
         category: 'love',
         goalType: 'milestone',
-        pointValue: 10,
-        order: 1
+        pointValue: 1,
+        order: 2,
+        automationType: 'challenge_complete_gen10'
     }
 ]
 
@@ -117,7 +130,7 @@ const knowledgeGoals: LegacyGoalTemplate[] = [
     {
         id: 'knowledge_skills_maxed',
         title: 'Skills Maxed Across Family',
-        description: 'Different skills maxed by any family member across all generations.',
+        description: 'Different skills maxed by any family member across all generations. Toddler and childhood skills count equally.',
         category: 'knowledge',
         goalType: 'threshold',
         pointValue: 1,
@@ -130,10 +143,18 @@ const knowledgeGoals: LegacyGoalTemplate[] = [
             { value: 18, points: 6 },
             { value: 21, points: 7 },
             { value: 24, points: 8 },
-            { value: 27, points: 9 },
-            { value: 30, points: 10 } // All base game + expansion skills
+            { value: 27, points: 9 }
         ],
         order: 1
+    },
+    {
+        id: 'knowledge_every_skill_maxed',
+        title: 'Every Skill Maxed (10th Point)',
+        description: 'Every available skill in the game is maxed at some point during the challenge. Can be done by different Sims in different generations. Includes toddler and childhood skills.',
+        category: 'knowledge',
+        goalType: 'milestone',
+        pointValue: 1,
+        order: 2
     }
 ]
 
@@ -142,7 +163,7 @@ const athleticGoals: LegacyGoalTemplate[] = [
     {
         id: 'athletic_aspirations_completed',
         title: 'Aspirations Completed Across Family',
-        description: 'Total number of aspirations completed by any family member.',
+        description: 'Total number of aspirations completed by any family member. Childhood aspirations count.',
         category: 'athletic',
         goalType: 'threshold',
         pointValue: 1,
@@ -155,10 +176,18 @@ const athleticGoals: LegacyGoalTemplate[] = [
             { value: 24, points: 6 },
             { value: 28, points: 7 },
             { value: 32, points: 8 },
-            { value: 36, points: 9 },
-            { value: 40, points: 10 } // All aspirations
+            { value: 36, points: 9 }
         ],
         order: 1
+    },
+    {
+        id: 'athletic_every_aspiration',
+        title: 'Every Aspiration Completed (10th Point)',
+        description: 'Every unique aspiration in the game is completed by a family member across the entire challenge.',
+        category: 'athletic',
+        goalType: 'milestone',
+        pointValue: 1,
+        order: 2
     }
 ]
 
@@ -167,93 +196,157 @@ const natureGoals: LegacyGoalTemplate[] = [
     {
         id: 'nature_collections_completed',
         title: 'Collections Completed',
-        description: 'Complete various collections (fossils, crystals, plants, etc.).',
+        description: 'Complete collections out of the 30 possible in the game. Can be earned throughout the challenge, not by a single Sim or generation.',
         category: 'nature',
-        goalType: 'counter',
+        goalType: 'threshold',
         pointValue: 1,
-        maxPoints: 5,
+        thresholds: [
+            { value: 1, points: 1 },
+            { value: 2, points: 2 },
+            { value: 5, points: 3 },
+            { value: 9, points: 4 },
+            { value: 13, points: 5 }
+        ],
         order: 1
     },
     {
-        id: 'nature_career_branches',
-        title: 'Career Branches Completed',
-        description: 'Complete different career branches across family members.',
+        id: 'nature_unique_death_types',
+        title: 'Ten Unique Death Types',
+        description: 'Have a Sim die on the family lot in each of the 10 different ways to die.',
         category: 'nature',
-        goalType: 'counter',
+        goalType: 'milestone',
         pointValue: 1,
-        maxPoints: 3,
         order: 2
     },
     {
-        id: 'nature_deaths_witnessed',
-        title: 'Deaths from Natural Causes',
-        description: 'Family members who die from old age (not accidents or other causes).',
+        id: 'nature_all_careers_topped',
+        title: 'All Career Tracks Topped',
+        description: 'Have Sims within the household reach the top level of each career track.',
         category: 'nature',
-        goalType: 'counter',
+        goalType: 'milestone',
         pointValue: 1,
-        maxPoints: 1,
         order: 3
     },
     {
-        id: 'nature_emotional_paintings',
-        title: 'Emotional Paintings Created',
-        description: 'Create paintings while experiencing different emotions.',
+        id: 'nature_all_career_branches',
+        title: 'All Career Branches Mastered',
+        description: 'Have Sims within the household reach the top level of both branches of every career track.',
         category: 'nature',
-        goalType: 'counter',
+        goalType: 'milestone',
         pointValue: 1,
-        maxPoints: 1,
         order: 4
+    },
+    {
+        id: 'nature_emotional_paintings',
+        title: 'All Emotional Paintings Collected',
+        description: 'Collect every single emotional painting type: Angry, Sad, Playful, Flirty, Confident, and Focused.',
+        category: 'nature',
+        goalType: 'milestone',
+        pointValue: 1,
+        order: 5
+    },
+    {
+        id: 'nature_aspiration_rewards',
+        title: 'All Aspiration Rewards Collected',
+        description: 'Collect and store on the family lot every single consumable aspiration reward.',
+        category: 'nature',
+        goalType: 'milestone',
+        pointValue: 1,
+        order: 6
     }
 ]
 
 // ===== FOOD CATEGORY (10 points) =====
 const foodGoals: LegacyGoalTemplate[] = [
     {
-        id: 'food_excellent_meals',
-        title: 'Excellent Quality Meals',
-        description: 'Cook meals of Excellent quality.',
+        id: 'food_upgrade_appliances',
+        title: 'Premium Kitchen Appliances',
+        description: 'Purchase the most expensive refrigerator and stove, then fully upgrade both of them.',
         category: 'food',
-        goalType: 'threshold',
+        goalType: 'milestone',
         pointValue: 1,
-        thresholds: [
-            { value: 25, points: 1 },
-            { value: 50, points: 2 },
-            { value: 100, points: 3 }
-        ],
         order: 1
     },
     {
-        id: 'food_gourmet_meals',
-        title: 'Gourmet Quality Meals',
-        description: 'Cook meals of Gourmet quality (requires Gourmet Cooking skill).',
+        id: 'food_baked_alaska',
+        title: 'Perfect Baked Alaska',
+        description: 'Have a Sim make the highest quality version of Baked Alaska, the most difficult dish to make. (Alternatively: bake the highest level baking dish.)',
         category: 'food',
-        goalType: 'threshold',
+        goalType: 'milestone',
         pointValue: 1,
-        thresholds: [
-            { value: 25, points: 1 },
-            { value: 50, points: 2 },
-            { value: 100, points: 3 }
-        ],
         order: 2
     },
     {
-        id: 'food_ambrosia_meals',
-        title: 'Ambrosia Meals Cooked',
-        description: 'Cook the legendary Ambrosia dish.',
+        id: 'food_culinary_master',
+        title: 'Culinary Master',
+        description: 'Have a single Sim max the Cooking, Baking (Get to Work), Gourmet Cooking, and Mixology skills.',
         category: 'food',
-        goalType: 'counter',
+        goalType: 'milestone',
         pointValue: 1,
-        maxPoints: 2,
         order: 3
     },
     {
-        id: 'food_culinary_career',
-        title: 'Culinary Career Completion',
-        description: 'Complete the Culinary career (Chef or Mixologist branch).',
+        id: 'food_both_aspirations',
+        title: 'Food Aspirations Complete',
+        description: 'Have Sims complete both food aspirations in a single generation. They can be done by two different Sims.',
         category: 'food',
         goalType: 'milestone',
-        pointValue: 2,
+        pointValue: 1,
         order: 4
+    },
+    {
+        id: 'food_overweight_sim',
+        title: 'Cooking Consequence',
+        description: 'Have a Sim get fat from your family\'s cooking.',
+        category: 'food',
+        goalType: 'milestone',
+        pointValue: 1,
+        order: 5
+    },
+    {
+        id: 'food_six_sims_dining',
+        title: 'Full Table Dinner',
+        description: 'Have at least six Sims (family members or guests) all sitting at the table eating at the same time.',
+        category: 'food',
+        goalType: 'milestone',
+        pointValue: 1,
+        order: 6
+    },
+    {
+        id: 'food_career_branches',
+        title: 'Chef and Mixologist',
+        description: 'Reach the top of both food career branches (Chef and Mixologist).',
+        category: 'food',
+        goalType: 'milestone',
+        pointValue: 1,
+        order: 7
+    },
+    {
+        id: 'food_fresh_ingredients',
+        title: 'Premium Ingredients Meal',
+        description: 'Cook a meal with at least two fresh ingredients that are of the highest quality.',
+        category: 'food',
+        goalType: 'milestone',
+        pointValue: 1,
+        order: 8
+    },
+    {
+        id: 'food_date_meal',
+        title: 'Romantic Dinner',
+        description: 'Have a Sim make their date a max-quality meal or mix a max-quality drink during a single date.',
+        category: 'food',
+        goalType: 'milestone',
+        pointValue: 1,
+        order: 9
+    },
+    {
+        id: 'food_party_catering',
+        title: 'Party Catering Success',
+        description: 'Serve a max-quality party-sized meal AND mix a max-quality drink, both served during a single party.',
+        category: 'food',
+        goalType: 'milestone',
+        pointValue: 1,
+        order: 10
     }
 ]
 
@@ -262,7 +355,7 @@ const popularityGoals: LegacyGoalTemplate[] = [
     {
         id: 'popularity_party_medals',
         title: 'Party Medal Points',
-        description: 'Earn medal points from throwing parties (Bronze=1, Silver=2, Gold=3).',
+        description: 'Earn medal points from throwing parties and dates (Bronze=1, Silver=2, Gold=3). Includes Toddler Playdates if you have Toddler Stuff Pack.',
         category: 'popularity',
         goalType: 'threshold',
         pointValue: 1,
@@ -275,10 +368,18 @@ const popularityGoals: LegacyGoalTemplate[] = [
             { value: 54, points: 6 },
             { value: 63, points: 7 },
             { value: 72, points: 8 },
-            { value: 81, points: 9 },
-            { value: 90, points: 10 }
+            { value: 81, points: 9 }
         ],
         order: 1
+    },
+    {
+        id: 'popularity_perfect_events',
+        title: 'Perfect Events Achieved (10th Point)',
+        description: 'A single Sim achieves a gold medal in every different type of party AND a gold medal on a date. (Can alternatively be replaced by earning all possible club perks in your Legacy club.)',
+        category: 'popularity',
+        goalType: 'milestone',
+        pointValue: 1,
+        order: 2
     }
 ]
 
@@ -312,31 +413,31 @@ const penaltyGoals: LegacyGoalTemplate[] = [
     {
         id: 'penalty_power_shutoffs',
         title: 'Power Shutoffs',
-        description: 'Each time utilities are shut off due to non-payment.',
+        description: 'Each time the power is shut off due to unpaid bills.',
         category: 'penalty',
         goalType: 'counter',
-        pointValue: -2,
+        pointValue: -1,
         maxPoints: -20,
         order: 1
     },
     {
-        id: 'penalty_children_taken',
-        title: 'Children Taken by Social Worker',
-        description: 'Each time a child is removed by social services.',
-        category: 'penalty',
-        goalType: 'counter',
-        pointValue: -5,
-        maxPoints: -50,
-        order: 2
-    },
-    {
-        id: 'penalty_fires',
-        title: 'House Fires',
-        description: 'Each house fire that occurs on the lot.',
+        id: 'penalty_plumbing_shutoffs',
+        title: 'Plumbing Shutoffs',
+        description: 'Each time the plumbing is shut off due to unpaid bills.',
         category: 'penalty',
         goalType: 'counter',
         pointValue: -1,
-        maxPoints: -10,
+        maxPoints: -20,
+        order: 2
+    },
+    {
+        id: 'penalty_children_taken',
+        title: 'Children Taken by Social Worker',
+        description: 'Each time a child or infant is taken away by social services.',
+        category: 'penalty',
+        goalType: 'counter',
+        pointValue: -1,
+        maxPoints: -20,
         order: 3
     }
 ]
@@ -493,7 +594,8 @@ export function convertGoalTemplateToDbGoal(
         max_points: template.maxPoints,
         thresholds: template.thresholds ? JSON.stringify(template.thresholds) : null,
         current_value: 0, // Start at 0 for counters/thresholds
-        target_value: template.goalType === 'milestone' ? 1 : undefined
+        target_value: template.goalType === 'milestone' ? 1 : undefined,
+        automation_type: template.automationType ?? null
     }
 }
 

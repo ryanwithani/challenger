@@ -1,6 +1,4 @@
-import { useCallback, useState } from "react"
-
-// Create error type definitions
+// Error type definitions
 export type ErrorType =
     | 'validation'     // Form validation errors
     | 'network'        // API/Network errors  
@@ -17,26 +15,3 @@ export interface AppError {
     recoverable?: boolean
 }
 
-// Create error context for consistent handling
-export function useErrorHandler() {
-    const [error, setError] = useState<AppError | null>(null)
-
-    const handleError = useCallback((error: any, context?: string) => {
-        const appError: AppError = {
-            type: 'unknown',
-            message: error.message || 'An unexpected error occurred',
-            code: error.code,
-            details: error,
-            recoverable: true
-        }
-
-        setError(appError)
-
-        // Log error
-        console.error(`Error in ${context}:`, error)
-    }, [])
-
-    const clearError = useCallback(() => setError(null), [])
-
-    return { error, handleError, clearError }
-}

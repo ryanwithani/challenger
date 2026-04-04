@@ -123,6 +123,7 @@ interface ChallengeState {
   hasStartedProgress: () => boolean
   isPenaltyGoal: (goal: Goal) => boolean
   persistPoints: () => Promise<void>
+  recalculateAutoGoals: () => Promise<void>
 }
 
 export const useChallengeStore = create<ChallengeState>((set, get) => ({
@@ -210,8 +211,9 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
         error: null,
       });
 
-      // Load checklist completions (non-blocking)
+      // Load checklist completions and recalculate auto goals (non-blocking)
       get().fetchCompletions(id)
+      get().recalculateAutoGoals()
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to load challenge';
       set({ loading: false, error: message });
@@ -233,9 +235,8 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
       if (error) throw error
 
       set({ completions: new Set((data || []).map((row: { item_key: string }) => row.item_key)) })
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to load completions'
-      set({ error: message })
+    } catch {
+      // Non-blocking: completions failure should not surface as a page error
     }
   },
 
@@ -406,6 +407,7 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
 
       if (data) {
         set({ sims: [...get().sims, data] });
+        await get().recalculateAutoGoals();
       }
     } catch (error) {
       throw error;
@@ -427,6 +429,7 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
           s.id === id ? { ...s, ...updates } : s
         )
       });
+      await get().recalculateAutoGoals();
     } catch (error) {
       throw error;
     }
@@ -445,6 +448,7 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
       set({
         sims: get().sims.filter(s => s.id !== id)
       });
+      await get().recalculateAutoGoals();
     } catch (error) {
       throw error;
     }
@@ -542,10 +546,14 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
         });
       } else {
         // Add progress
+        const challengeId = get().currentChallenge?.id;
+        if (!challengeId) throw new Error('No active challenge');
+
         const { data, error } = await supabase
           .from('progress')
           .insert({
             user_id: user.id,
+            challenge_id: challengeId,
             goal_id: goalId,
             sim_id: simId,
           })
@@ -592,10 +600,14 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
         );
         
         // Add a new penalty occurrence
+        const challengeId = get().currentChallenge?.id;
+        if (!challengeId) throw new Error('No active challenge');
+
         const { data, error } = await supabase
           .from('progress')
           .insert({
             user_id: user.id,
+            challenge_id: challengeId,
             goal_id: goalId,
             sim_id: simId,
             // Store the timestamp to track when penalties occurred
@@ -852,10 +864,14 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
         });
       } else {
         // Create new progress entry
+        const challengeId = get().currentChallenge?.id;
+        if (!challengeId) throw new Error('No active challenge');
+
         const { data, error } = await supabase
           .from('progress')
           .insert({
             user_id: user.id,
+            challenge_id: challengeId,
             goal_id: goalId,
             sim_id: simId,
             completion_details: JSON.stringify(completionDetails)
@@ -884,6 +900,104 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
       await get().persistPoints();
     } catch (error) {
       throw error;
+    }
+  },
+
+  recalculateAutoGoals: async () => {
+    const { sims, goals, progress, currentChallenge } = get()
+    if (!currentChallenge) return
+
+    const autoGoals = goals.filter(g => (g as Goal & { automation_type?: string | null }).automation_type)
+    if (autoGoals.length === 0) return
+
+    const supabase = createSupabaseBrowserClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
+    let milestoneChanged = false
+
+    for (const goal of autoGoals) {
+      const automationType = (goal as Goal & { automation_type: string }).automation_type
+
+      if (automationType === 'generation_ya') {
+        const count = new Set(
+          sims
+            .filter(s => s.age_stage != null && ['young_adult', 'adult', 'elder'].includes(s.age_stage))
+            .map(s => s.generation)
+        ).size
+        if ((goal.current_value ?? 0) !== count) {
+          await get().updateGoalValue(goal.id, count)
+        }
+
+      } else if (automationType === 'ten_children_per_gen') {
+        const childrenByGen = new Map<number, number>()
+        for (const s of sims) {
+          if (s.relationship_to_heir === 'child' && s.generation != null) {
+            childrenByGen.set(s.generation, (childrenByGen.get(s.generation) ?? 0) + 1)
+          }
+        }
+        const maxChildren = childrenByGen.size > 0 ? Math.max(...Array.from(childrenByGen.values())) : 0
+        const conditionMet = maxChildren >= 10
+
+        const existingProgress = get().progress.find(p => p.goal_id === goal.id && p.user_id === user.id)
+        if (conditionMet && !existingProgress) {
+          const { data, error } = await supabase
+            .from('progress')
+            .insert({ user_id: user.id, challenge_id: currentChallenge.id, goal_id: goal.id })
+            .select()
+            .single()
+          if (!error && data) {
+            set({ progress: [...get().progress, data] })
+            milestoneChanged = true
+          }
+        } else if (!conditionMet && existingProgress) {
+          const { error } = await supabase.from('progress').delete().eq('id', existingProgress.id)
+          if (!error) {
+            set({ progress: get().progress.filter(p => p.id !== existingProgress.id) })
+            milestoneChanged = true
+          }
+        }
+
+      } else if (automationType === 'unique_spouse_traits') {
+        const spouseTraits = new Set<string>()
+        for (const s of sims) {
+          if (s.relationship_to_heir === 'spouse' && Array.isArray(s.traits)) {
+            for (const t of s.traits as string[]) {
+              spouseTraits.add(t)
+            }
+          }
+        }
+        const count = spouseTraits.size
+        if ((goal.current_value ?? 0) !== count) {
+          await get().updateGoalValue(goal.id, count)
+        }
+
+      } else if (automationType === 'challenge_complete_gen10') {
+        const conditionMet = sims.some(s => s.generation === 10 && s.is_heir === true)
+
+        const existingProgress = get().progress.find(p => p.goal_id === goal.id && p.user_id === user.id)
+        if (conditionMet && !existingProgress) {
+          const { data, error } = await supabase
+            .from('progress')
+            .insert({ user_id: user.id, challenge_id: currentChallenge.id, goal_id: goal.id })
+            .select()
+            .single()
+          if (!error && data) {
+            set({ progress: [...get().progress, data] })
+            milestoneChanged = true
+          }
+        } else if (!conditionMet && existingProgress) {
+          const { error } = await supabase.from('progress').delete().eq('id', existingProgress.id)
+          if (!error) {
+            set({ progress: get().progress.filter(p => p.id !== existingProgress.id) })
+            milestoneChanged = true
+          }
+        }
+      }
+    }
+
+    if (milestoneChanged) {
+      await get().persistPoints()
     }
   },
 

@@ -34,14 +34,14 @@ export function Progress({
   if (variant === 'minimal') {
     return (
       <div className={cn('flex items-center space-x-2', className)} {...props}>
-        <div className="flex-1 bg-gray-200 rounded-full h-1">
+        <div className="flex-1 bg-warmGray-200 dark:bg-warmGray-700 rounded-full h-1">
           <div
             className="bg-brand-500 h-1 rounded-full transition-all duration-300 ease-out"
             style={{ width: `${progressPercentage}%` }}
             aria-hidden="true"
           />
         </div>
-        <span className="text-sm text-gray-600 font-medium">
+        <span className="text-sm text-warmGray-600 dark:text-warmGray-400 font-medium">
           {currentStep + 1} of {steps.length}
         </span>
       </div>
@@ -67,8 +67,8 @@ export function Progress({
                       : isCurrent
                         ? 'border-brand-500 bg-white dark:bg-warmGray-900'
                         : isDisabled
-                          ? 'border-gray-300 bg-gray-100'
-                          : 'border-gray-300 bg-white dark:bg-warmGray-900'
+                          ? 'border-warmGray-300 dark:border-warmGray-600 bg-warmGray-100 dark:bg-warmGray-800'
+                          : 'border-warmGray-300 dark:border-warmGray-600 bg-white dark:bg-warmGray-900'
                   )}
                   aria-current={isCurrent ? 'step' : undefined}
                 >
@@ -89,7 +89,7 @@ export function Progress({
                     <span
                       className={cn(
                         'text-xs font-medium',
-                        isCurrent ? 'text-brand-500' : 'text-gray-500'
+                        isCurrent ? 'text-brand-500' : 'text-warmGray-500 dark:text-warmGray-400'
                       )}
                     >
                       {stepIdx + 1}
@@ -103,8 +103,8 @@ export function Progress({
                       isCurrent
                         ? 'text-brand-500'
                         : isComplete
-                          ? 'text-gray-700'
-                          : 'text-gray-500'
+                          ? 'text-warmGray-700 dark:text-warmGray-300'
+                          : 'text-warmGray-500 dark:text-warmGray-400'
                     )}
                   >
                     {step.name}
@@ -114,7 +114,7 @@ export function Progress({
                   <div
                     className={cn(
                       'mx-2 h-0.5 w-4 transition-all duration-200',
-                      isComplete ? 'bg-brand-500' : 'bg-gray-200'
+                      isComplete ? 'bg-brand-500' : 'bg-warmGray-200 dark:bg-warmGray-700'
                     )}
                     aria-hidden="true"
                   />
@@ -125,7 +125,7 @@ export function Progress({
         </ol>
         {showProgressBar && (
           <div className="mt-4">
-            <div className="w-full bg-gray-200 rounded-full h-1">
+            <div className="w-full bg-warmGray-200 dark:bg-warmGray-700 rounded-full h-1">
               <div
                 className="bg-brand-500 h-1 rounded-full transition-all duration-300 ease-out"
                 style={{ width: `${progressPercentage}%` }}
@@ -150,11 +150,11 @@ export function Progress({
           return (
             <li key={step.id} className="relative flex-1">
               {stepIdx !== steps.length - 1 && (
-                <div className="absolute top-4 left-1/2 w-full h-0.5 bg-gray-200">
+                <div className="absolute top-4 left-1/2 w-full h-0.5 bg-warmGray-200 dark:bg-warmGray-700">
                   <div
                     className={cn(
                       'h-full transition-all duration-300',
-                      isComplete ? 'bg-brand-500 w-full' : 'bg-gray-200 w-0'
+                      isComplete ? 'bg-brand-500 w-full' : 'bg-warmGray-200 dark:bg-warmGray-700 w-0'
                     )}
                     aria-hidden="true"
                   />
@@ -170,8 +170,8 @@ export function Progress({
                       : isCurrent
                         ? 'border-brand-500 bg-white dark:bg-warmGray-900'
                         : isDisabled
-                          ? 'border-gray-300 bg-gray-100'
-                          : 'border-gray-300 bg-white dark:bg-warmGray-900'
+                          ? 'border-warmGray-300 dark:border-warmGray-600 bg-warmGray-100 dark:bg-warmGray-800'
+                          : 'border-warmGray-300 dark:border-warmGray-600 bg-white dark:bg-warmGray-900'
                   )}
                   aria-current={isCurrent ? 'step' : undefined}
                 >
@@ -192,7 +192,7 @@ export function Progress({
                     <span
                       className={cn(
                         'text-sm font-medium',
-                        isCurrent ? 'text-brand-500' : 'text-gray-500'
+                        isCurrent ? 'text-brand-500' : 'text-warmGray-500 dark:text-warmGray-400'
                       )}
                     >
                       {stepIdx + 1}
@@ -206,8 +206,8 @@ export function Progress({
                       isCurrent
                         ? 'text-brand-500'
                         : isComplete
-                          ? 'text-gray-700'
-                          : 'text-gray-500'
+                          ? 'text-warmGray-700 dark:text-warmGray-300'
+                          : 'text-warmGray-500 dark:text-warmGray-400'
                     )}
                   >
                     {step.name}
@@ -220,14 +220,14 @@ export function Progress({
       </ol>
       {showProgressBar && (
         <div className="mt-6">
-          <div className="w-full bg-gray-200 rounded-full h-2">
+          <div className="w-full bg-warmGray-200 dark:bg-warmGray-700 rounded-full h-2">
             <div
               className="bg-brand-500 h-2 rounded-full transition-all duration-300 ease-out"
               style={{ width: `${progressPercentage}%` }}
               aria-hidden="true"
             />
           </div>
-          <div className="mt-2 text-center text-sm text-gray-500">
+          <div className="mt-2 text-center text-sm text-warmGray-500 dark:text-warmGray-400">
             Step {currentStep + 1} of {steps.length}
           </div>
         </div>

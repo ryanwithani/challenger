@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Button } from '@/src/components/ui/Button'
+import { ErrorMessage } from '@/src/components/ui/ErrorMessage'
 import { Modal } from '@/src/components/sim/SimModal'
 import { SimForm } from '@/src/components/forms/SimForm'
 import { SimProfile } from '@/src/components/sim/SimProfile'
@@ -49,18 +50,16 @@ export default function SimProfilePage() {
     if (loading) {
         return (
             <div className="text-center py-12">
-                <p className="text-gray-500">Loading sim...</p>
+                <p className="text-warmGray-500 dark:text-warmGray-400">Loading sim...</p>
             </div>
         )
     }
 
     if (error || !currentSim) {
         return (
-            <div className="text-center py-12">
-                <p className="text-red-500">Error loading sim: {error}</p>
-                <Button onClick={() => router.back()} className="mt-4">
-                    Go Back
-                </Button>
+            <div className="py-12 max-w-md mx-auto space-y-4">
+                <ErrorMessage error={error ?? 'Sim not found'} />
+                <Button onClick={() => router.back()}>Go Back</Button>
             </div>
         )
     }
@@ -73,7 +72,7 @@ export default function SimProfilePage() {
                     <Button
                         variant="secondary"
                         onClick={() => router.back()}
-                        className="flex items-center space-x-2"
+                        className="flex items-center gap-1.5"
                     >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -81,11 +80,11 @@ export default function SimProfilePage() {
                         <span>Back</span>
                     </Button>
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900">{currentSim.name}</h1>
-                        <p className="text-gray-600">
+                        <h1 className="text-3xl font-bold text-warmGray-900 dark:text-warmGray-50">{currentSim.name}</h1>
+                        <p className="text-warmGray-600 dark:text-warmGray-300">
                             Generation {currentSim.generation} • {currentSim.age_stage?.replace('_', ' ')}
                             {currentSim.is_heir && (
-                                <span className="ml-2 px-2 py-1 bg-accent-400/20 text-accent-600 rounded text-sm font-medium">
+                                <span className="ml-2 px-2 py-1 bg-accent-400/20 dark:bg-accent-500/20 text-accent-600 dark:text-accent-400 rounded text-sm font-medium">
                                     Heir
                                 </span>
                             )}
@@ -97,7 +96,7 @@ export default function SimProfilePage() {
                     <Button
                         variant="secondary"
                         onClick={() => setShowEditModal(true)}
-                        className="flex items-center space-x-2"
+                        className="flex items-center gap-1.5"
                     >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -105,9 +104,9 @@ export default function SimProfilePage() {
                         <span>Edit</span>
                     </Button>
                     <Button
-                        variant="secondary"
+                        variant="outline"
                         onClick={() => setShowDeleteConfirm(true)}
-                        className="flex items-center space-x-2 text-red-600 border-red-200 hover:bg-red-50"
+                        className="flex items-center gap-1.5 border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30"
                     >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -144,7 +143,7 @@ export default function SimProfilePage() {
                 title="Delete Sim"
             >
                 <div className="space-y-4">
-                    <p className="text-gray-700">
+                    <p className="text-warmGray-700 dark:text-warmGray-200">
                         Are you sure you want to delete <strong>{currentSim.name}</strong>?
                         This action cannot be undone and will remove all their achievements and progress.
                     </p>
@@ -156,8 +155,8 @@ export default function SimProfilePage() {
                             Cancel
                         </Button>
                         <Button
+                            variant="destructive"
                             onClick={handleDeleteSim}
-                            className="bg-red-600 hover:bg-red-700 text-white"
                         >
                             Delete Sim
                         </Button>

@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react'
 import { Database } from '@/src/types/database.types'
 import { useSimStore } from '@/src/lib/store/simStore'
 import { SimCard } from '@/src/components/sim/SimCard'
+import { Traits } from '@/src/components/sim/TraitsCatalog'
 
 type Sim = Database['public']['Tables']['sims']['Row']
 type Challenge = Database['public']['Tables']['challenges']['Row']
-type SimAchievement = Database['public']['Tables']['sim_achievements']['Row']
 
 // ===== SIM RELATIONSHIPS COMPONENT =====
 interface SimRelationshipsProps {
@@ -38,26 +38,26 @@ export function SimRelationships({ sim, challenge }: SimRelationshipsProps) {
         member.id !== sim.id
     )
 
-    const children = familyMembers.filter(member =>
+    const children = currentGeneration != null ? familyMembers.filter(member =>
         member.generation === currentGeneration + 1 &&
         member.relationship_to_heir === 'child'
-    )
+    ) : []
 
-    const siblings = familyMembers.filter(member =>
+    const siblings = currentGeneration != null ? familyMembers.filter(member =>
         member.generation === currentGeneration &&
         member.id !== sim.id &&
         member.relationship_to_heir !== 'spouse'
-    )
+    ) : []
 
-    const parents = familyMembers.filter(member =>
+    const parents = currentGeneration != null ? familyMembers.filter(member =>
         member.generation === currentGeneration - 1
-    )
+    ) : []
 
     return (
         <div className="space-y-6">
             {/* Family Tree Overview */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <h3 className="text-lg font-semibold mb-4 flex items-center">
+            <div className="bg-white dark:bg-warmGray-900 rounded-lg border border-gray-200 dark:border-warmGray-800 p-6">
+                <h3 className="text-lg font-semibold mb-4 flex items-center text-warmGray-900 dark:text-warmGray-50">
                     <span className="mr-2">🌳</span>
                     Family Tree
                 </h3>
@@ -66,10 +66,12 @@ export function SimRelationships({ sim, challenge }: SimRelationshipsProps) {
                     {/* Parents Generation */}
                     {parents.length > 0 && (
                         <div>
-                            <h4 className="font-medium text-gray-700 mb-3">Parents (Generation {currentGeneration - 1})</h4>
+                            <h4 className="font-medium text-warmGray-700 dark:text-warmGray-300 mb-3">Parents (Generation {currentGeneration != null ? currentGeneration - 1 : '?'})</h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {parents.map((parent) => (
-                                    <SimCard key={parent.id} sim={parent} className="bg-gray-50" />
+                                    <div key={parent.id} className="rounded-xl bg-warmGray-50 dark:bg-warmGray-800 p-0.5">
+                                        <SimCard sim={parent} traitCatalog={Traits} />
+                                    </div>
                                 ))}
                             </div>
                         </div>
@@ -77,11 +79,13 @@ export function SimRelationships({ sim, challenge }: SimRelationshipsProps) {
 
                     {/* Current Generation */}
                     <div>
-                        <h4 className="font-medium text-gray-700 mb-3">Generation {currentGeneration}</h4>
+                        <h4 className="font-medium text-warmGray-700 dark:text-warmGray-300 mb-3">Generation {currentGeneration}</h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {/* Current Sim */}
                             <div className="relative">
-                                <SimCard sim={sim} showProfileLink={false} className="bg-brand-100 border-brand-500" />
+                                <div className="rounded-xl bg-brand-50 dark:bg-brand-900/20 p-0.5">
+                                    <SimCard sim={sim} traitCatalog={Traits} />
+                                </div>
                                 <span className="absolute -top-2 -right-2 px-2 py-1 bg-brand-500 text-white text-xs rounded-full">
                                     You
                                 </span>
@@ -89,12 +93,16 @@ export function SimRelationships({ sim, challenge }: SimRelationshipsProps) {
 
                             {/* Spouse */}
                             {spouse && (
-                                <SimCard sim={spouse} className="bg-pink-50" />
+                                <div className="rounded-xl bg-pink-50 dark:bg-pink-900/20 p-0.5">
+                                    <SimCard sim={spouse} traitCatalog={Traits} />
+                                </div>
                             )}
 
                             {/* Siblings */}
                             {siblings.map((sibling) => (
-                                <SimCard key={sibling.id} sim={sibling} className="bg-blue-50" />
+                                <div key={sibling.id} className="rounded-xl bg-blue-50 dark:bg-blue-900/20 p-0.5">
+                                    <SimCard sim={sibling} traitCatalog={Traits} />
+                                </div>
                             ))}
                         </div>
                     </div>
@@ -102,10 +110,12 @@ export function SimRelationships({ sim, challenge }: SimRelationshipsProps) {
                     {/* Children Generation */}
                     {children.length > 0 && (
                         <div>
-                            <h4 className="font-medium text-gray-700 mb-3">Children (Generation {currentGeneration + 1})</h4>
+                            <h4 className="font-medium text-warmGray-700 dark:text-warmGray-300 mb-3">Children (Generation {currentGeneration != null ? currentGeneration + 1 : '?'})</h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {children.map((child) => (
-                                    <SimCard key={child.id} sim={child} className="bg-yellow-50" />
+                                    <div key={child.id} className="rounded-xl bg-yellow-50 dark:bg-yellow-900/20 p-0.5">
+                                        <SimCard sim={child} traitCatalog={Traits} />
+                                    </div>
                                 ))}
                             </div>
                         </div>
@@ -115,8 +125,8 @@ export function SimRelationships({ sim, challenge }: SimRelationshipsProps) {
                 {familyMembers.length === 1 && (
                     <div className="text-center py-8">
                         <div className="text-4xl mb-2">👨‍👩‍👧‍👦</div>
-                        <h4 className="font-medium text-gray-700 mb-2">Start Your Family</h4>
-                        <p className="text-gray-600 text-sm">
+                        <h4 className="font-medium text-warmGray-700 dark:text-warmGray-300 mb-2">Start Your Family</h4>
+                        <p className="text-warmGray-600 dark:text-warmGray-400 text-sm">
                             {sim.name} is ready to start their legacy! Add family members to see the family tree grow.
                         </p>
                     </div>
@@ -124,24 +134,24 @@ export function SimRelationships({ sim, challenge }: SimRelationshipsProps) {
             </div>
 
             {/* Generation Overview */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <h3 className="text-lg font-semibold mb-4 flex items-center">
+            <div className="bg-white dark:bg-warmGray-900 rounded-lg border border-gray-200 dark:border-warmGray-800 p-6">
+                <h3 className="text-lg font-semibold mb-4 flex items-center text-warmGray-900 dark:text-warmGray-50">
                     <span className="mr-2">📊</span>
                     Generation Overview
                 </h3>
 
                 <div className="grid grid-cols-3 gap-4">
-                    <div className="text-center p-4 bg-gray-50 rounded-lg">
-                        <div className="text-2xl font-bold text-gray-900">{Object.keys(familyByGeneration).length}</div>
-                        <div className="text-sm text-gray-600">Total Generations</div>
+                    <div className="text-center p-4 bg-warmGray-50 dark:bg-warmGray-800 rounded-lg">
+                        <div className="text-2xl font-bold text-warmGray-900 dark:text-warmGray-50">{Object.keys(familyByGeneration).length}</div>
+                        <div className="text-sm text-warmGray-600 dark:text-warmGray-400">Total Generations</div>
                     </div>
-                    <div className="text-center p-4 bg-gray-50 rounded-lg">
-                        <div className="text-2xl font-bold text-gray-900">{familyMembers.length}</div>
-                        <div className="text-sm text-gray-600">Family Members</div>
+                    <div className="text-center p-4 bg-warmGray-50 dark:bg-warmGray-800 rounded-lg">
+                        <div className="text-2xl font-bold text-warmGray-900 dark:text-warmGray-50">{familyMembers.length}</div>
+                        <div className="text-sm text-warmGray-600 dark:text-warmGray-400">Family Members</div>
                     </div>
-                    <div className="text-center p-4 bg-gray-50 rounded-lg">
-                        <div className="text-2xl font-bold text-gray-900">{children.length}</div>
-                        <div className="text-sm text-gray-600">Children</div>
+                    <div className="text-center p-4 bg-warmGray-50 dark:bg-warmGray-800 rounded-lg">
+                        <div className="text-2xl font-bold text-warmGray-900 dark:text-warmGray-50">{children.length}</div>
+                        <div className="text-sm text-warmGray-600 dark:text-warmGray-400">Children</div>
                     </div>
                 </div>
             </div>

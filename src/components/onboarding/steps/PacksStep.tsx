@@ -87,10 +87,10 @@ export default function PacksStep({ onBack, onNext }: PacksStepProps) {
   const activeSelectedCount = activePacks.filter((p) => selectedSet.has(p.acronym)).length
 
   return (
-    <div className="p-8 md:p-12 space-y-6">
+    <div className="p-6 md:p-8 space-y-6">
       {/* Stats */}
-      <div className="text-center p-4 bg-brand-50 dark:bg-brand-900/30 rounded-2xl border border-brand-200 dark:border-brand-800">
-        <div className="text-2xl font-bold text-brand-600 dark:text-brand-400">
+      <div className="text-center p-4 bg-brand-50 dark:bg-brand-900/30 rounded-lg border border-brand-200 dark:border-brand-800">
+        <div className="font-display text-2xl font-bold text-brand-600 dark:text-brand-400">
           {selectedPacks.length}
         </div>
         <div className="text-sm text-gray-600 dark:text-warmGray-300">Packs Selected</div>
@@ -144,57 +144,59 @@ export default function PacksStep({ onBack, onNext }: PacksStepProps) {
       </div>
 
       {/* Pack Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-        {activePacks.map((pack) => {
-          const isSelected = selectedSet.has(pack.acronym)
-          return (
-            <button
-              key={pack.acronym}
-              type="button"
-              onClick={() => togglePack(pack.acronym)}
-              className={`relative group transition-all duration-200 ${
-                isSelected ? 'scale-[1.02]' : 'hover:scale-[1.01]'
-              }`}
-            >
-              <div
-                className={`border-2 rounded-xl p-2 transition-all duration-200 w-full h-full ${
-                  isSelected
-                    ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20 shadow-lg ring-2 ring-brand-200 dark:ring-brand-800'
-                    : 'border-gray-200 dark:border-warmGray-700 bg-white dark:bg-warmGray-900 hover:border-gray-300 dark:hover:border-warmGray-700 hover:shadow-md'
+      <div className="max-h-[50vh] overflow-y-auto p-1">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+          {activePacks.map((pack) => {
+            const isSelected = selectedSet.has(pack.acronym)
+            return (
+              <button
+                key={pack.acronym}
+                type="button"
+                role="checkbox"
+                aria-checked={isSelected}
+                aria-label={pack.name}
+                onClick={() => togglePack(pack.acronym)}
+                className={`relative group transition-all duration-200 ${
+                  isSelected ? 'scale-[1.02]' : 'hover:scale-[1.01]'
                 }`}
               >
-                <div className="flex flex-col items-center justify-center h-full">
-                  <PackIcon
-                    name={pack.acronym}
-                    size={96}
-                    className="mx-auto mb-2 w-8 h-8 object-contain flex-shrink-0"
-                  />
-                  <div className="text-[10px] text-gray-400 font-mono mb-0.5">
-                    {pack.acronym}
+                <div
+                  className={`border-2 rounded-lg p-3 transition-all duration-200 w-full h-full ${
+                    isSelected
+                      ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20 shadow-lg ring-2 ring-brand-200 dark:ring-brand-800'
+                      : 'border-brand-100 dark:border-warmGray-700 bg-white dark:bg-warmGray-900 hover:border-brand-200 dark:hover:border-warmGray-600 hover:shadow-md'
+                  }`}
+                >
+                  <div className="flex flex-col items-center justify-center h-full gap-2">
+                    <PackIcon
+                      name={pack.acronym}
+                      size={48}
+                      className="w-12 h-12 object-contain flex-shrink-0"
+                    />
+                    <div className="text-xs font-medium text-gray-900 dark:text-warmGray-100 leading-tight text-center line-clamp-2">
+                      {pack.name}
+                    </div>
                   </div>
-                  <div className="text-xs font-medium text-gray-900 dark:text-warmGray-100 leading-tight text-center min-h-[42px] flex items-center">
-                    {pack.name}
-                  </div>
+                  {isSelected && (
+                    <div className="absolute -top-1 -right-1 w-6 h-6 bg-brand-500 rounded-full flex items-center justify-center shadow-lg ring-2 ring-white dark:ring-warmGray-800">
+                      <svg
+                        className="w-3 h-3 text-white"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                  )}
                 </div>
-                {isSelected && (
-                  <div className="absolute -top-1 -right-1 w-6 h-6 bg-brand-500 rounded-full flex items-center justify-center shadow-lg ring-2 ring-white dark:ring-warmGray-800">
-                    <svg
-                      className="w-3 h-3 text-white"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </div>
-                )}
-              </div>
-            </button>
-          )
-        })}
+              </button>
+            )
+          })}
+        </div>
       </div>
 
       {/* Navigation */}

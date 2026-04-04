@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { z } from 'zod'
 import { TraitPickerPanel } from '@/src/components/sim/TraitPickerPanel'
 import { Button } from '@/src/components/ui/Button'
+import { AlertBanner } from '@/src/components/ui/AlertBanner'
 
 const traitsSchema = z.array(z.string()).min(0).max(3, 'You can select a maximum of 3 traits');
 
@@ -88,24 +89,16 @@ export function TraitsStep({ data, onNext, onBack, nextStepName = 'Personality' 
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6" onKeyDown={handleKeyDown}>
-      <h2 className="text-xl font-semibold text-gray-900">Sim Traits</h2>
-      
-      {/* Show form-level errors */}
+      <div>
+        <h2 className="text-xl font-semibold text-warmGray-900 dark:text-warmGray-100">Sim Traits</h2>
+        <p className="mt-1 text-sm text-warmGray-500 dark:text-warmGray-400">Choose up to 3 traits that define your Sim's personality.</p>
+      </div>
+
       {Object.keys(errors).length > 0 && (
-        <div className="mb-6 p-4 bg-amber-50 border-2 border-amber-200 rounded-xl">
-          <div className="flex items-start gap-3">
-            <span className="text-xl">⚠️</span>
-            <div>
-              <p className="text-amber-800 font-semibold mb-2">
-                Please fix the following errors:
-              </p>
-              <ul className="text-sm text-amber-700 space-y-1 list-disc list-inside">
-                {errors.general && <li className="text-red-600 font-medium">{errors.general}</li>}
-                {errors.traits && <li>{errors.traits}</li>}
-              </ul>
-            </div>
-          </div>
-        </div>
+        <AlertBanner
+          type={errors.general ? 'error' : 'warning'}
+          messages={[errors.general, errors.traits].filter(Boolean) as string[]}
+        />
       )}
       
       <TraitPickerPanel
@@ -135,9 +128,8 @@ export function TraitsStep({ data, onNext, onBack, nextStepName = 'Personality' 
         </Button>
       </div>
       
-      {/* Keyboard shortcut hint */}
-      <div className="text-xs text-gray-500 text-center">
-        💡 Tip: Press Ctrl+Enter (or Cmd+Enter on Mac) to quickly proceed to the next step
+      <div className="text-xs text-warmGray-500 dark:text-warmGray-400 text-center">
+        Tip: Press Ctrl+Enter (or Cmd+Enter on Mac) to quickly proceed to the next step
       </div>
     </form>
   );

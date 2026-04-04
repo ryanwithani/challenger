@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.12 (cd3cf9e)"
+    PostgrestVersion: "13.0.5"
   }
   public: {
     Tables: {
@@ -44,89 +44,10 @@ export type Database = {
         }
         Relationships: []
       }
-      challenge_members: {
-        Row: {
-          challenge_id: string
-          role: string | null
-          user_id: string
-        }
-        Insert: {
-          challenge_id: string
-          role?: string | null
-          user_id: string
-        }
-        Update: {
-          challenge_id?: string
-          role?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "challenge_members_challenge_id_fkey"
-            columns: ["challenge_id"]
-            isOneToOne: false
-            referencedRelation: "challenges"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      challenge_sims: {
-        Row: {
-          challenge_id: string
-          created_at: string | null
-          generation: number | null
-          id: string
-          is_heir: boolean
-          relationship_to_heir:
-            | Database["public"]["Enums"]["relationship_to_heir"]
-            | null
-          sim_id: string
-          updated_at: string | null
-        }
-        Insert: {
-          challenge_id: string
-          created_at?: string | null
-          generation?: number | null
-          id?: string
-          is_heir?: boolean
-          relationship_to_heir?:
-            | Database["public"]["Enums"]["relationship_to_heir"]
-            | null
-          sim_id: string
-          updated_at?: string | null
-        }
-        Update: {
-          challenge_id?: string
-          created_at?: string | null
-          generation?: number | null
-          id?: string
-          is_heir?: boolean
-          relationship_to_heir?:
-            | Database["public"]["Enums"]["relationship_to_heir"]
-            | null
-          sim_id?: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "challenge_sims_challenge_id_fkey"
-            columns: ["challenge_id"]
-            isOneToOne: false
-            referencedRelation: "challenges"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "challenge_sims_sim_id_fkey"
-            columns: ["sim_id"]
-            isOneToOne: false
-            referencedRelation: "sims"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       challenges: {
         Row: {
           challenge_type: string | null
+          completion_percentage: number
           configuration: Json | null
           created_at: string | null
           description: string | null
@@ -134,6 +55,7 @@ export type Database = {
           is_public: boolean | null
           is_template: boolean | null
           name: string
+          points: number
           status: string | null
           total_points: number | null
           updated_at: string | null
@@ -141,6 +63,7 @@ export type Database = {
         }
         Insert: {
           challenge_type?: string | null
+          completion_percentage?: number
           configuration?: Json | null
           created_at?: string | null
           description?: string | null
@@ -148,6 +71,7 @@ export type Database = {
           is_public?: boolean | null
           is_template?: boolean | null
           name: string
+          points?: number
           status?: string | null
           total_points?: number | null
           updated_at?: string | null
@@ -155,6 +79,7 @@ export type Database = {
         }
         Update: {
           challenge_type?: string | null
+          completion_percentage?: number
           configuration?: Json | null
           created_at?: string | null
           description?: string | null
@@ -162,6 +87,7 @@ export type Database = {
           is_public?: boolean | null
           is_template?: boolean | null
           name?: string
+          points?: number
           status?: string | null
           total_points?: number | null
           updated_at?: string | null
@@ -183,21 +109,21 @@ export type Database = {
           created_at: string | null
           email: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
         }
         Insert: {
           attempted_at?: string | null
           created_at?: string | null
           email: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
         }
         Update: {
           attempted_at?: string | null
           created_at?: string | null
           email?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
         }
         Relationships: []
       }
@@ -272,9 +198,9 @@ export type Database = {
       progress: {
         Row: {
           challenge_id: string
-          created_at: string | null
           completed_at: string | null
           completion_details: Json | null
+          created_at: string
           goal_id: string
           id: string
           notes: string | null
@@ -283,9 +209,9 @@ export type Database = {
         }
         Insert: {
           challenge_id: string
-          created_at?: string | null
           completed_at?: string | null
           completion_details?: Json | null
+          created_at?: string
           goal_id: string
           id?: string
           notes?: string | null
@@ -294,9 +220,9 @@ export type Database = {
         }
         Update: {
           challenge_id?: string
-          created_at?: string | null
           completed_at?: string | null
           completion_details?: Json | null
+          created_at?: string
           goal_id?: string
           id?: string
           notes?: string | null
@@ -329,11 +255,11 @@ export type Database = {
       }
       sim_achievements: {
         Row: {
-          notes: any
           achieved_at: string | null
           completion_method: string
           goal_title: string
           id: string
+          notes: string | null
           points_earned: number | null
           sim_id: string
         }
@@ -342,6 +268,7 @@ export type Database = {
           completion_method: string
           goal_title: string
           id?: string
+          notes?: string | null
           points_earned?: number | null
           sim_id: string
         }
@@ -350,6 +277,7 @@ export type Database = {
           completion_method?: string
           goal_title?: string
           id?: string
+          notes?: string | null
           points_earned?: number | null
           sim_id?: string
         }
@@ -361,7 +289,7 @@ export type Database = {
           aspiration: string | null
           avatar_url: string | null
           career: string | null
-          challenge_id: string
+          challenge_id: string | null
           created_at: string | null
           generation: number | null
           id: string
@@ -370,13 +298,14 @@ export type Database = {
           relationship_to_heir: string | null
           traits: Json | null
           updated_at: string | null
+          user_id: string
         }
         Insert: {
           age_stage?: string | null
           aspiration?: string | null
           avatar_url?: string | null
           career?: string | null
-          challenge_id: string
+          challenge_id?: string | null
           created_at?: string | null
           generation?: number | null
           id?: string
@@ -385,13 +314,14 @@ export type Database = {
           relationship_to_heir?: string | null
           traits?: Json | null
           updated_at?: string | null
+          user_id: string
         }
         Update: {
           age_stage?: string | null
           aspiration?: string | null
           avatar_url?: string | null
           career?: string | null
-          challenge_id?: string
+          challenge_id?: string | null
           created_at?: string | null
           generation?: number | null
           id?: string
@@ -400,6 +330,7 @@ export type Database = {
           relationship_to_heir?: string | null
           traits?: Json | null
           updated_at?: string | null
+          user_id?: string
         }
         Relationships: [
           {
@@ -407,6 +338,13 @@ export type Database = {
             columns: ["challenge_id"]
             isOneToOne: false
             referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sims_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -470,52 +408,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      can_manage_challenge: {
-        Args: { ch_id: string }
-        Returns: boolean
-      }
-      is_account_locked: {
-        Args: Record<PropertyKey, never> | { user_email: string }
-        Returns: boolean
-      }
-      link_sim_to_challenge: {
-        Args: { p_challenge_id: string; p_sim_id: string }
-        Returns: {
-          challenge_id: string
-          created_at: string | null
-          generation: number | null
-          id: string
-          is_heir: boolean
-          relationship_to_heir:
-            | Database["public"]["Enums"]["relationship_to_heir"]
-            | null
-          sim_id: string
-          updated_at: string | null
-        }
-      }
+      can_manage_challenge: { Args: { ch_id: string }; Returns: boolean }
+      is_account_locked:
+        | { Args: never; Returns: boolean }
+        | { Args: { user_email: string }; Returns: boolean }
       log_audit: {
         Args: { p_event: string; p_ip: string; p_meta: Json; p_ua: string }
         Returns: undefined
-      }
-      update_challenge_sim: {
-        Args: {
-          p_generation?: number
-          p_id: string
-          p_is_heir?: boolean
-          p_relationship_to_heir?: Database["public"]["Enums"]["relationship_to_heir"]
-        }
-        Returns: {
-          challenge_id: string
-          created_at: string | null
-          generation: number | null
-          id: string
-          is_heir: boolean
-          relationship_to_heir:
-            | Database["public"]["Enums"]["relationship_to_heir"]
-            | null
-          sim_id: string
-          updated_at: string | null
-        }
       }
     }
     Enums: {

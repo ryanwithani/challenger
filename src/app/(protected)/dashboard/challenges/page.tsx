@@ -7,6 +7,7 @@ import { ChallengeTile } from '@/src/components/challenge/ChallengeTile'
 import { Button } from '@/src/components/ui/Button'
 import { Input } from '@/src/components/ui/Input'
 import { ErrorMessage } from '@/src/components/ui/ErrorMessage'
+import { cn } from '@/src/lib/utils/cn'
 import { TbBolt, TbCheck, TbTarget, TbCalendar } from 'react-icons/tb'
 
 interface FilterState {
@@ -94,18 +95,18 @@ export default function ChallengesPage() {
   return (
     <div className="max-w-[1400px] mx-auto space-y-8">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="font-display text-2xl text-brand-700 dark:text-brand-300">
+            <h1 className="font-display text-3xl font-bold text-gray-900 dark:text-warmGray-50">
               All Challenges
             </h1>
-            <p className="text-base text-gray-600 dark:text-warmGray-300 mt-1">
+            <p className="text-sm text-gray-500 dark:text-warmGray-400 mt-1">
               {filteredChallenges.length} of {challenges.length} challenges
               {filters.searchTerm && ` matching "${filters.searchTerm}"`}
             </p>
           </div>
           <Link href="/dashboard/new/challenge">
-            <Button variant="primary">
+            <Button variant="primary" size="sm">
               Create New Challenge
             </Button>
           </Link>
@@ -119,20 +120,20 @@ export default function ChallengesPage() {
         )}
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
           {[
-            { label: 'Active', value: stats.active, icon: TbBolt, iconClass: 'text-brand-500' },
-            { label: 'Completed', value: stats.completed, icon: TbCheck, iconClass: 'text-green-500' },
-            { label: 'Legacy', value: stats.legacy, icon: TbTarget, iconClass: 'text-brand-500' },
-            { label: 'This Month', value: stats.thisMonth, icon: TbCalendar, iconClass: 'text-brand-400' }
-          ].map((stat, index) => (
-            <div key={index} className="card">
-              <div className="flex items-center gap-3 mb-2">
-                <stat.icon className={`w-5 h-5 ${stat.iconClass}`} />
-                <span className="text-sm text-gray-600 dark:text-warmGray-300">{stat.label}</span>
+            { label: 'Active', value: stats.active, icon: TbBolt, iconColor: 'text-amber-500 dark:text-amber-400', iconBg: 'bg-amber-100 dark:bg-amber-900/30' },
+            { label: 'Completed', value: stats.completed, icon: TbCheck, iconColor: 'text-green-600 dark:text-green-400', iconBg: 'bg-green-100 dark:bg-green-900/30' },
+            { label: 'Legacy', value: stats.legacy, icon: TbTarget, iconColor: 'text-brand-500 dark:text-brand-400', iconBg: 'bg-brand-100 dark:bg-brand-900/40' },
+            { label: 'This Month', value: stats.thisMonth, icon: TbCalendar, iconColor: 'text-blue-500 dark:text-blue-400', iconBg: 'bg-blue-100 dark:bg-blue-900/30' }
+          ].map((stat) => (
+            <div key={stat.label} className="card flex items-start justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-500 dark:text-warmGray-400">{stat.label}</p>
+                <p className="mt-1 font-display text-3xl font-bold text-gray-900 dark:text-warmGray-50">{stat.value}</p>
               </div>
-              <div className="text-2xl font-semibold text-gray-900 dark:text-warmGray-100">
-                {stat.value}
+              <div className={cn('rounded-lg p-2.5', stat.iconBg)}>
+                <stat.icon className={cn('w-5 h-5', stat.iconColor)} />
               </div>
             </div>
           ))}
@@ -222,24 +223,27 @@ export default function ChallengesPage() {
             <Button variant="outline" onClick={clearFilters}>Clear Filters</Button>
           </div>
         ) : (
-          <div className="space-y-8">
+          <div className="space-y-6">
             {Object.entries(challengesByStatus).map(([status, statusChallenges]) => (
-              <div key={status} className="card">
-                <h3 className="font-display text-lg text-gray-900 dark:text-warmGray-100 mb-6 flex items-center">
-                  {status.charAt(0).toUpperCase() + status.slice(1)}
-                  <span className="ml-2 px-2 py-0.5 bg-gray-100 dark:bg-warmGray-800 text-gray-600 dark:text-warmGray-300 text-xs rounded-full">
+              <div key={status} className="card !p-0 overflow-hidden">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-warmGray-800">
+                  <h3 className="font-display text-lg font-semibold text-gray-900 dark:text-warmGray-100">
+                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                  </h3>
+                  <span className="px-2.5 py-0.5 bg-gray-100 dark:bg-warmGray-800 text-gray-600 dark:text-warmGray-300 text-xs font-medium rounded-full">
                     {statusChallenges.length}
                   </span>
-                </h3>
-
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {statusChallenges
-                    .sort((a, b) => new Date(b.updated_at ?? '').getTime() - new Date(a.updated_at ?? '').getTime())
-                    .map((challenge) => (
-                      <Link key={challenge.id} href={`/challenge/${challenge.id}`}>
-                        <ChallengeTile challenge={challenge} />
-                      </Link>
-                    ))}
+                </div>
+                <div className="p-6">
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {statusChallenges
+                      .sort((a, b) => new Date(b.updated_at ?? '').getTime() - new Date(a.updated_at ?? '').getTime())
+                      .map((challenge) => (
+                        <Link key={challenge.id} href={`/challenge/${challenge.id}`}>
+                          <ChallengeTile challenge={challenge} />
+                        </Link>
+                      ))}
+                  </div>
                 </div>
               </div>
             ))}

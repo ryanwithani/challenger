@@ -67,7 +67,7 @@ export const useSimStore = create<SimState>((set, get) => ({
     },
 
     updateSim: async (id: string, updates: SimUpdate) => {
-        set({ loading: true, error: null })
+        set({ error: null })
         const supabase = createSupabaseBrowserClient()
 
         try {
@@ -85,10 +85,9 @@ export const useSimStore = create<SimState>((set, get) => ({
                 familyMembers: get().familyMembers.map(sim =>
                     sim.id === id ? data : sim
                 ),
-                loading: false
             })
         } catch (error: any) {
-            set({ error: error.message, loading: false })
+            set({ error: error.message })
         }
     },
 

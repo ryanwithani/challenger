@@ -32,7 +32,7 @@ export function SimTimeline({ sim, achievements }: SimTimelineProps) {
             icon: '🏆',
             points: achievement.points_earned
         }))
-    ].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    ].sort((a, b) => new Date(a.date ?? 0).getTime() - new Date(b.date ?? 0).getTime())
 
     const getEventColor = (type: string) => {
         switch (type) {
@@ -47,20 +47,20 @@ export function SimTimeline({ sim, achievements }: SimTimelineProps) {
     return (
         <div className="space-y-6">
             {/* Timeline Header */}
-            <div className="bg-white dark:bg-surface-dark rounded-lg border border-gray-200 dark:border-brand-800 p-6">
-                <h3 className="text-lg font-semibold mb-2 flex items-center text-gray-900 dark:text-warmGray-100">
+            <div className="bg-white dark:bg-warmGray-900 rounded-2xl border border-warmGray-100 dark:border-warmGray-800 p-6">
+                <h3 className="text-lg font-semibold mb-2 flex items-center text-warmGray-900 dark:text-warmGray-100">
                     <span className="mr-2">📅</span>
                     {sim.name}'s Timeline
                 </h3>
-                <p className="text-gray-600 dark:text-warmGray-200">Key moments and achievements in their legacy journey</p>
+                <p className="text-warmGray-600 dark:text-warmGray-400">Key moments and achievements in their legacy journey</p>
             </div>
 
             {/* Timeline */}
-            <div className="bg-white dark:bg-surface-dark rounded-lg border border-gray-200 dark:border-brand-800 p-6">
+            <div className="bg-white dark:bg-warmGray-900 rounded-2xl border border-warmGray-100 dark:border-warmGray-800 p-6">
                 {timelineEvents.length > 0 ? (
                     <div className="relative">
                         {/* Timeline line */}
-                        <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gray-200"></div>
+                        <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-warmGray-200 dark:bg-warmGray-700"></div>
 
                         <div className="space-y-6">
                             {timelineEvents.map((event, index) => (
@@ -74,21 +74,23 @@ export function SimTimeline({ sim, achievements }: SimTimelineProps) {
                                     <div className="flex-1 min-w-0 pb-6">
                                         <div className="flex items-start justify-between">
                                             <div className="flex-1">
-                                                <h4 className="font-semibold text-gray-900 dark:text-warmGray-100">{event.title}</h4>
-                                                <p className="text-sm text-gray-600 dark:text-warmGray-200 mt-1">{event.description}</p>
-                                                <p className="text-xs text-gray-500 mt-2">
-                                                    {new Date(event.date).toLocaleDateString('en-US', {
-                                                        year: 'numeric',
-                                                        month: 'long',
-                                                        day: 'numeric'
-                                                    })}
-                                                </p>
+                                                <h4 className="font-semibold text-warmGray-900 dark:text-warmGray-100">{event.title}</h4>
+                                                <p className="text-sm text-warmGray-600 dark:text-warmGray-400 mt-1">{event.description}</p>
+                                                {event.date && (
+                                                    <p className="text-xs text-warmGray-500 dark:text-warmGray-400 mt-2">
+                                                        {new Date(event.date).toLocaleDateString('en-US', {
+                                                            year: 'numeric',
+                                                            month: 'long',
+                                                            day: 'numeric'
+                                                        })}
+                                                    </p>
+                                                )}
                                             </div>
 
                                             {event.type === 'achievement' && 'points' in event && (
                                                 <div className="ml-4 text-right">
-                                                    <div className="font-bold text-green-600">+{event.points}</div>
-                                                    <div className="text-xs text-gray-500">points</div>
+                                                    <div className="font-bold text-green-600 dark:text-green-400">+{event.points}</div>
+                                                    <div className="text-xs text-warmGray-500 dark:text-warmGray-400">points</div>
                                                 </div>
                                             )}
                                         </div>

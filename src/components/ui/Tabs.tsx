@@ -11,7 +11,7 @@ key={t}
 onClick={() => onChange(t)}
 className={cn(
 'rounded-lg px-3 py-1.5 text-sm transition-colors',
-value === t ? 'bg-white text-brand-700 shadow' : 'text-gray-600 hover:text-gray-900'
+value === t ? 'bg-white dark:bg-warmGray-900 text-brand-700 dark:text-brand-300 shadow' : 'text-warmGray-600 dark:text-warmGray-400 hover:text-warmGray-900 dark:hover:text-warmGray-100'
 )}
 >
 {t}

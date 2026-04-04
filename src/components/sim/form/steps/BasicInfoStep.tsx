@@ -8,6 +8,7 @@ import { Button } from '@/src/components/ui/Button'
 import { Input } from '@/src/components/ui/Input'
 import { FormField } from '@/src/components/ui/FormField'
 import { Select } from '@/src/components/ui/Select'
+import { AlertBanner } from '@/src/components/ui/AlertBanner'
 import type { SimWizardData } from '@/src/lib/validations/sim'
 
 const AGE_OPTIONS = [
@@ -154,28 +155,13 @@ export function BasicInfoStep({ data, challenges, onNext, onCancel, nextStepName
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6" onKeyDown={handleKeyDown}>
-      <h2 className="text-xl font-semibold text-gray-900">Basic Information</h2>
-      
-      {/* Show form-level errors */}
+      <h2 className="text-xl font-semibold text-warmGray-900 dark:text-warmGray-100">Basic Information</h2>
+
       {Object.keys(errors).length > 0 && (
-        <div className="mb-6 p-4 bg-amber-50 border-2 border-amber-200 rounded-xl">
-          <div className="flex items-start gap-3">
-            <span className="text-xl">⚠️</span>
-            <div>
-              <p className="text-amber-800 font-semibold mb-2">
-                Please fix the following errors:
-              </p>
-              <ul className="text-sm text-amber-700 space-y-1 list-disc list-inside">
-                {errors.general && <li className="text-red-600 font-medium">{errors.general}</li>}
-                {errors.firstName && <li>{errors.firstName}</li>}
-                {errors.familyName && <li>{errors.familyName}</li>}
-                {errors.age_stage && <li>{errors.age_stage}</li>}
-                {errors.avatar_url && <li>{errors.avatar_url}</li>}
-                {errors.challenge_id && <li>{errors.challenge_id}</li>}
-              </ul>
-            </div>
-          </div>
-        </div>
+        <AlertBanner
+          type={errors.general ? 'error' : 'warning'}
+          messages={[errors.general, errors.firstName, errors.familyName, errors.age_stage, errors.avatar_url, errors.challenge_id].filter(Boolean) as string[]}
+        />
       )}
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -275,9 +261,8 @@ export function BasicInfoStep({ data, challenges, onNext, onCancel, nextStepName
         </Button>
       </div>
       
-      {/* Keyboard shortcut hint */}
-      <div className="text-xs text-gray-500 text-center">
-        💡 Tip: Press Ctrl+Enter (or Cmd+Enter on Mac) to quickly proceed to the next step
+      <div className="text-xs text-warmGray-500 dark:text-warmGray-400 text-center">
+        Tip: Press Ctrl+Enter (or Cmd+Enter on Mac) to quickly proceed to the next step
       </div>
     </form>
   );

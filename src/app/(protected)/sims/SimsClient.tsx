@@ -158,7 +158,6 @@ function SimsGrid({
   selectedSimIds: Record<string, true>
   onSelect?: (id: string) => void
 }) {
-  const router = useRouter()
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
       {sims.map(sim => (
@@ -167,7 +166,6 @@ function SimsGrid({
           sim={sim}
           traitCatalog={traitCatalog}
           onOpenPanel={() => onOpenPanel(sim.id)}
-          onEdit={() => router.push(`/sim/${sim.id}`)}
           isSelected={!!selectedSimIds[sim.id]}
           onSelect={onSelect}
         />

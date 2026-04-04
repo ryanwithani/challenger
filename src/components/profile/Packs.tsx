@@ -133,9 +133,6 @@ export function Packs({
                     )}
 
                     <div className="flex flex-col items-center justify-center h-full">
-                      <div className="text-[10px] text-gray-400 font-mono mb-1">
-                        {pack.acronym}
-                      </div>
                       <div className="text-xs font-medium leading-tight text-center min-h-[42px] flex items-center">
                         {pack.name}
                       </div>

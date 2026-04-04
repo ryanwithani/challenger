@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/src/components/ui/Card'
 import { Button } from '@/src/components/ui/Button'
 import { PackIcon } from '@/src/components/sim/PackIcon'
@@ -30,8 +31,15 @@ export function SummaryStep({ data, onSubmit, onBack, loading }: SummaryStepProp
 
     const legacyScoring = isLegacyChallenge ? calculateLegacyScoring(selectedPacks) : null
 
-    const handleSubmit = () => {
-        onSubmit(data)
+    const [isSubmitting, setIsSubmitting] = useState(false)
+
+    const handleSubmit = async () => {
+        setIsSubmitting(true)
+        try {
+            await onSubmit(data)
+        } finally {
+            setIsSubmitting(false)
+        }
     }
 
     return (
@@ -129,16 +137,13 @@ export function SummaryStep({ data, onSubmit, onBack, loading }: SummaryStepProp
                     </Button>
                     <Button
                         onClick={handleSubmit}
-                        loading={loading}
+                        loading={loading || isSubmitting}
                         loadingText="Creating Challenge..."
                         variant="primary"
                     >
                         Create Challenge
                     </Button>
                 </div>
-                {loading && (
-                    <p className="text-sm text-brand-500 text-right">Creating your challenge...</p>
-                )}
             </div>
         </div>
     )

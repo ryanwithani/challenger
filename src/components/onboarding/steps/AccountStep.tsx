@@ -108,6 +108,7 @@ export default function AccountStep({ onSuccess, initialData }: AccountStepProps
     // Honeypot check — silent rejection for bots
     const honeypotValue = (e.target as HTMLFormElement).website?.value
     if (honeypotValue && honeypotValue.trim() !== '') {
+      console.warn('Honeypot triggered')
       setGlobalError('Submission blocked - please try again')
       return
     }
@@ -154,10 +155,10 @@ export default function AccountStep({ onSuccess, initialData }: AccountStepProps
   return (
     <div className="p-8 md:p-12">
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <h1 className="font-display text-3xl font-bold text-gray-900 dark:text-warmGray-100 mb-2">
           Welcome to Challenger!
         </h1>
-        <p className="text-gray-600">
+        <p className="text-gray-600 dark:text-warmGray-300">
           Create your account to start tracking your challenges.
         </p>
       </div>
@@ -180,7 +181,7 @@ export default function AccountStep({ onSuccess, initialData }: AccountStepProps
             aria-hidden="true"
             defaultValue=""
           />
-          <Label htmlFor="username" className="text-sm font-semibold text-gray-700 mb-1.5">
+          <Label htmlFor="username" className="text-sm font-semibold text-gray-700 dark:text-warmGray-200 mb-1.5">
             Username
           </Label>
           <Input
@@ -200,7 +201,7 @@ export default function AccountStep({ onSuccess, initialData }: AccountStepProps
         </div>
 
         <div>
-          <Label htmlFor="email" className="text-sm font-semibold text-gray-700 mb-1.5">
+          <Label htmlFor="email" className="text-sm font-semibold text-gray-700 dark:text-warmGray-200 mb-1.5">
             Email Address
           </Label>
           <Input
@@ -221,7 +222,7 @@ export default function AccountStep({ onSuccess, initialData }: AccountStepProps
         </div>
 
         <div>
-          <Label htmlFor="password" className="text-sm font-semibold text-gray-700 mb-1.5">
+          <Label htmlFor="password" className="text-sm font-semibold text-gray-700 dark:text-warmGray-200 mb-1.5">
             Password
           </Label>
           <PasswordInput
@@ -239,8 +240,8 @@ export default function AccountStep({ onSuccess, initialData }: AccountStepProps
         </div>
 
         {globalError && (
-          <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
-            <p className="text-sm text-red-800">{globalError}</p>
+          <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+            <p className="text-sm text-red-800 dark:text-red-300">{globalError}</p>
           </div>
         )}
 
@@ -253,7 +254,7 @@ export default function AccountStep({ onSuccess, initialData }: AccountStepProps
           {loading ? 'Validating...' : 'Continue'}
         </Button>
 
-        <p className="text-center text-sm text-gray-600 mt-4">
+        <p className="text-center text-sm text-gray-600 dark:text-warmGray-300 mt-4">
           Already have an account?{' '}
           <button
             type="button"

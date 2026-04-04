@@ -43,9 +43,9 @@ export function Modal({ open, onClose, children, title }: { open: boolean; onClo
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4" role="dialog" aria-modal="true" aria-labelledby="modal-title" onClick={onClose}>
       <div ref={containerRef} className="w-full max-w-lg rounded-xl bg-white dark:bg-warmGray-900 shadow-lg border border-gray-200 dark:border-warmGray-700" onKeyDown={handleTabTrap} onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-center justify-between border-b px-5 py-3">
-          <h2 id="modal-title" className="text-base font-semibold text-gray-900">{title}</h2>
-          <button aria-label="Close" onClick={onClose} className="rounded-lg p-1 hover:bg-gray-100 dark:hover:bg-warmGray-800">✕</button>
+        <div className="flex items-center justify-between border-b border-warmGray-200 dark:border-warmGray-700 px-5 py-3">
+          <h2 id="modal-title" className="text-base font-semibold text-warmGray-900 dark:text-warmGray-50">{title}</h2>
+          <button aria-label="Close" onClick={onClose} className="rounded-lg p-1 text-warmGray-500 dark:text-warmGray-400 hover:bg-warmGray-100 dark:hover:bg-warmGray-800">✕</button>
         </div>
         <div className="p-5">{children}</div>
       </div>

@@ -147,8 +147,8 @@ export function OnboardingWizard() {
   }, [loading, isClient])
 
   return (
-    <div className="min-h-screen bg-cozy-cream flex items-center justify-center p-4">
-      <div className="w-full max-w-4xl">
+    <div className="min-h-screen bg-cozy-cream dark:bg-surface-dark flex items-center justify-center p-4">
+      <div className={`w-full ${currentStep === 'packs' ? 'max-w-6xl' : 'max-w-4xl'} transition-all duration-300`}>
         {/* Progress Indicator */}
         <OnboardingProgress
           steps={[
@@ -160,7 +160,7 @@ export function OnboardingWizard() {
         />
 
         {/* Step Content */}
-        <div className="mt-8 bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+        <div className="mt-8 bg-white dark:bg-warmGray-900 rounded-lg shadow-xl border border-brand-100 dark:border-warmGray-800 overflow-hidden">
           {currentStep === 'account' && (
             <AccountStep onSuccess={handleAccountCreated} />
           )}

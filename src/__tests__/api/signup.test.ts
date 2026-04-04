@@ -48,7 +48,6 @@ describe('POST /api/auth/signup', () => {
                 data: { user: mockUser },
                 error: null,
             })
-            mockInsert.mockResolvedValue({ error: null })
 
             const request = createMockRequest({
                 username: 'testuser',
@@ -80,7 +79,6 @@ describe('POST /api/auth/signup', () => {
                 data: { user: { id: '123', email: 'test@example.com' } },
                 error: null,
             })
-            mockInsert.mockResolvedValue({ error: null })
 
             const request = createMockRequest({
                 username: 'TestUser',
@@ -272,30 +270,6 @@ describe('POST /api/auth/signup', () => {
             expect(data.error).toContain('valid email address')
         })
 
-        test('handles database insert errors', async () => {
-            mockMaybeSingle.mockResolvedValue({ data: null })
-            mockSupabase.auth.signUp.mockResolvedValue({
-                data: { user: { id: '123', email: 'test@example.com' } },
-                error: null,
-            })
-            mockInsert.mockResolvedValue({
-                error: { message: 'Database error' },
-            })
-
-            const request = createMockRequest({
-                username: 'testuser',
-                email: 'test@example.com',
-                password: 'ValidPass123!@#',
-                website: '',
-            })
-
-            const response = await POST(request)
-            const data = await response.json()
-
-            expect(response.status).toBe(500)
-            expect(data.error).toBe('Failed to create account. Please try again.')
-        })
-
         test('handles unexpected errors', async () => {
             mockMaybeSingle.mockRejectedValue(new Error('Unexpected error'))
 
@@ -315,7 +289,7 @@ describe('POST /api/auth/signup', () => {
     })
 
     describe('Profile Creation', () => {
-        test('creates user profile in database', async () => {
+        test('profile is delegated to database trigger, not inserted by route', async () => {
             const mockUser = {
                 id: 'user-123',
                 email: 'test@example.com',
@@ -326,7 +300,6 @@ describe('POST /api/auth/signup', () => {
                 data: { user: mockUser },
                 error: null,
             })
-            mockInsert.mockResolvedValue({ error: null })
 
             const request = createMockRequest({
                 username: 'testuser',
@@ -335,15 +308,13 @@ describe('POST /api/auth/signup', () => {
                 website: '',
             })
 
-            await POST(request)
+            const response = await POST(request)
+            const data = await response.json()
 
-            expect(mockInsert).toHaveBeenCalledWith({
-                id: 'user-123',
-                email: 'test@example.com',
-                username: 'testuser',
-                display_name: 'testuser',
-                created_at: expect.any(String),
-            })
+            expect(response.status).toBe(200)
+            expect(data.success).toBe(true)
+            // Route should NOT call insert — the handle_new_user() trigger does this
+            expect(mockInsert).not.toHaveBeenCalled()
         })
     })
 })
