@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Modal } from '@/src/components/sim/SimModal'
 import { Button } from '@/src/components/ui/Button'
@@ -37,7 +37,7 @@ export function AddSimModal({ open, onClose, challengeId }: AddSimModalProps) {
   const [fetchError, setFetchError] = useState<string | null>(null)
   const [linking, setLinking] = useState(false)
 
-  const currentSimIds = sims.map(s => s.id)
+  const currentSimIds = useMemo(() => sims.map(s => s.id), [sims])
   const selectedSim = simOptions.find(s => s.id === selectedSimId)
 
   const fetchSims = useCallback(async () => {
