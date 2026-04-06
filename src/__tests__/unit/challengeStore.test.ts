@@ -236,6 +236,23 @@ describe('challengeStore', () => {
                 expect(useChallengeStore.getState().calculateCategoryPoints('family')).toBe(10)
             })
         })
+
+        // --- 10 Children in Single Generation (milestone) ---
+
+        describe('10 Children in Single Generation (milestone)', () => {
+            test('returns 0 when milestone is not completed', () => {
+                const goal = makeFamilyTenChildrenGoal()
+                useChallengeStore.setState({ goals: [goal as any], progress: [] })
+                expect(useChallengeStore.getState().calculateCategoryPoints('family')).toBe(0)
+            })
+
+            test('returns 1 when milestone is completed', () => {
+                const goal = makeFamilyTenChildrenGoal()
+                const prog = makeProgress({ goal_id: 'family-ten-children' })
+                useChallengeStore.setState({ goals: [goal as any], progress: [prog as any] })
+                expect(useChallengeStore.getState().calculateCategoryPoints('family')).toBe(1)
+            })
+        })
     })
 
     // ---- isPenaltyGoal ----
