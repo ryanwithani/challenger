@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import { createSupabaseBrowserClient } from '@/src/lib/supabase/client'
 import { SimWizard } from '@/src/components/sim/form/SimWizard'
@@ -11,6 +11,8 @@ type SimInsert = Database['public']['Tables']['sims']['Insert']
 
 export default function NewSimClient() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const challengeId = searchParams.get('challenge')
 
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -35,7 +37,11 @@ export default function NewSimClient() {
       toast.success(`${simData.name} has been created successfully!`)
 
       setTimeout(() => {
-        router.push(`/sim/${data.id}`);
+        if (challengeId) {
+          router.push(`/challenge/${challengeId}`);
+        } else {
+          router.push(`/sim/${data.id}`);
+        }
       }, 1500);
 
     } catch (err: any) {
@@ -45,7 +51,11 @@ export default function NewSimClient() {
   }
 
   const handleCancel = () => {
-    router.push('/sims')
+    if (challengeId) {
+      router.push(`/challenge/${challengeId}`)
+    } else {
+      router.push('/sims')
+    }
   }
 
   return (
@@ -70,6 +80,7 @@ export default function NewSimClient() {
             onSubmit={handleFinalSubmit}
             onCancel={handleCancel}
             loading={isSubmitting}
+            defaultChallengeId={challengeId}
           />
         </div>
 

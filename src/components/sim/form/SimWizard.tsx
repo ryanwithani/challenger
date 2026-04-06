@@ -15,6 +15,7 @@ interface SimWizardProps {
   onSubmit: (data: SimInsert) => void | Promise<void>;
   onCancel: () => void;
   loading?: boolean;
+  defaultChallengeId?: string | null;
 }
 
 interface WizardError {
@@ -36,11 +37,11 @@ const BASIC_INFO_STORAGE_KEY = 'sim_wizard_basic_info'
 const TRAITS_STORAGE_KEY = 'sim_wizard_traits'
 const PERSONALITY_STORAGE_KEY = 'sim_wizard_personality'
 
-export function SimWizard({ onSubmit, onCancel, loading }: SimWizardProps) {
+export function SimWizard({ onSubmit, onCancel, loading, defaultChallengeId }: SimWizardProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [challenges, setChallenges] = useState<any[]>([]);
   const [wizardData, setWizardData] = useState<SimWizardData>({
-    basicInfo: { firstName: '', familyName: '', age_stage: 'young_adult', avatar_url: null, challenge_id: null },
+    basicInfo: { firstName: '', familyName: '', age_stage: 'young_adult', avatar_url: null, challenge_id: defaultChallengeId || null },
     traits: [],
     personality: { career: null, aspiration: null }
   });
