@@ -107,7 +107,7 @@ function EmptyState() {
         No sims yet. Add your first sim to start tracking your legacy.
       </p>
       <Link href="/dashboard/new/sim">
-        <Button size="sm">Add Sim</Button>
+        <Button size="sm">Create Sim</Button>
       </Link>
     </div>
   )
@@ -341,7 +341,7 @@ export default function SimsClient({ initialSims }: SimsClientProps) {
       title="Sims"
       actions={
         <Link href="/dashboard/new/sim">
-          <Button size="sm">Add Sim</Button>
+          <Button size="sm">Create Sim</Button>
         </Link>
       }
     >
