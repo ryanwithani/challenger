@@ -253,6 +253,63 @@ describe('challengeStore', () => {
                 expect(useChallengeStore.getState().calculateCategoryPoints('family')).toBe(1)
             })
         })
+
+        // --- Combined scoring ---
+
+        describe('combined family scoring', () => {
+            test('sums counter + milestone when both have progress', () => {
+                const genGoal = makeFamilyGenerationGoal({ current_value: 7 })
+                const childGoal = makeFamilyTenChildrenGoal()
+                const prog = makeProgress({ goal_id: 'family-ten-children' })
+                useChallengeStore.setState({
+                    goals: [genGoal as any, childGoal as any],
+                    progress: [prog as any],
+                })
+                // 7 (counter) + 1 (milestone) = 8
+                expect(useChallengeStore.getState().calculateCategoryPoints('family')).toBe(8)
+            })
+
+            test('sums counter + milestone at max yields 11 (counter max 10 + milestone 1)', () => {
+                const genGoal = makeFamilyGenerationGoal({ current_value: 10 })
+                const childGoal = makeFamilyTenChildrenGoal()
+                const prog = makeProgress({ goal_id: 'family-ten-children' })
+                useChallengeStore.setState({
+                    goals: [genGoal as any, childGoal as any],
+                    progress: [prog as any],
+                })
+                // 10 (counter capped) + 1 (milestone) = 11
+                expect(useChallengeStore.getState().calculateCategoryPoints('family')).toBe(11)
+            })
+
+            test('excludes goals from other categories', () => {
+                const genGoal = makeFamilyGenerationGoal({ current_value: 5 })
+                const otherGoal = makeGoal({
+                    id: 'fortune-1',
+                    goal_type: 'milestone',
+                    point_value: 10,
+                    category: 'fortune',
+                })
+                const otherProgress = makeProgress({ goal_id: 'fortune-1' })
+                useChallengeStore.setState({
+                    goals: [genGoal as any, otherGoal as any],
+                    progress: [otherProgress as any],
+                })
+                // Only the family counter (5), fortune goal excluded
+                expect(useChallengeStore.getState().calculateCategoryPoints('family')).toBe(5)
+            })
+
+            test('returns 0 when only non-family goals exist', () => {
+                const otherGoal = makeGoal({
+                    id: 'fortune-1',
+                    goal_type: 'milestone',
+                    point_value: 10,
+                    category: 'fortune',
+                })
+                const prog = makeProgress({ goal_id: 'fortune-1' })
+                useChallengeStore.setState({ goals: [otherGoal as any], progress: [prog as any] })
+                expect(useChallengeStore.getState().calculateCategoryPoints('family')).toBe(0)
+            })
+        })
     })
 
     // ---- isPenaltyGoal ----
