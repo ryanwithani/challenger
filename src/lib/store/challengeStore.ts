@@ -95,6 +95,7 @@ interface ChallengeState {
   addSim: (sim: Partial<Sim>) => Promise<void>
   updateSim: (id: string, updates: Partial<Sim>) => Promise<void>
   deleteSim: (id: string) => Promise<void>
+  linkExistingSim: (simId: string, challengeId: string) => Promise<void>
   getSimAchievements: (simId: string) => Promise<any[]>
 
   // Goal methods
@@ -400,6 +401,27 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
       const { data, error } = await supabase
         .from('sims')
         .insert(sim)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        set({ sims: [...get().sims, data] });
+        await get().recalculateAutoGoals();
+      }
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  linkExistingSim: async (simId: string, challengeId: string) => {
+    try {
+      const supabase = createSupabaseBrowserClient();
+      const { data, error } = await supabase
+        .from('sims')
+        .update({ challenge_id: challengeId })
+        .eq('id', simId)
         .select()
         .single();
 

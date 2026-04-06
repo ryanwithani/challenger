@@ -478,4 +478,53 @@ describe('challengeStore', () => {
             expect(useChallengeStore.getState().completions.has('skills:Cooking')).toBe(false)
         })
     })
+
+    describe('linkExistingSim', () => {
+        beforeEach(() => {
+            useChallengeStore.setState({
+                ...initialState,
+                currentChallenge: { id: 'challenge-1' } as any,
+                sims: [],
+                goals: [],
+            })
+            ;(createSupabaseBrowserClient as jest.Mock).mockReturnValue(mockSupabase)
+        })
+
+        test('updates sim challenge_id and adds to local state', async () => {
+            const linkedSim = {
+                id: 'sim-99',
+                name: 'Bella Goth',
+                challenge_id: 'challenge-1',
+                age_stage: 'young_adult',
+            }
+
+            // Mock the update().eq().select().single() chain
+            const mockLinkSingle = jest.fn().mockResolvedValue({ data: linkedSim, error: null })
+            const mockLinkSelect = jest.fn().mockReturnValue({ single: mockLinkSingle })
+            const mockLinkEq = jest.fn().mockReturnValue({ select: mockLinkSelect })
+            const mockLinkUpdate = jest.fn().mockReturnValue({ eq: mockLinkEq })
+            mockSupabase.from.mockReturnValueOnce({ update: mockLinkUpdate })
+
+            await useChallengeStore.getState().linkExistingSim('sim-99', 'challenge-1')
+
+            expect(mockLinkUpdate).toHaveBeenCalledWith({ challenge_id: 'challenge-1' })
+            expect(mockLinkEq).toHaveBeenCalledWith('id', 'sim-99')
+            expect(useChallengeStore.getState().sims).toHaveLength(1)
+            expect(useChallengeStore.getState().sims[0].id).toBe('sim-99')
+        })
+
+        test('throws on supabase error', async () => {
+            const mockLinkSingle = jest.fn().mockResolvedValue({ data: null, error: { message: 'DB error' } })
+            const mockLinkSelect = jest.fn().mockReturnValue({ single: mockLinkSingle })
+            const mockLinkEq = jest.fn().mockReturnValue({ select: mockLinkSelect })
+            const mockLinkUpdate = jest.fn().mockReturnValue({ eq: mockLinkEq })
+            mockSupabase.from.mockReturnValueOnce({ update: mockLinkUpdate })
+
+            await expect(
+                useChallengeStore.getState().linkExistingSim('sim-99', 'challenge-1')
+            ).rejects.toMatchObject({ message: 'DB error' })
+
+            expect(useChallengeStore.getState().sims).toHaveLength(0)
+        })
+    })
 })
