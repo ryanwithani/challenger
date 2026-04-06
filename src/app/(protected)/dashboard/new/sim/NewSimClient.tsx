@@ -26,6 +26,18 @@ export default function NewSimClient() {
         throw new Error("You must be logged in to create a sim");
       }
 
+      // Validate challenge ownership (ignore invalid/foreign IDs)
+      let validChallengeId: string | null = null
+      if (challengeId) {
+        const { data: challenge } = await supabase
+          .from('challenges')
+          .select('id')
+          .eq('id', challengeId)
+          .eq('user_id', user.id)
+          .maybeSingle()
+        if (challenge) validChallengeId = challengeId
+      }
+
       const { data, error } = await supabase
         .from('sims')
         .insert({ ...simData, user_id: user.id })
@@ -37,8 +49,8 @@ export default function NewSimClient() {
       toast.success(`${simData.name} has been created successfully!`)
 
       setTimeout(() => {
-        if (challengeId) {
-          router.push(`/challenge/${challengeId}`);
+        if (validChallengeId) {
+          router.push(`/challenge/${validChallengeId}`);
         } else {
           router.push(`/sim/${data.id}`);
         }
