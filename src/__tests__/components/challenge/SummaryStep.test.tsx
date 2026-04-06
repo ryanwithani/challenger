@@ -58,13 +58,13 @@ describe('SummaryStep — loading state', () => {
     render(
       <SummaryStep data={baseData} onSubmit={onSubmit} onBack={onBack} loading={true} />
     )
-    expect(screen.getByText('Creating your challenge...')).toBeDefined()
+    expect(screen.getByText('Creating Challenge...')).toBeDefined()
   })
 
   test('does not show status text when loading is false', () => {
     render(
       <SummaryStep data={baseData} onSubmit={onSubmit} onBack={onBack} loading={false} />
     )
-    expect(screen.queryByText('Creating your challenge...')).toBeNull()
+    expect(screen.queryByText('Creating Challenge...')).toBeNull()
   })
 })
