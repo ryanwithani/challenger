@@ -428,7 +428,11 @@ export const useChallengeStore = create<ChallengeState>((set, get) => ({
       if (error) throw error;
 
       if (data) {
-        set({ sims: [...get().sims, data] });
+        set({
+          sims: get().sims.some(s => s.id === data.id)
+            ? get().sims.map(s => s.id === data.id ? data : s)
+            : [...get().sims, data],
+        });
         await get().recalculateAutoGoals();
       }
     } catch (error) {
