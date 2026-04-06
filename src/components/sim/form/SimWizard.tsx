@@ -8,8 +8,9 @@ import { type SimWizardData } from '@/src/lib/validations/sim'
 import { BasicInfoStep, TraitsStep, PersonalityStep, ReviewStep } from './steps'
 import { Button } from '@/src/components/ui/Button'
 import { FadeTransition } from '@/src/components/ui/FadeTransition'
+import type { Database } from '@/src/types/database.types'
 
-type SimInsert = any; // Import your SimInsert type from the store
+type SimInsert = Database['public']['Tables']['sims']['Insert']
 
 interface SimWizardProps {
   onSubmit: (data: SimInsert) => void | Promise<void>;

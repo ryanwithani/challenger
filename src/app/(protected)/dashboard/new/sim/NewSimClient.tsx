@@ -47,6 +47,7 @@ export default function NewSimClient() {
       if (error) throw error;
 
       toast.success(`${simData.name} has been created successfully!`)
+      setIsSubmitting(false)
 
       setTimeout(() => {
         if (validChallengeId) {
