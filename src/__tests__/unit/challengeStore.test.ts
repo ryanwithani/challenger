@@ -184,6 +184,60 @@ describe('challengeStore', () => {
         })
     })
 
+    // ---- calculateCategoryPoints — family ----
+
+    function makeFamilyGenerationGoal(overrides: Record<string, any> = {}) {
+        return makeGoal({
+            id: 'family-gen-ya',
+            title: 'Generations Reaching Young Adult',
+            goal_type: 'counter',
+            point_value: 1,
+            max_points: 10,
+            current_value: 0,
+            category: 'family',
+            ...overrides,
+        })
+    }
+
+    function makeFamilyTenChildrenGoal(overrides: Record<string, any> = {}) {
+        return makeGoal({
+            id: 'family-ten-children',
+            title: '10 Children in Single Generation',
+            goal_type: 'milestone',
+            point_value: 1,
+            category: 'family',
+            ...overrides,
+        })
+    }
+
+    describe('calculateCategoryPoints — family', () => {
+        describe('Generations Reaching Young Adult (counter)', () => {
+            test('returns 0 when no generations have reached YA', () => {
+                const goal = makeFamilyGenerationGoal({ current_value: 0 })
+                useChallengeStore.setState({ goals: [goal as any], progress: [] })
+                expect(useChallengeStore.getState().calculateCategoryPoints('family')).toBe(0)
+            })
+
+            test('returns 1 point per generation that reached YA', () => {
+                const goal = makeFamilyGenerationGoal({ current_value: 3 })
+                useChallengeStore.setState({ goals: [goal as any], progress: [] })
+                expect(useChallengeStore.getState().calculateCategoryPoints('family')).toBe(3)
+            })
+
+            test('caps at max_points (10) even if current_value exceeds it', () => {
+                const goal = makeFamilyGenerationGoal({ current_value: 15 })
+                useChallengeStore.setState({ goals: [goal as any], progress: [] })
+                expect(useChallengeStore.getState().calculateCategoryPoints('family')).toBe(10)
+            })
+
+            test('returns exactly 10 when all 10 generations reached YA', () => {
+                const goal = makeFamilyGenerationGoal({ current_value: 10 })
+                useChallengeStore.setState({ goals: [goal as any], progress: [] })
+                expect(useChallengeStore.getState().calculateCategoryPoints('family')).toBe(10)
+            })
+        })
+    })
+
     // ---- isPenaltyGoal ----
 
     describe('isPenaltyGoal', () => {
