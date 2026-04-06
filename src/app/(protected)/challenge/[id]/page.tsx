@@ -7,7 +7,7 @@ import { SimCard } from '@/src/components/sim/SimCard'
 import { GoalCard } from '@/src/components/challenge/GoalCard'
 import { PointTracker } from '@/src/components/challenge/PointTracker'
 import { Button } from '@/src/components/ui/Button'
-import { SimForm } from '@/src/components/forms/SimForm'
+import { AddSimModal } from '@/src/components/challenge/AddSimModal'
 import { GoalForm } from '@/src/components/forms/GoalForm'
 import { Modal } from '@/src/components/sim/SimModal'
 import { ChallengeSuccessModal } from '@/src/components/challenge/ChallengeSuccessModal'
@@ -43,7 +43,6 @@ function ChallengePageContent() {
 
   // Get functions separately and memoize them to prevent re-renders
   const fetchChallenge = useCallback(useChallengeStore.getState().fetchChallenge, [])
-  const addSim = useCallback(useChallengeStore.getState().addSim, [])
   const addGoal = useCallback(useChallengeStore.getState().addGoal, [])
   const updateSim = useCallback(useChallengeStore.getState().updateSim, [])
   const toggleGoalProgress = useCallback(useChallengeStore.getState().toggleGoalProgress, [])
@@ -51,11 +50,11 @@ function ChallengePageContent() {
   const completeGoalWithDetails = useCallback(useChallengeStore.getState().completeGoalWithDetails, [])
   const calculatePoints = useCallback(useChallengeStore.getState().calculatePoints, [])
   const calculateCategoryPoints = useCallback(useChallengeStore.getState().calculateCategoryPoints, [])
-  const handleAddSim = useCallback(() => setShowSimForm(true), [])
+  const handleAddSim = useCallback(() => setShowAddSimModal(true), [])
   const handleAddGoal = useCallback(() => setShowGoalForm(true), [])
   const handleToggleGoal = useCallback((goalId: string) => toggleGoalProgress(goalId), [toggleGoalProgress])
 
-  const [showSimForm, setShowSimForm] = useState(false)
+  const [showAddSimModal, setShowAddSimModal] = useState(false)
   const [showGoalForm, setShowGoalForm] = useState(false)
   const [showChecklist, setShowChecklist] = useState(false)
   const [checklistCategory, setChecklistCategory] = useState<CatalogType>('skills')
@@ -71,7 +70,7 @@ function ChallengePageContent() {
   useEffect(() => {
     const action = searchParams.get('action')
     if (action === 'add-sim') {
-      setShowSimForm(true)
+      setShowAddSimModal(true)
     }
   }, [searchParams])
 
@@ -221,22 +220,11 @@ function ChallengePageContent() {
         />
 
         {/* Modals */}
-        <Modal
-          open={showSimForm}
-          onClose={() => setShowSimForm(false)}
-          title="Add New Sim"
-        >
-          <SimForm
-            onSubmit={async (data) => {
-              await addSim({
-                ...data,
-                challenge_id: challengeId,
-                career: data.career ? String(data.career) : null
-              })
-              setShowSimForm(false)
-            }}
-          />
-        </Modal>
+        <AddSimModal
+          open={showAddSimModal}
+          onClose={() => setShowAddSimModal(false)}
+          challengeId={challengeId}
+        />
 
         <Modal
           open={showGoalForm}
@@ -335,22 +323,11 @@ function ChallengePageContent() {
       </div>
 
       {/* Modals */}
-      <Modal
-        open={showSimForm}
-        onClose={() => setShowSimForm(false)}
-        title="Add New Sim"
-      >
-        <SimForm
-          onSubmit={async (data) => {
-            await addSim({
-              ...data,
-              challenge_id: challengeId,
-              career: data.career ? String(data.career) : null
-            })
-            setShowSimForm(false)
-          }}
-        />
-      </Modal>
+      <AddSimModal
+        open={showAddSimModal}
+        onClose={() => setShowAddSimModal(false)}
+        challengeId={challengeId}
+      />
 
       <Modal
         open={showGoalForm}
